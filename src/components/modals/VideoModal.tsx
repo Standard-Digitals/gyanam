@@ -47,7 +47,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({ story, onClose }) => {
             <div className="absolute inset-0 bg-black/50" />
 
             <div className="relative z-10 space-y-4 max-w-md">
-              <div className="w-16 h-16 bg-[#ED7026] text-white rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-[#ED7026]/50 animate-pulse">
+              <div className="w-16 h-16 bg-[#C12223] text-white rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-[#C12223]/50 animate-pulse">
                 <Play className="w-8 h-8 fill-white translate-x-0.5" />
               </div>
               <div>
@@ -66,7 +66,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({ story, onClose }) => {
 
           <div className="p-4 bg-slate-900 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
             <div className="flex items-center gap-2">
-              <Award className="w-4 h-4 text-[#ED7026]" />
+              <Award className="w-4 h-4 text-[#C12223]" />
               <span>{story.badge} ({story.hometown})</span>
             </div>
             <div className="flex items-center gap-1 text-[#27AE60] font-bold">

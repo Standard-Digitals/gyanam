@@ -10,23 +10,23 @@ export const WhyGyanam: React.FC = () => {
   const offlineTuition = prepMonths * 4500; // ~36,000
   const hostelRent = hostelNeeded ? prepMonths * 7500 : 0; // ~60,000
   const totalOfflineCost = offlineTuition + hostelRent;
-  const GyanamCourseFee = 3499;
-  const totalSavings = totalOfflineCost - GyanamCourseFee;
+  const gyanamCourseFee = 3499;
+  const totalSavings = totalOfflineCost - gyanamCourseFee;
 
   return (
-    <section id="why-Gyanam" className="py-20 bg-[#FFF8F6] relative overflow-hidden">
+    <section id="why-gyanam" className="py-20 bg-[#FFF5F5] relative overflow-hidden">
       <div className="max-w-[1320px] mx-auto px-4 sm:px-6">
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="px-3.5 py-1 bg-[#ED7026]/10 text-[#ED7026] text-xs font-extrabold uppercase rounded-full tracking-wider">
+          <span className="px-3.5 py-1 bg-[#C12223]/10 text-[#C12223] text-xs font-extrabold uppercase rounded-full tracking-wider">
             Smart Decision For Aspirants
           </span>
-          <h2 className="font-heading font-black text-3xl sm:text-5xl text-[#111111] mt-3 tracking-tight">
-            Gyanam Tech vs Traditional Offline Coaching
+          <h2 className="font-heading font-black text-3xl sm:text-5xl text-[#1F1A1C] mt-3 tracking-tight">
+            GYANAM Tech vs Traditional Offline Coaching
           </h2>
           <p className="text-sm sm:text-base text-[#555555] mt-3">
-            Why over 500,000+ students switch from expensive offline centers to Gyanam.
+            Why over 500,000+ students switch from expensive offline centers to GYANAM.
           </p>
         </div>
 
@@ -34,8 +34,8 @@ export const WhyGyanam: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-8 mb-16">
           
           {/* Traditional Coaching Box */}
-          <div className="p-8 bg-white rounded-3xl border border-[#ECECEC] shadow-md opacity-80">
-            <div className="flex items-center justify-between pb-6 border-b border-[#ECECEC] mb-6">
+          <div className="p-8 bg-white rounded-3xl border border-[#F3DCDD] shadow-md opacity-80">
+            <div className="flex items-center justify-between pb-6 border-b border-[#F3DCDD] mb-6">
               <div>
                 <span className="text-xs font-bold text-[#888888] uppercase tracking-wider block">Old Method</span>
                 <h3 className="font-heading font-extrabold text-2xl text-[#555555]">
@@ -71,17 +71,17 @@ export const WhyGyanam: React.FC = () => {
             </ul>
           </div>
 
-          {/* Gyanam Tech Platform Box */}
-          <div className="p-8 bg-gradient-to-br from-[#111111] via-[#1c1c1c] to-[#2b1011] text-white rounded-3xl border-2 border-[#ED7026] shadow-2xl relative glow-orange">
-            <div className="absolute -top-3 right-6 px-4 py-1 bg-gradient-to-r from-[#ED7026] to-[#C12223] text-white font-extrabold text-xs rounded-full uppercase tracking-wider shadow-md">
+          {/* GYANAM Tech Platform Box */}
+          <div className="p-8 bg-gradient-to-br from-[#1A0506] via-[#2A0809] to-[#3B0A0C] text-white rounded-3xl border-2 border-[#C12223] shadow-2xl shadow-[#C12223]/20 relative">
+            <div className="absolute -top-3 right-6 px-4 py-1 bg-gradient-to-r from-[#C12223] to-[#8C1316] text-white font-extrabold text-xs rounded-full uppercase tracking-wider shadow-md">
               ★ 10x Smarter Choice
             </div>
 
             <div className="flex items-center justify-between pb-6 border-b border-white/10 mb-6">
               <div>
-                <span className="text-xs font-bold text-[#ED7026] uppercase tracking-wider block">Gyanam Technology</span>
+                <span className="text-xs font-bold text-[#C12223] uppercase tracking-wider block">GYANAM Technology</span>
                 <h3 className="font-heading font-extrabold text-2xl text-white">
-                  Gyanam Digital Learning Hub
+                  GYANAM Digital Learning Hub
                 </h3>
               </div>
               <div className="w-10 h-10 rounded-full bg-[#27AE60]/20 flex items-center justify-center text-[#27AE60]">
@@ -116,28 +116,28 @@ export const WhyGyanam: React.FC = () => {
         </div>
 
         {/* Interactive Savings Calculator */}
-        <div className="p-8 bg-white rounded-3xl border border-[#ECECEC] shadow-xl max-w-4xl mx-auto">
+        <div className="p-8 bg-white rounded-3xl border border-[#F3DCDD] shadow-xl max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-[#ED7026]/10 text-[#ED7026] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-[#C12223]/10 text-[#C12223] flex items-center justify-center">
               <Calculator className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-heading font-extrabold text-xl text-[#111111]">
-                Calculate Your Preparation Savings with Gyanam
+              <h3 className="font-heading font-extrabold text-xl text-[#1F1A1C]">
+                Calculate Your Preparation Savings with GYANAM
               </h3>
               <p className="text-xs text-[#555555]">
-                See how much money & commute hours you save by choosing Gyanam.
+                See how much money & commute hours you save by choosing GYANAM.
               </p>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 items-center pt-4 border-t border-[#ECECEC]">
+          <div className="grid md:grid-cols-2 gap-8 items-center pt-4 border-t border-[#F3DCDD]">
             {/* Input Controls */}
             <div className="space-y-6">
               <div>
-                <div className="flex justify-between text-xs font-bold text-[#111111] mb-2">
+                <div className="flex justify-between text-xs font-bold text-[#1F1A1C] mb-2">
                   <span>Preparation Duration</span>
-                  <span className="text-[#ED7026]">{prepMonths} Months</span>
+                  <span className="text-[#C12223]">{prepMonths} Months</span>
                 </div>
                 <input
                   type="range"
@@ -145,16 +145,16 @@ export const WhyGyanam: React.FC = () => {
                   max={12}
                   value={prepMonths}
                   onChange={e => setPrepMonths(Number(e.target.value))}
-                  className="w-full accent-[#ED7026] cursor-pointer"
+                  className="w-full accent-[#C12223] cursor-pointer"
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3.5 bg-[#FFF8F6] rounded-xl border border-[#ECECEC]">
-                <span className="text-xs font-bold text-[#111111]">Requires Relocation / PG Hostel?</span>
+              <div className="flex items-center justify-between p-3.5 bg-[#FFF5F5] rounded-xl border border-[#F3DCDD]">
+                <span className="text-xs font-bold text-[#1F1A1C]">Requires Relocation / PG Hostel?</span>
                 <button
                   type="button"
                   onClick={() => setHostelNeeded(!hostelNeeded)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-extrabold transition ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-extrabold transition cursor-pointer ${
                     hostelNeeded ? 'bg-[#C12223] text-white' : 'bg-slate-200 text-[#555555]'
                   }`}
                 >
@@ -164,7 +164,7 @@ export const WhyGyanam: React.FC = () => {
             </div>
 
             {/* Savings Result Card */}
-            <div className="p-6 bg-gradient-to-br from-[#FFF8F6] to-white rounded-2xl border border-[#ED7026]/30 text-center space-y-3">
+            <div className="p-6 bg-gradient-to-br from-[#FFF5F5] to-white rounded-2xl border border-[#C12223]/30 text-center space-y-3">
               <span className="text-xs font-bold text-[#555555] uppercase tracking-wider block">
                 Estimated Money Saved
               </span>
@@ -172,7 +172,7 @@ export const WhyGyanam: React.FC = () => {
                 ₹{totalSavings.toLocaleString()}
               </div>
               <p className="text-xs text-[#555555]">
-                Plus save over <strong className="text-[#111111]">{prepMonths * 60} hours</strong> of travel commute!
+                Plus save over <strong className="text-[#1F1A1C]">{prepMonths * 60} hours</strong> of travel commute!
               </p>
             </div>
           </div>

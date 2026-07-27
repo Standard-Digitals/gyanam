@@ -37,13 +37,13 @@ export const LearningProcess: React.FC = () => {
     {
       num: '06',
       title: 'Crack Dream Govt Job!',
-      desc: 'Join over 10,000+ Gyanam alumni working across Central & State Ministries, Banks, and Railways.',
+      desc: 'Join over 10,000+ GYANAM alumni working across Central & State Ministries, Banks, and Railways.',
       icon: Trophy
     }
   ];
 
   return (
-    <section className="py-20 bg-white border-y border-[#ECECEC]">
+    <section className="py-20 bg-white border-y border-[#F3DCDD]">
       <div className="max-w-[1320px] mx-auto px-4 sm:px-6">
         
         {/* Header */}
@@ -51,8 +51,8 @@ export const LearningProcess: React.FC = () => {
           <span className="px-3.5 py-1 bg-[#27AE60]/10 text-[#27AE60] text-xs font-extrabold uppercase rounded-full tracking-wider">
             6-Step Proven System
           </span>
-          <h2 className="font-heading font-black text-3xl sm:text-5xl text-[#111111] mt-3 tracking-tight">
-            How Gyanam Guides You to Selection
+          <h2 className="font-heading font-black text-3xl sm:text-5xl text-[#1F1A1C] mt-3 tracking-tight">
+            How GYANAM Guides You to Selection
           </h2>
           <p className="text-sm sm:text-base text-[#555555] mt-3">
             A scientifically designed learning framework refined over 15+ years.
@@ -68,10 +68,10 @@ export const LearningProcess: React.FC = () => {
                 key={idx}
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
-                className="p-8 bg-[#FFF8F6] rounded-3xl border border-[#ECECEC] hover:border-[#ED7026] hover:shadow-xl transition relative group"
+                className="p-8 bg-[#FFF5F5] rounded-3xl border border-[#F3DCDD] hover:border-[#C12223] hover:shadow-xl transition relative group"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-white border border-[#ECECEC] text-[#ED7026] flex items-center justify-center font-bold shadow-sm group-hover:bg-[#ED7026] group-hover:text-white transition">
+                  <div className="w-12 h-12 rounded-2xl bg-white border border-[#F3DCDD] text-[#DC2626] flex items-center justify-center font-bold shadow-sm group-hover:bg-[#C12223] group-hover:text-white transition">
                     <IconComp className="w-6 h-6" />
                   </div>
                   <span className="font-heading font-black text-3xl text-[#C12223]/20 group-hover:text-[#C12223] transition">
@@ -79,7 +79,7 @@ export const LearningProcess: React.FC = () => {
                   </span>
                 </div>
 
-                <h3 className="font-heading font-extrabold text-xl text-[#111111] mb-2">
+                <h3 className="font-heading font-extrabold text-xl text-[#1F1A1C] mb-2">
                   {s.title}
                 </h3>
                 <p className="text-xs sm:text-sm text-[#555555] leading-relaxed">

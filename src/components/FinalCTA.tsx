@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
 import { ArrowRight, Clock, ShieldCheck, Flame, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface FinalCTAProps {
@@ -23,7 +22,7 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onStartLearning, onOpenMento
   }, []);
 
   return (
-    <section className="py-20 bg-gradient-to-br from-[#8C1316] via-[#C12223] to-[#ED7026] text-white relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-[#3B0A0C] via-[#8C1316] to-[#C12223] text-white relative overflow-hidden">
       {/* Background Orbs */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-400/20 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-[100px] pointer-events-none" />

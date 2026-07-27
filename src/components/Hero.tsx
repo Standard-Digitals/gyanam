@@ -28,7 +28,7 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
     {
       id: 1,
       tag: '🔥 POPULAR LIVE BATCH 2026',
-      badgeColor: 'bg-[#ED7026]',
+      badgeColor: 'bg-[#DC2626]',
       title: 'SSC CGL 2026 Foundation + Mains Super Batch',
       subtitle: '350+ Live Interactive Classes • Tier I + Tier II • TCS Pattern Mock Tests • Bilingual Notes',
       offer: 'Flat 60% OFF • Early Bird Price ₹3,499',
@@ -71,7 +71,7 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
     {
       id: 4,
       tag: 'PERSONAL GUIDANCE',
-      badgeColor: 'bg-[#111111]',
+      badgeColor: 'bg-[#8C1316]',
       title: '1-on-1 Mentorship With Selected Officers',
       subtitle: 'Customized Study Plan, Weekly Answer Writing Review & Doubt Solving directly via Zoom/Calls',
       offer: 'Book Free 15-Min Academic Strategy Call',
@@ -104,19 +104,19 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
   const currentBanner = banners[currentSlide];
 
   return (
-    <section className="bg-gradient-to-b from-[#FFFDFB] via-[#FFF9F6] to-white py-8 lg:py-12 border-b border-[#ECECEC] relative overflow-hidden">
+    <section className="bg-gradient-to-b from-[#FFF5F5] via-[#FFFAFA] to-white py-8 lg:py-12 border-b border-[#F3DCDD] relative overflow-hidden">
       
       {/* Background Ambient Gradient */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[300px] bg-gradient-to-b from-[#ED7026]/5 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[300px] bg-gradient-to-b from-[#C12223]/5 to-transparent blur-3xl pointer-events-none" />
 
       <div className="max-w-[1320px] mx-auto px-4 sm:px-6 relative z-10">
         
         {/* Top Clean Goal Selection Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#ED7026] animate-ping shrink-0" />
-            <span className="font-heading font-black text-lg sm:text-xl text-[#111111] tracking-tight">
-              Gyanam ACADEMY <span className="text-[#ED7026]">•</span> BATCHES & OFFERS
+            <span className="w-2.5 h-2.5 rounded-full bg-[#C12223] animate-ping shrink-0" />
+            <span className="font-heading font-black text-lg sm:text-xl text-[#1F1A1C] tracking-tight">
+              GYANAM ACADEMY <span className="text-[#C12223]">•</span> BATCHES & OFFERS
             </span>
           </div>
 
@@ -131,8 +131,8 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
                 }}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
                   selectedGoal === g.id
-                    ? 'bg-[#111111] text-white shadow-sm'
-                    : 'bg-white text-[#555555] border border-[#ECECEC] hover:border-[#ED7026] hover:text-[#ED7026]'
+                    ? 'bg-[#3B0A0C] text-white shadow-sm'
+                    : 'bg-white text-[#555555] border border-[#F3DCDD] hover:border-[#C12223] hover:text-[#C12223]'
                 }`}
               >
                 {g.name}
@@ -141,8 +141,8 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
           </div>
         </div>
 
-        {/* MAIN BANNER SLIDER CARD - Clean, Premium, Spacious */}
-        <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-black/10 bg-[#111111] text-white min-h-[380px] lg:min-h-[420px] flex flex-col justify-between">
+        {/* MAIN BANNER SLIDER CARD - Clean, Premium, Deep Red */}
+        <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-red-950/20 bg-[#2D0A0B] text-white min-h-[380px] lg:min-h-[420px] flex flex-col justify-between">
           
           <AnimatePresence mode="wait">
             <motion.div
@@ -153,14 +153,14 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
               transition={{ duration: 0.4 }}
               className="relative w-full h-full min-h-[380px] lg:min-h-[420px] p-6 sm:p-10 lg:p-12 flex flex-col justify-between z-10"
             >
-              {/* Background Image with Dark Vignette */}
+              {/* Background Image with Dark Red Vignette */}
               <div className="absolute inset-0 z-0 overflow-hidden">
                 <img
                   src={currentBanner.image}
                   alt={currentBanner.title}
                   className="w-full h-full object-cover object-center opacity-30 scale-105 transition-transform duration-1000"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/40" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#2D0A0B] via-[#2D0A0B]/85 to-[#2D0A0B]/40" />
               </div>
 
               {/* Banner Content Upper Area */}
@@ -212,7 +212,7 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
                 <div className="flex items-center gap-3">
                   <button
                     onClick={currentBanner.action}
-                    className="px-6 py-3.5 bg-gradient-to-r from-[#ED7026] to-[#C12223] hover:from-[#C12223] hover:to-[#ED7026] text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-xl shadow-[#ED7026]/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
+                    className="px-6 py-3.5 bg-gradient-to-r from-[#DC2626] to-[#8C1316] hover:from-[#8C1316] hover:to-[#DC2626] text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-xl shadow-[#C12223]/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>{currentBanner.ctaText}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -222,7 +222,7 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
                     onClick={onExploreCourses}
                     className="px-5 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs sm:text-sm rounded-2xl transition flex items-center justify-center gap-1.5 cursor-pointer backdrop-blur-md"
                   >
-                    <Monitor className="w-4 h-4 text-[#ED7026]" />
+                    <Monitor className="w-4 h-4 text-[#DC2626]" />
                     <span>View All Batches</span>
                   </button>
                 </div>
@@ -237,7 +237,7 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
                         key={idx}
                         onClick={() => setCurrentSlide(idx)}
                         className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                          currentSlide === idx ? 'w-6 bg-[#ED7026]' : 'w-2 bg-white/40 hover:bg-white'
+                          currentSlide === idx ? 'w-6 bg-[#DC2626]' : 'w-2 bg-white/40 hover:bg-white'
                         }`}
                       />
                     ))}
@@ -271,12 +271,12 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
         {/* BOTTOM CLEAN TRUST STATS BAR - Spacious & High-Contrast */}
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
           
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#ECECEC] shadow-sm flex items-center gap-3.5 hover:border-[#ED7026]/40 transition">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#F3DCDD] shadow-sm flex items-center gap-3.5 hover:border-[#C12223]/40 transition">
             <div className="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
               <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
             </div>
             <div>
-              <span className="font-heading font-black text-lg text-[#111111] block leading-none">
+              <span className="font-heading font-black text-lg text-[#1F1A1C] block leading-none">
                 4.9 / 5.0 Rating
               </span>
               <span className="text-xs text-[#666666] font-medium mt-1 block">
@@ -285,12 +285,12 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#ECECEC] shadow-sm flex items-center gap-3.5 hover:border-[#ED7026]/40 transition">
-            <div className="w-11 h-11 rounded-xl bg-[#ED7026]/10 text-[#ED7026] flex items-center justify-center shrink-0">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#F3DCDD] shadow-sm flex items-center gap-3.5 hover:border-[#C12223]/40 transition">
+            <div className="w-11 h-11 rounded-xl bg-[#C12223]/10 text-[#C12223] flex items-center justify-center shrink-0">
               <Trophy className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-heading font-black text-lg text-[#111111] block leading-none">
+              <span className="font-heading font-black text-lg text-[#1F1A1C] block leading-none">
                 10,000+ Selections
               </span>
               <span className="text-xs text-[#666666] font-medium mt-1 block">
@@ -299,26 +299,26 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#ECECEC] shadow-sm flex items-center gap-3.5 hover:border-[#ED7026]/40 transition">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#F3DCDD] shadow-sm flex items-center gap-3.5 hover:border-[#C12223]/40 transition">
             <div className="w-11 h-11 rounded-xl bg-[#C12223]/10 text-[#C12223] flex items-center justify-center shrink-0">
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-heading font-black text-lg text-[#111111] block leading-none">
+              <span className="font-heading font-black text-lg text-[#1F1A1C] block leading-none">
                 5,00,000+ Aspirants
               </span>
               <span className="text-xs text-[#666666] font-medium mt-1 block">
-                Trust Gyanam Academy
+                Trust GYANAM Academy
               </span>
             </div>
           </div>
 
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#ECECEC] shadow-sm flex items-center gap-3.5 hover:border-[#ED7026]/40 transition">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#F3DCDD] shadow-sm flex items-center gap-3.5 hover:border-[#C12223]/40 transition">
             <div className="w-11 h-11 rounded-xl bg-[#27AE60]/10 text-[#27AE60] flex items-center justify-center shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-heading font-black text-lg text-[#111111] block leading-none">
+              <span className="font-heading font-black text-lg text-[#1F1A1C] block leading-none">
                 100% TCS Pattern
               </span>
               <span className="text-xs text-[#666666] font-medium mt-1 block">

@@ -25,7 +25,7 @@ export const TrustBar: React.FC<TrustBarProps> = ({ selectedCategory, onSelectCa
   const categoriesList = [...EXAM_CATEGORIES, ...EXAM_CATEGORIES];
 
   return (
-    <section className="py-8 bg-white border-y border-[#ECECEC]">
+    <section className="py-8 bg-white border-y border-[#F3DCDD]">
       <div className="max-w-[1320px] mx-auto px-4 sm:px-6">
         <div className="text-center mb-6">
           <p className="text-xs font-extrabold uppercase tracking-widest text-[#555555]">
@@ -49,17 +49,17 @@ export const TrustBar: React.FC<TrustBarProps> = ({ selectedCategory, onSelectCa
                   onClick={() => onSelectCategory(cat.id)}
                   className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 flex items-center gap-2 shrink-0 border cursor-pointer ${
                     isSelected
-                      ? 'bg-gradient-to-r from-[#ED7026] to-[#C12223] text-white border-transparent shadow-lg shadow-[#ED7026]/20 scale-105'
-                      : 'bg-[#FFF8F6] text-[#555555] border-[#ECECEC] hover:border-[#ED7026] hover:text-[#ED7026] hover:bg-white'
+                      ? 'bg-gradient-to-r from-[#C12223] to-[#8C1316] text-white border-transparent shadow-lg shadow-[#C12223]/20 scale-105'
+                      : 'bg-[#FFF5F5] text-[#555555] border-[#F3DCDD] hover:border-[#C12223] hover:text-[#C12223] hover:bg-white'
                   }`}
                 >
-                  <span className={isSelected ? 'text-white' : 'text-[#ED7026]'}>
+                  <span className={isSelected ? 'text-white' : 'text-[#C12223]'}>
                     {getIcon(cat.icon)}
                   </span>
                   <span className="whitespace-nowrap">{cat.name}</span>
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                      isSelected ? 'bg-white/20 text-white' : 'bg-white text-[#888888] border border-[#ECECEC]'
+                      isSelected ? 'bg-white/20 text-white' : 'bg-white text-[#888888] border border-[#F3DCDD]'
                     }`}
                   >
                     {cat.count}

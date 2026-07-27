@@ -34,21 +34,21 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
   });
 
   return (
-    <section id="mentors" className="py-20 bg-gradient-to-b from-[#FFFDFC] via-[#FFF8F5] to-white border-y border-[#ECECEC] relative overflow-hidden">
+    <section id="mentors" className="py-20 bg-gradient-to-b from-[#FFF5F5] via-[#FFFAFA] to-white border-y border-[#F3DCDD] relative overflow-hidden">
       {/* Background Decorative Ambient Elements */}
-      <div className="absolute top-10 left-10 w-96 h-96 bg-[#ED7026]/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-96 h-96 bg-[#C12223]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-10 left-10 w-96 h-96 bg-[#C12223]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-96 h-96 bg-[#8C1316]/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-[1320px] mx-auto px-4 sm:px-6 relative z-10">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#FFF0EA] border border-[#ED7026]/30 text-[#ED7026] text-xs font-black uppercase rounded-full tracking-wider shadow-sm mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#FFF0EA] border border-[#C12223]/30 text-[#C12223] text-xs font-black uppercase rounded-full tracking-wider shadow-sm mb-4">
             <Sparkles className="w-3.5 h-3.5 text-[#C12223]" />
             <span>LEARN FROM INDIA'S FINEST FACULTY</span>
           </div>
           
-          <h2 className="font-heading font-black text-3xl sm:text-5xl text-[#111111] tracking-tight leading-tight">
+          <h2 className="font-heading font-black text-3xl sm:text-5xl text-[#1F1A1C] tracking-tight leading-tight">
             Ex-Officers & Veteran Mentors
           </h2>
           <p className="text-sm sm:text-base text-[#555555] mt-3 leading-relaxed">
@@ -63,8 +63,8 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
                 onClick={() => setSelectedFilter(cat.id)}
                 className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer ${
                   selectedFilter === cat.id
-                    ? 'bg-gradient-to-r from-[#ED7026] to-[#C12223] text-white shadow-md shadow-[#ED7026]/25 scale-105'
-                    : 'bg-white text-[#555555] border border-[#ECECEC] hover:border-[#ED7026] hover:text-[#ED7026]'
+                    ? 'bg-gradient-to-r from-[#DC2626] to-[#8C1316] text-white shadow-md shadow-[#C12223]/25 scale-105'
+                    : 'bg-white text-[#555555] border border-[#F3DCDD] hover:border-[#C12223] hover:text-[#C12223]'
                 }`}
               >
                 {cat.label}
@@ -85,16 +85,16 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
                 onMouseLeave={() => setHoveredMentorId(null)}
                 className={`bg-white rounded-3xl border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${
                   isHovered
-                    ? 'border-[#ED7026] shadow-2xl shadow-[#ED7026]/15 -translate-y-2'
-                    : 'border-[#ECECEC] shadow-sm hover:shadow-md'
+                    ? 'border-[#C12223] shadow-2xl shadow-[#C12223]/15 -translate-y-2'
+                    : 'border-[#F3DCDD] shadow-sm hover:shadow-md'
                 }`}
               >
                 {/* Top Subtle Gradient Accent */}
-                <div className={`h-1.5 w-full bg-gradient-to-r from-[#ED7026] to-[#C12223] transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
+                <div className={`h-1.5 w-full bg-gradient-to-r from-[#DC2626] to-[#8C1316] transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
 
                 <div className="p-5">
                   {/* Portrait Image Container */}
-                  <div className="relative w-full h-56 rounded-2xl overflow-hidden bg-[#FFF8F6] border border-[#ECECEC] mb-4 group">
+                  <div className="relative w-full h-56 rounded-2xl overflow-hidden bg-[#FFF5F5] border border-[#F3DCDD] mb-4 group">
                     <img
                       src={m.image}
                       alt={m.name}
@@ -102,21 +102,21 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
                     />
 
                     {/* Top Right Rating Badge */}
-                    <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-md text-[#111111] text-[11px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 border border-white/40">
-                      <Star className="w-3.5 h-3.5 fill-[#ED7026] text-[#ED7026]" />
+                    <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-md text-[#1F1A1C] text-[11px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 border border-white/40">
+                      <Star className="w-3.5 h-3.5 fill-[#C12223] text-[#C12223]" />
                       <span>{m.rating.toFixed(2)}</span>
                     </div>
 
                     {/* Top Left Experience Badge */}
-                    <div className="absolute top-3 left-3 bg-[#111111]/85 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/20 shadow-md flex items-center gap-1">
-                      <Award className="w-3 h-3 text-[#ED7026]" />
+                    <div className="absolute top-3 left-3 bg-[#2D0A0B]/85 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/20 shadow-md flex items-center gap-1">
+                      <Award className="w-3 h-3 text-[#DC2626]" />
                       <span>{m.experienceYears}+ Yrs Exp</span>
                     </div>
 
                     {/* Bottom Ex-Role Pill Banner Over Portrait */}
                     {m.exRole && (
-                      <div className="absolute bottom-3 inset-x-3 bg-gradient-to-r from-[#111111]/90 to-[#222222]/90 backdrop-blur-md text-white text-[10px] font-extrabold px-3 py-1.5 rounded-xl border border-white/15 flex items-center gap-1.5 shadow-lg">
-                        <ShieldCheck className="w-3.5 h-3.5 text-[#ED7026] shrink-0" />
+                      <div className="absolute bottom-3 inset-x-3 bg-gradient-to-r from-[#2D0A0B]/90 to-[#3B0A0C]/90 backdrop-blur-md text-white text-[10px] font-extrabold px-3 py-1.5 rounded-xl border border-white/15 flex items-center gap-1.5 shadow-lg">
+                        <ShieldCheck className="w-3.5 h-3.5 text-[#DC2626] shrink-0" />
                         <span className="truncate">{m.exRole}</span>
                       </div>
                     )}
@@ -125,12 +125,12 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
                   {/* Clean Basic Info (Default View) */}
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-heading font-black text-xl text-[#111111] hover:text-[#C12223] transition-colors leading-tight">
+                      <h3 className="font-heading font-black text-xl text-[#1F1A1C] hover:text-[#C12223] transition-colors leading-tight">
                         {m.name}
                       </h3>
                     </div>
 
-                    <p className="text-xs font-bold text-[#ED7026]">{m.title}</p>
+                    <p className="text-xs font-bold text-[#C12223]">{m.title}</p>
                     
                     <div className="flex items-center gap-1 text-[11px] text-[#666666] pt-1">
                       <GraduationCap className="w-3.5 h-3.5 text-[#888888] shrink-0" />
@@ -139,18 +139,18 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
                   </div>
 
                   {/* Subject Tag */}
-                  <div className="mt-3.5 p-2.5 bg-[#FFF8F5] rounded-xl border border-[#ED7026]/15 flex items-center justify-between">
+                  <div className="mt-3.5 p-2.5 bg-[#FFF5F5] rounded-xl border border-[#C12223]/15 flex items-center justify-between">
                     <div>
                       <span className="text-[9px] font-black uppercase tracking-wider text-[#C12223] block">
                         SUBJECT
                       </span>
-                      <span className="text-xs font-bold text-[#111111] line-clamp-1">
+                      <span className="text-xs font-bold text-[#1F1A1C] line-clamp-1">
                         {m.subject}
                       </span>
                     </div>
                     <div className="text-right shrink-0 pl-2">
                       <span className="text-[9px] font-extrabold text-[#777777] block">SELECTIONS</span>
-                      <span className="text-xs font-black text-[#ED7026]">
+                      <span className="text-xs font-black text-[#C12223]">
                         {m.selectionsMentored.toLocaleString()}+
                       </span>
                     </div>
@@ -162,16 +162,16 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
                       onClick={() => setActiveMentorModal(m)}
                       className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-between border cursor-pointer ${
                         isHovered
-                          ? 'bg-[#FFF0EA] border-[#ED7026]/40 text-[#C12223]'
-                          : 'bg-gray-50 border-[#ECECEC] text-[#555555] hover:bg-[#FFF8F5]'
+                          ? 'bg-[#FFF0EA] border-[#C12223]/40 text-[#C12223]'
+                          : 'bg-gray-50 border-[#F3DCDD] text-[#555555] hover:bg-[#FFF5F5]'
                       }`}
                     >
                       <span className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5 text-[#ED7026]" />
+                        <Users className="w-3.5 h-3.5 text-[#C12223]" />
                         <span>{isHovered ? 'Faculty Overview' : 'More Details'}</span>
                       </span>
                       <ChevronDown
-                        className={`w-4 h-4 text-[#ED7026] transition-transform duration-300 ${
+                        className={`w-4 h-4 text-[#C12223] transition-transform duration-300 ${
                           isHovered ? 'rotate-180' : ''
                         }`}
                       />
@@ -188,13 +188,13 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
                           className="overflow-hidden"
                         >
                           <div className="pt-3 space-y-2">
-                            <p className="text-xs text-[#555555] italic leading-relaxed bg-[#FFF8F6] p-3 rounded-xl border border-[#ECECEC]">
+                            <p className="text-xs text-[#555555] italic leading-relaxed bg-[#FFF5F5] p-3 rounded-xl border border-[#F3DCDD]">
                               "{m.bio}"
                             </p>
 
                             <button
                               onClick={() => setActiveMentorModal(m)}
-                              className="w-full text-center text-[11px] font-extrabold text-[#ED7026] hover:text-[#C12223] pt-1 flex items-center justify-center gap-1 group/btn"
+                              className="w-full text-center text-[11px] font-extrabold text-[#C12223] hover:text-[#8C1316] pt-1 flex items-center justify-center gap-1 group/btn cursor-pointer"
                             >
                               <span>View Full Teaching Experience</span>
                               <ChevronRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
@@ -210,7 +210,7 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
                 <div className="p-5 pt-0 mt-2">
                   <button
                     onClick={onOpenMentorship}
-                    className="w-full py-2.5 bg-gradient-to-r from-[#ED7026] to-[#C12223] hover:from-[#C12223] hover:to-[#ED7026] text-white text-xs font-extrabold rounded-xl shadow-md shadow-[#ED7026]/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2.5 bg-gradient-to-r from-[#DC2626] to-[#8C1316] hover:from-[#8C1316] hover:to-[#DC2626] text-white text-xs font-extrabold rounded-xl shadow-md shadow-[#C12223]/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Calendar className="w-3.5 h-3.5" />
                     <span>Book 1-on-1 Call</span>
@@ -222,11 +222,11 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
         </div>
 
         {/* Bottom Banner */}
-        <div className="mt-16 bg-gradient-to-r from-[#111111] via-[#1a1a1a] to-[#2b1010] rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden border border-white/10">
+        <div className="mt-16 bg-gradient-to-r from-[#2D0A0B] via-[#3B0A0C] to-[#4A0D0F] rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden border border-white/10">
           <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-[#C12223]/20 to-transparent pointer-events-none" />
           
           <div className="space-y-2 text-center md:text-left relative z-10 max-w-2xl">
-            <span className="bg-[#ED7026] text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-full">
+            <span className="bg-[#C12223] text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-full">
               PERSONALIZED GUIDANCE
             </span>
             <h3 className="font-heading font-black text-2xl sm:text-3xl text-white">
@@ -239,7 +239,7 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
 
           <button
             onClick={onOpenMentorship}
-            className="shrink-0 px-6 py-3.5 bg-gradient-to-r from-[#ED7026] to-[#C12223] hover:from-[#C12223] hover:to-[#ED7026] text-white font-extrabold text-sm rounded-2xl shadow-xl shadow-[#ED7026]/30 flex items-center gap-2 transition-all transform hover:scale-105 cursor-pointer relative z-10"
+            className="shrink-0 px-6 py-3.5 bg-gradient-to-r from-[#DC2626] to-[#8C1316] hover:from-[#8C1316] hover:to-[#DC2626] text-white font-extrabold text-sm rounded-2xl shadow-xl shadow-[#C12223]/30 flex items-center gap-2 transition-all transform hover:scale-105 cursor-pointer relative z-10"
           >
             <MessageSquare className="w-4 h-4" />
             <span>Connect With A Mentor</span>
@@ -256,7 +256,7 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 relative shadow-2xl overflow-hidden border border-[#ECECEC]"
+              className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 relative shadow-2xl overflow-hidden border border-[#F3DCDD]"
             >
               <button
                 onClick={() => setActiveMentorModal(null)}
@@ -269,13 +269,13 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
                 <img
                   src={activeMentorModal.image}
                   alt={activeMentorModal.name}
-                  className="w-24 h-24 rounded-2xl object-cover object-top border-2 border-[#ED7026] shrink-0 shadow-md"
+                  className="w-24 h-24 rounded-2xl object-cover object-top border-2 border-[#C12223] shrink-0 shadow-md"
                 />
                 <div>
-                  <span className="text-[10px] font-bold bg-[#ED7026]/10 text-[#ED7026] px-2.5 py-0.5 rounded-md uppercase">
+                  <span className="text-[10px] font-bold bg-[#C12223]/10 text-[#C12223] px-2.5 py-0.5 rounded-md uppercase">
                     {activeMentorModal.experienceYears}+ Years Experience
                   </span>
-                  <h3 className="font-heading font-black text-2xl text-[#111111] mt-1">
+                  <h3 className="font-heading font-black text-2xl text-[#1F1A1C] mt-1">
                     {activeMentorModal.name}
                   </h3>
                   <p className="text-xs font-bold text-[#C12223]">{activeMentorModal.title}</p>
@@ -285,17 +285,17 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
 
               <div className="mt-6 space-y-4">
                 {activeMentorModal.exRole && (
-                  <div className="p-3 bg-[#111111] text-white rounded-2xl flex items-center gap-2 text-xs font-bold">
-                    <ShieldCheck className="w-4 h-4 text-[#ED7026] shrink-0" />
+                  <div className="p-3 bg-[#2D0A0B] text-white rounded-2xl flex items-center gap-2 text-xs font-bold">
+                    <ShieldCheck className="w-4 h-4 text-[#DC2626] shrink-0" />
                     <span>Background: {activeMentorModal.exRole}</span>
                   </div>
                 )}
 
-                <div className="p-4 bg-[#FFF8F6] rounded-2xl border border-[#ECECEC]">
+                <div className="p-4 bg-[#FFF5F5] rounded-2xl border border-[#F3DCDD]">
                   <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#C12223] mb-1">
                     Expertise & Teaching Specialization
                   </h4>
-                  <p className="text-sm font-bold text-[#111111]">
+                  <p className="text-sm font-bold text-[#1F1A1C]">
                     {activeMentorModal.subject}
                   </p>
                 </div>
@@ -311,13 +311,13 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
 
                 <div className="grid grid-cols-2 gap-3 pt-2">
                   <div className="p-3 bg-gray-50 rounded-xl text-center border border-gray-100">
-                    <span className="block text-lg font-black text-[#111111]">
+                    <span className="block text-lg font-black text-[#1F1A1C]">
                       {activeMentorModal.selectionsMentored.toLocaleString()}+
                     </span>
                     <span className="text-[10px] font-bold text-gray-500">Aspirants Mentored</span>
                   </div>
                   <div className="p-3 bg-gray-50 rounded-xl text-center border border-gray-100">
-                    <span className="block text-lg font-black text-[#ED7026]">
+                    <span className="block text-lg font-black text-[#C12223]">
                       {activeMentorModal.rating} / 5.0
                     </span>
                     <span className="text-[10px] font-bold text-gray-500">Student Rating</span>
@@ -330,7 +330,7 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
                       setActiveMentorModal(null);
                       onOpenMentorship();
                     }}
-                    className="flex-1 py-3 bg-gradient-to-r from-[#ED7026] to-[#C12223] text-white font-extrabold rounded-xl text-xs shadow-lg shadow-[#ED7026]/20 hover:opacity-95 transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="flex-1 py-3 bg-gradient-to-r from-[#DC2626] to-[#8C1316] text-white font-extrabold rounded-xl text-xs shadow-lg shadow-[#C12223]/20 hover:opacity-95 transition flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Calendar className="w-4 h-4" />
                     <span>Book 1-on-1 Mentorship</span>

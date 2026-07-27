@@ -5,6 +5,7 @@ import { TrustBar } from './components/TrustBar';
 import { StatsCounter } from './components/StatsCounter';
 import { BentoGrid } from './components/BentoGrid';
 import { CourseSection } from './components/CourseSection';
+import { WhyGyanam } from './components/WhyGyanam';
 import { LearningProcess } from './components/LearningProcess';
 import { CurrentAffairs } from './components/CurrentAffairs';
 import { MockTestDashboard } from './components/MockTestDashboard';
@@ -16,6 +17,8 @@ import { BlogSection } from './components/BlogSection';
 import { FAQSection } from './components/FAQSection';
 import { FinalCTA } from './components/FinalCTA';
 import { Footer } from './components/Footer';
+import { ScrollToTop } from './components/ScrollToTop';
+import { FloatingQrWidget } from './components/FloatingQrWidget';
 
 // Modals
 import { SearchModal } from './components/modals/SearchModal';
@@ -26,7 +29,6 @@ import { VideoModal } from './components/modals/VideoModal';
 
 import { Course, SuccessStory } from './types';
 import { COURSES_DATA } from './data/mockData';
-import { WhyGyanam } from './components/WhyGyanam';
 
 export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -55,7 +57,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFF8F6] text-[#111111] font-sans antialiased selection:bg-[#ED7026] selection:text-white">
+    <div className="min-h-screen bg-[#FFF5F5] text-[#1F1A1C] font-sans antialiased selection:bg-[#C12223] selection:text-white">
       {/* Header */}
       <Header
         onOpenSearch={() => setSearchOpen(true)}
@@ -104,7 +106,7 @@ export default function App() {
           onEnrollCourse={(course) => handleEnrollCourse(course)}
         />
 
-        {/* Why Gyanam + Savings Calculator */}
+        {/* Why GYANAM + Savings Calculator */}
         <WhyGyanam />
 
         {/* Learning Process Timeline */}
@@ -176,6 +178,12 @@ export default function App() {
         story={selectedVideoStory}
         onClose={() => setSelectedVideoStory(null)}
       />
+
+      {/* Floating Scroll To Top Button */}
+      <ScrollToTop />
+
+      {/* Floating Side Right Center QR Code Widget */}
+      <FloatingQrWidget />
     </div>
   );
 }

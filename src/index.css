@@ -4,21 +4,21 @@
   --font-display: 'Manrope', sans-serif;
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --color-Gyanam-red: #C12223;
-  --color-Gyanam-orange: #ED7026;
+  --color-Gyanam-brightred: #DC2626;
   --color-Gyanam-darkred: #8C1316;
   --color-Gyanam-white: #FEFCFA;
-  --color-Gyanam-bg: #FFF8F6;
-  --color-Gyanam-text: #111111;
-  --color-Gyanam-subtext: #555555;
-  --color-Gyanam-border: #ECECEC;
+  --color-Gyanam-bg: #FFF5F5;
+  --color-Gyanam-text: #1F1A1C;
+  --color-Gyanam-subtext: #5C4A4D;
+  --color-Gyanam-border: #F3DCDD;
   --color-Gyanam-success: #27AE60;
 }
 
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    color: #111111;
-    background-color: #FFF8F6;
+    color: #1F1A1C;
+    background-color: #FFF5F5;
     overflow-x: hidden;
   }
 
@@ -32,37 +32,35 @@
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #ED7026 0%, #C12223 100%);
+  background: linear-gradient(135deg, #DC2626 0%, #8C1316 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, #ED7026 0%, #C12223 100%);
+  background: linear-gradient(135deg, #DC2626 0%, #8C1316 100%);
 }
 
 .glass-header {
   background: rgba(254, 252, 250, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(236, 236, 236, 0.8);
+  border-bottom: 1px solid rgba(243, 220, 221, 0.8);
 }
 
 .glass-card {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid #ECECEC;
+  border: 1px solid #F3DCDD;
 }
 
-.glow-orange-sm {
-  box-shadow: 0 4px 20px -2px rgba(237, 112, 38, 0.25);
+.glow-orange-sm,
+.glow-red-sm {
+  box-shadow: 0 4px 20px -2px rgba(193, 34, 35, 0.25);
 }
 
-.glow-orange {
-  box-shadow: 0 10px 30px -5px rgba(237, 112, 38, 0.35);
-}
-
+.glow-orange,
 .glow-red {
   box-shadow: 0 10px 30px -5px rgba(193, 34, 35, 0.35);
 }
@@ -95,14 +93,14 @@
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #FFF8F6;
+  background: #FFF5F5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #ED7026;
+  background: #C12223;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #C12223;
+  background: #8C1316;
 }
 
 /* Hide Scrollbar Utility */
