@@ -6,6 +6,6 @@ interface GyanamLogoProps {
 
 export const GyanamLogo: React.FC<GyanamLogoProps> = ({ className = "w-24 h-24" }) => {
   return (
-    <img src="/assets/logo.png" alt="Gyanam" className={className} />
+    <img src="/favicon.svg" alt="Gyanam" className={className} />
   );
 };
