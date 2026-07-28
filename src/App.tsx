@@ -10,7 +10,6 @@ import { LearningProcess } from './components/LearningProcess';
 import { CurrentAffairs } from './components/CurrentAffairs';
 import { MockTestDashboard } from './components/MockTestDashboard';
 import { SuccessStories } from './components/SuccessStories';
-import { YouTubeCollageSection } from './components/YouTubeCollageSection';
 import { Mentors } from './components/Mentors';
 import { MobileApp } from './components/MobileApp';
 import { FreeResources } from './components/FreeResources';
@@ -30,6 +29,7 @@ import { VideoModal } from './components/modals/VideoModal';
 
 import { Course, SuccessStory } from './types';
 import { COURSES_DATA } from './data/mockData';
+import { YouTubeCollageSection } from './components/YouTubeCollageSection';
 
 export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);

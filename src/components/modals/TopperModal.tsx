@@ -144,19 +144,6 @@ export const TopperModal: React.FC<TopperModalProps> = ({ story, onClose, onWatc
               </div>
 
               <div className="flex items-center gap-2 w-full sm:w-auto">
-                {story.hasVideo && onWatchVideo && (
-                  <button
-                    onClick={() => {
-                      onClose();
-                      onWatchVideo(story);
-                    }}
-                    className="flex-1 sm:flex-none px-5 py-2.5 bg-[#C12223] hover:bg-[#EF4444] text-white font-extrabold text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Play className="w-4 h-4 fill-white" />
-                    <span>Watch Full Interview</span>
-                  </button>
-                )}
-
                 <button
                   onClick={onClose}
                   className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-[#1F1A1C] font-extrabold text-xs rounded-xl transition cursor-pointer"
