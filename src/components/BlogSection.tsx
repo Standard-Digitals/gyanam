@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { BLOG_POSTS } from '../data/mockData';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Clock, User, Bell } from 'lucide-react';
 
 export const BlogSection: React.FC = () => {
   return (
@@ -37,7 +37,7 @@ export const BlogSection: React.FC = () => {
               className="bg-white rounded-3xl border border-[#F3DCDD] shadow-xl hover:shadow-2xl overflow-hidden flex flex-col justify-between group"
             >
               <div>
-                <div className="relative h-48 overflow-hidden bg-[#2D0A0B]">
+                <div className="relative h-48 overflow-hidden bg-[#450A0A]">
                   <img
                     src={post.imageUrl}
                     alt={post.title}

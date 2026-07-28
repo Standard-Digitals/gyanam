@@ -47,7 +47,7 @@ export const CourseSection: React.FC<CourseSectionProps> = ({
                 onClick={() => onSelectCategory(cat.id)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition shrink-0 border ${
                   selectedCategory === cat.id
-                    ? 'bg-[#3B0A0C] text-white border-[#3B0A0C]'
+                    ? 'bg-[#C12223] text-white border-[#C12223]'
                     : 'bg-[#FFF5F5] text-[#555555] border-[#F3DCDD] hover:border-[#C12223] hover:text-[#C12223]'
                 }`}
               >
@@ -68,13 +68,13 @@ export const CourseSection: React.FC<CourseSectionProps> = ({
             >
               <div>
                 {/* Course Thumbnail */}
-                <div className="relative h-48 overflow-hidden bg-slate-900">
+                <div className="relative h-48 overflow-hidden bg-[#450A0A]">
                   <img
                     src={course.thumbnail}
                     alt={course.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#450A0A]/85 via-transparent to-transparent" />
 
                   {/* Top Badges */}
                   <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
@@ -82,7 +82,7 @@ export const CourseSection: React.FC<CourseSectionProps> = ({
                       {course.category}
                     </span>
                     {course.badge && (
-                      <span className="px-3 py-1 bg-[#8C1316] text-white font-extrabold text-[10px] rounded-full shadow-md">
+                      <span className="px-3 py-1 bg-[#B91C1C] text-white font-extrabold text-[10px] rounded-full shadow-md">
                         {course.badge}
                       </span>
                     )}
@@ -155,7 +155,7 @@ export const CourseSection: React.FC<CourseSectionProps> = ({
 
                   <button
                     onClick={() => onEnrollCourse(course)}
-                    className="px-4 py-2.5 bg-gradient-to-r from-[#DC2626] to-[#8C1316] text-white font-bold text-xs rounded-xl shadow-md shadow-[#C12223]/20 hover:scale-105 active:scale-95 transition flex items-center gap-1"
+                    className="px-4 py-2.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold text-xs rounded-xl shadow-md shadow-[#C12223]/20 hover:scale-105 active:scale-95 transition flex items-center gap-1"
                   >
                     Enroll <ArrowRight className="w-3.5 h-3.5" />
                   </button>

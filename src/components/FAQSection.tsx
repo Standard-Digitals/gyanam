@@ -30,7 +30,7 @@ export const FAQSection: React.FC = () => {
             Frequently Asked Questions
           </h2>
           <p className="text-sm text-[#555555] mt-2">
-            Got questions regarding GYANAM courses, mock tests or batches? We’re here to help.
+            Got questions regarding Gyanam courses, mock tests or batches? We’re here to help.
           </p>
         </div>
 
@@ -54,7 +54,7 @@ export const FAQSection: React.FC = () => {
                 onClick={() => setActiveCategory(cat)}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 border cursor-pointer ${
                   activeCategory === cat
-                    ? 'bg-[#2D0A0B] text-white border-[#2D0A0B]'
+                    ? 'bg-[#C12223] text-white border-[#C12223]'
                     : 'bg-white text-[#555555] border-[#F3DCDD] hover:border-[#C12223]'
                 }`}
               >
@@ -105,7 +105,7 @@ export const FAQSection: React.FC = () => {
             Still have questions? Speak to a Counselor.
           </h4>
           <p className="text-xs text-[#555555]">
-            Call GYANAM Student Helpdesk directly: <a href="tel:9117343434" className="font-bold text-[#C12223]">9117 34 34 34</a> (9 AM – 8 PM)
+            Call Gyanam Student Helpdesk directly: <a href="tel:9117343434" className="font-bold text-[#C12223]">9117 34 34 34</a> (9 AM – 8 PM)
           </p>
         </div>
 

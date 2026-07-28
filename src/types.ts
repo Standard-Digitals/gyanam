@@ -35,12 +35,17 @@ export interface SuccessStory {
   year: number;
   photoUrl: string;
   videoUrl?: string;
+  youtubeUrl?: string;
+  youtubeViews?: string;
+  videoDuration?: string;
   hasVideo: boolean;
   testimonial: string;
   previousAttempts: string;
   hometown: string;
   badge: string;
   category: string;
+  rollNumber?: string;
+  score?: string;
 }
 
 export interface Mentor {

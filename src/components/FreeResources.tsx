@@ -72,7 +72,7 @@ export const FreeResources: React.FC = () => {
                 <button
                   onClick={() => handleDownload(res.id)}
                   disabled={downloadingId === res.id}
-                  className="w-full py-3 bg-gradient-to-r from-[#DC2626] to-[#8C1316] text-white font-bold text-xs rounded-xl shadow-md shadow-[#C12223]/20 hover:scale-102 transition flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold text-xs rounded-xl shadow-md shadow-[#C12223]/20 hover:scale-102 transition flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {downloadingId === res.id ? (
                     'Preparing PDF...'

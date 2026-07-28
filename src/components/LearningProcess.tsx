@@ -37,7 +37,7 @@ export const LearningProcess: React.FC = () => {
     {
       num: '06',
       title: 'Crack Dream Govt Job!',
-      desc: 'Join over 10,000+ GYANAM alumni working across Central & State Ministries, Banks, and Railways.',
+      desc: 'Join over 10,000+ Gyanam alumni working across Central & State Ministries, Banks, and Railways.',
       icon: Trophy
     }
   ];
@@ -52,7 +52,7 @@ export const LearningProcess: React.FC = () => {
             6-Step Proven System
           </span>
           <h2 className="font-heading font-black text-3xl sm:text-5xl text-[#1F1A1C] mt-3 tracking-tight">
-            How GYANAM Guides You to Selection
+            How Gyanam Guides You to Selection
           </h2>
           <p className="text-sm sm:text-base text-[#555555] mt-3">
             A scientifically designed learning framework refined over 15+ years.

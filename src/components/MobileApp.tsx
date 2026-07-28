@@ -22,26 +22,26 @@ export const MobileApp: React.FC = () => {
   const [activeScreen, setActiveScreen] = useState<'live' | 'test' | 'notes' | 'doubt'>('live');
 
   return (
-    <section id="mobile-app" className="py-20 bg-gradient-to-br from-[#1A0506] via-[#2A0809] to-[#3B0A0C] text-white relative overflow-hidden">
+    <section id="mobile-app" className="py-20 bg-gradient-to-br from-[#8C1316] via-[#A6181B] to-[#B91C1C] text-white relative overflow-hidden">
       {/* Background Glows */}
-      <div className="absolute top-1/4 left-10 w-96 h-96 bg-[#C12223]/15 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-96 h-96 bg-[#8C1316]/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/4 left-10 w-96 h-96 bg-[#EF4444]/25 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-96 h-96 bg-[#EF4444]/20 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-[1320px] mx-auto px-4 sm:px-6 relative z-10">
         <div className="grid lg:grid-cols-12 gap-12 items-center">
           
           {/* LEFT: App Highlights & SMS Link Sender */}
           <div className="lg:col-span-7 space-y-6">
-            <span className="px-3.5 py-1 bg-[#C12223]/20 border border-[#C12223]/30 text-amber-300 text-xs font-extrabold uppercase rounded-full tracking-wider">
+            <span className="px-3.5 py-1 bg-[#EF4444]/20 border border-[#EF4444]/40 text-amber-300 text-xs font-extrabold uppercase rounded-full tracking-wider">
               📱 Study Anytime, Anywhere
             </span>
 
             <h2 className="font-heading font-black text-3xl sm:text-5xl text-white tracking-tight leading-tight">
               Download the Official <br />
-              <span className="gradient-text font-black">GYANAM Mobile App</span>
+              <span className="gradient-text font-black">Gyanam Mobile App</span>
             </h2>
 
-            <p className="text-sm sm:text-base text-slate-300 max-w-xl font-normal leading-relaxed">
+            <p className="text-sm sm:text-base text-red-100 max-w-xl font-normal leading-relaxed">
               Access 1,000+ hours of 4K HD live classes, TCS pattern mock tests, offline video downloads, and 24/7 instant doubt chat directly on your mobile device.
             </p>
 
@@ -61,8 +61,8 @@ export const MobileApp: React.FC = () => {
                     onClick={() => setActiveScreen(btn.id as any)}
                     className={`p-3 rounded-2xl text-xs font-bold transition flex items-center gap-2 border cursor-pointer ${
                       isActive
-                        ? 'bg-gradient-to-r from-[#C12223] to-[#8C1316] text-white border-transparent shadow-lg shadow-[#C12223]/30'
-                        : 'bg-white/10 text-slate-300 border-white/10 hover:border-[#C12223]'
+                        ? 'bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white border-transparent shadow-lg shadow-[#EF4444]/30'
+                        : 'bg-white/10 text-red-100 border-white/10 hover:border-white/30'
                     }`}
                   >
                     <IconComp className="w-4 h-4" />
@@ -77,14 +77,14 @@ export const MobileApp: React.FC = () => {
               <button className="px-5 py-3 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/20 transition flex items-center gap-3 cursor-pointer">
                 <GooglePlayIcon />
                 <div className="text-left">
-                  <span className="text-[9px] uppercase text-slate-400 block font-bold">Download on</span>
+                  <span className="text-[9px] uppercase text-red-200 block font-bold">Download on</span>
                   <span className="font-bold text-xs text-white">Google Play Store</span>
                 </div>
               </button>
               <button className="px-5 py-3 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/20 transition flex items-center gap-3 cursor-pointer">
                 <AppleIcon />
                 <div className="text-left">
-                  <span className="text-[9px] uppercase text-slate-400 block font-bold">Download on</span>
+                  <span className="text-[9px] uppercase text-red-200 block font-bold">Download on</span>
                   <span className="font-bold text-xs text-white">Apple App Store</span>
                 </div>
               </button>
@@ -98,11 +98,11 @@ export const MobileApp: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4 }}
-              className="w-72 sm:w-80 h-[520px] bg-[#1A0506] rounded-[40px] p-3 border-4 border-red-950/80 shadow-2xl shadow-[#C12223]/20 relative"
+              className="w-72 sm:w-80 h-[520px] bg-[#9E1B1E] rounded-[40px] p-3 border-4 border-red-400/50 shadow-2xl shadow-[#EF4444]/30 relative"
             >
               {/* Phone Notch */}
-              <div className="w-32 h-4 bg-[#2D0A0B] rounded-b-xl mx-auto mb-2 flex items-center justify-center">
-                <div className="w-8 h-1 bg-red-900/60 rounded-full" />
+              <div className="w-32 h-4 bg-[#8C1316] rounded-b-xl mx-auto mb-2 flex items-center justify-center">
+                <div className="w-8 h-1 bg-red-400/60 rounded-full" />
               </div>
 
               {/* Phone Screen Display */}
@@ -110,7 +110,7 @@ export const MobileApp: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-[#F3DCDD] mb-3">
                     <div className="flex items-center gap-1.5">
-                      <GyanamLogo className="w-8 h-8" />
+                      <GyanamLogo className="w-5 h-5" />
                       <span className="font-heading font-black text-sm text-[#C12223]">GYANAM App</span>
                     </div>
                     <span className="text-[10px] font-bold text-[#27AE60] bg-[#27AE60]/10 px-2 py-0.5 rounded">ONLINE</span>
@@ -118,13 +118,13 @@ export const MobileApp: React.FC = () => {
 
                   {activeScreen === 'live' && (
                     <div className="space-y-3">
-                      <div className="relative h-32 rounded-2xl bg-slate-900 overflow-hidden">
+                      <div className="relative h-32 rounded-2xl bg-[#B91C1C] overflow-hidden">
                         <img
                           src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=400"
                           alt="Live Class"
                           className="w-full h-full object-cover opacity-70"
                         />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <div className="absolute inset-0 bg-[#8C1316]/40 flex items-center justify-center">
                           <PlayCircle className="w-10 h-10 text-white fill-[#C12223]" />
                         </div>
                         <span className="absolute top-2 left-2 px-2 py-0.5 bg-[#C12223] text-white text-[9px] font-black rounded">

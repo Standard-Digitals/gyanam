@@ -379,7 +379,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAuth, onOpen
             {/* Primary Action Button */}
             <button
               onClick={() => onOpenAuth('signup')}
-              className="px-4.5 py-2.5 bg-gradient-to-r from-[#DC2626] to-[#8C1316] hover:from-[#8C1316] hover:to-[#DC2626] text-white font-extrabold text-xs rounded-xl shadow-md shadow-[#C12223]/20 hover:shadow-lg transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+              className="px-4.5 py-2.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#EF4444] text-white font-extrabold text-xs rounded-xl shadow-md shadow-[#C12223]/20 hover:shadow-lg transition flex items-center gap-1.5 shrink-0 cursor-pointer"
             >
               <span>Join Batch</span>
               <ArrowRight className="w-3.5 h-3.5" />

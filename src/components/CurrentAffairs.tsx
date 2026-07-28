@@ -46,7 +46,7 @@ export const CurrentAffairs: React.FC = () => {
               onClick={() => setActiveTab('news')}
               className={`px-5 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center gap-2 ${
                 activeTab === 'news'
-                  ? 'bg-gradient-to-r from-[#DC2626] to-[#8C1316] text-white shadow-md'
+                  ? 'bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white shadow-md'
                   : 'text-[#555555] hover:text-[#1F1A1C]'
               }`}
             >
@@ -56,7 +56,7 @@ export const CurrentAffairs: React.FC = () => {
               onClick={() => setActiveTab('quiz')}
               className={`px-5 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center gap-2 ${
                 activeTab === 'quiz'
-                  ? 'bg-gradient-to-r from-[#DC2626] to-[#8C1316] text-white shadow-md'
+                  ? 'bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white shadow-md'
                   : 'text-[#555555] hover:text-[#1F1A1C]'
               }`}
             >
@@ -211,7 +211,7 @@ export const CurrentAffairs: React.FC = () => {
                 <button
                   onClick={() => setShowResults(true)}
                   disabled={Object.keys(quizAnswers).length < 5}
-                  className="px-8 py-3.5 bg-gradient-to-r from-[#DC2626] to-[#8C1316] text-white font-bold text-sm rounded-xl shadow-lg shadow-[#C12223]/25 disabled:opacity-50 transition"
+                  className="px-8 py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold text-sm rounded-xl shadow-lg shadow-[#C12223]/25 disabled:opacity-50 transition"
                 >
                   Submit & Check Solutions
                 </button>

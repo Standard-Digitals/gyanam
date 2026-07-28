@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { ArrowRight, Clock, ShieldCheck, Flame, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface FinalCTAProps {
@@ -22,7 +23,7 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onStartLearning, onOpenMento
   }, []);
 
   return (
-    <section className="py-20 bg-gradient-to-br from-[#3B0A0C] via-[#8C1316] to-[#C12223] text-white relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-[#7F1D1D] via-[#B91C1C] to-[#EF4444] text-white relative overflow-hidden">
       {/* Background Orbs */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-400/20 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-[100px] pointer-events-none" />
@@ -50,16 +51,16 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onStartLearning, onOpenMento
             Special Fee Discount Ends In:
           </span>
           <div className="flex items-center gap-3 font-mono font-black text-2xl text-white">
-            <div className="bg-black/30 px-3 py-1 rounded-xl">
-              {timeLeft.hours.toString().padStart(2, '0')}<span className="text-[10px] block font-sans text-slate-300">HRS</span>
+            <div className="bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 rounded-xl">
+              {timeLeft.hours.toString().padStart(2, '0')}<span className="text-[10px] block font-sans text-red-100">HRS</span>
             </div>
             <span>:</span>
-            <div className="bg-black/30 px-3 py-1 rounded-xl">
-              {timeLeft.minutes.toString().padStart(2, '0')}<span className="text-[10px] block font-sans text-slate-300">MIN</span>
+            <div className="bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 rounded-xl">
+              {timeLeft.minutes.toString().padStart(2, '0')}<span className="text-[10px] block font-sans text-red-100">MIN</span>
             </div>
             <span>:</span>
-            <div className="bg-black/30 px-3 py-1 rounded-xl">
-              {timeLeft.seconds.toString().padStart(2, '0')}<span className="text-[10px] block font-sans text-slate-300">SEC</span>
+            <div className="bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 rounded-xl">
+              {timeLeft.seconds.toString().padStart(2, '0')}<span className="text-[10px] block font-sans text-red-100">SEC</span>
             </div>
           </div>
         </div>

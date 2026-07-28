@@ -62,7 +62,7 @@ export const FloatingQrWidget: React.FC = () => {
       >
         <button
           onClick={() => setShowQrModal(true)}
-          className={`group flex items-center gap-2.5 bg-gradient-to-l from-[#8C1316] via-[#C12223] to-[#C12223] text-white rounded-l-2xl border-l-2 border-y-2 border-white/30 cursor-pointer transition-all duration-500 ease-out ${
+          className={`group flex items-center gap-2.5 bg-gradient-to-l from-[#B91C1C] via-[#C12223] to-[#EF4444] text-white rounded-l-2xl border-l-2 border-y-2 border-white/30 cursor-pointer transition-all duration-500 ease-out ${
             isExpanded
               ? 'p-3 translate-x-0 opacity-100 shadow-2xl shadow-[#C12223]/50 scale-100 ring-2 ring-[#C12223]/30'
               : isHovered
@@ -116,7 +116,7 @@ export const FloatingQrWidget: React.FC = () => {
       {/* QR Code Modal Overlay */}
       <AnimatePresence>
         {showQrModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#450A0A]/80 backdrop-blur-md">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -125,7 +125,7 @@ export const FloatingQrWidget: React.FC = () => {
             >
               <button
                 onClick={() => setShowQrModal(false)}
-                className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-black transition cursor-pointer"
+                className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-600 hover:bg-red-100 hover:text-[#C12223] transition cursor-pointer"
                 title="Close"
               >
                 <X className="w-5 h-5" />
@@ -139,49 +139,49 @@ export const FloatingQrWidget: React.FC = () => {
                 Scan to Install App
               </h3>
               <p className="text-xs text-[#555555] mb-6">
-                Point your mobile phone camera or Google Lens at this QR code to download GYANAM App instantly.
+                Point your mobile phone camera or Google Lens at this QR code to download Gyanam App instantly.
               </p>
 
               {/* QR Code Graphics Card */}
-                                <div className="p-4 bg-[#FFF5F5] rounded-2xl border-2 border-dashed border-[#C12223]/30 inline-block mb-6 relative group">
-                                  <div className="w-48 h-48 bg-white p-3 rounded-xl border border-[#F3DCDD] shadow-md flex items-center justify-center relative">
-                                    {/* Realistic SVG QR Pattern */}
-                                    <svg viewBox="0 0 100 100" className="w-full h-full fill-[#1F1A1C]">
-                                      {/* Corner Position Detection Squares */}
-                                      <path d="M0,0 h30 v30 h-30 z M4,4 v22 h22 v-22 z M8,8 h14 v14 h-14 z" />
-                                      <path d="M70,0 h30 v30 h-30 z M74,4 v22 h22 v-22 z M78,8 h14 v14 h-14 z" />
-                                      <path d="M0,70 h30 v30 h-30 z M4,74 v22 h22 v-22 z M8,78 h14 v14 h-14 z" />
-                                      
-                                      {/* Internal QR Matrix Data Modules */}
-                                      <rect x="36" y="4" width="8" height="8" />
-                                      <rect x="48" y="4" width="16" height="8" />
-                                      <rect x="36" y="16" width="12" height="8" />
-                                      <rect x="52" y="16" width="12" height="8" />
-                                      <rect x="4" y="36" width="8" height="12" />
-                                      <rect x="16" y="36" width="12" height="8" />
-                                      <rect x="32" y="32" width="12" height="12" />
-                                      <rect x="48" y="36" width="8" height="12" />
-                                      <rect x="60" y="32" width="16" height="8" />
-                                      <rect x="80" y="36" width="16" height="12" />
-                                      
-                                      <rect x="4" y="52" width="16" height="8" />
-                                      <rect x="24" y="48" width="8" height="16" />
-                                      <rect x="36" y="52" width="16" height="8" />
-                                      <rect x="56" y="48" width="12" height="12" />
-                                      <rect x="72" y="52" width="8" height="12" />
-                                      <rect x="84" y="52" width="12" height="8" />
-              
-                                      <rect x="36" y="68" width="12" height="12" />
-                                      <rect x="52" y="64" width="12" height="8" />
-                                      <rect x="68" y="68" width="16" height="8" />
-                                      <rect x="36" y="84" width="20" height="12" />
-                                      <rect x="60" y="80" width="8" height="16" />
-                                      <rect x="72" y="84" width="24" height="12" />
-                                    </svg>
-                                    {/* Center Logo */}
-                                    <GyanamLogo className="absolute inset-0 m-auto w-10 h-10" />
-                                  </div>
-                                </div>
+              <div className="p-4 bg-[#FFF5F5] rounded-2xl border-2 border-dashed border-[#C12223]/30 inline-block mb-6 relative group">
+                <div className="w-48 h-48 bg-white p-3 rounded-xl border border-[#F3DCDD] shadow-md flex items-center justify-center relative">
+                  {/* Realistic SVG QR Pattern */}
+                  <svg viewBox="0 0 100 100" className="w-full h-full fill-[#1F1A1C]">
+                    {/* Corner Position Detection Squares */}
+                    <path d="M0,0 h30 v30 h-30 z M4,4 v22 h22 v-22 z M8,8 h14 v14 h-14 z" />
+                    <path d="M70,0 h30 v30 h-30 z M74,4 v22 h22 v-22 z M78,8 h14 v14 h-14 z" />
+                    <path d="M0,70 h30 v30 h-30 z M4,74 v22 h22 v-22 z M8,78 h14 v14 h-14 z" />
+                    
+                    {/* Internal QR Matrix Data Modules */}
+                    <rect x="36" y="4" width="8" height="8" />
+                    <rect x="48" y="4" width="16" height="8" />
+                    <rect x="36" y="16" width="12" height="8" />
+                    <rect x="52" y="16" width="12" height="8" />
+                    <rect x="4" y="36" width="8" height="12" />
+                    <rect x="16" y="36" width="12" height="8" />
+                    <rect x="32" y="32" width="12" height="12" />
+                    <rect x="48" y="36" width="8" height="12" />
+                    <rect x="60" y="32" width="16" height="8" />
+                    <rect x="80" y="36" width="16" height="12" />
+                    
+                    <rect x="4" y="52" width="16" height="8" />
+                    <rect x="24" y="48" width="8" height="16" />
+                    <rect x="36" y="52" width="16" height="8" />
+                    <rect x="56" y="48" width="12" height="12" />
+                    <rect x="72" y="52" width="8" height="12" />
+                    <rect x="84" y="52" width="12" height="8" />
+
+                    <rect x="36" y="68" width="12" height="12" />
+                    <rect x="52" y="64" width="12" height="8" />
+                    <rect x="68" y="68" width="16" height="8" />
+                    <rect x="36" y="84" width="20" height="12" />
+                    <rect x="60" y="80" width="8" height="16" />
+                    <rect x="72" y="84" width="24" height="12" />
+                  </svg>
+                  {/* Center Logo */}
+                  <GyanamLogo className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-[#C12223] border-2 border-white flex items-center justify-center text-white font-heading font-black text-xs shadow-md" />
+                </div>
+              </div>
 
               <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#27AE60] bg-[#27AE60]/10 py-2.5 px-4 rounded-xl border border-[#27AE60]/20">
                 <CheckCircle2 className="w-4 h-4" /> Compatible with Android & iOS

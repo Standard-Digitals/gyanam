@@ -75,30 +75,30 @@ export const MockTestDashboard: React.FC = () => {
           </p>
         </div>
 
-        {/* Live Simulator Window Box - Dark Red Background */}
-        <div className="max-w-4xl mx-auto bg-[#2D0A0B] rounded-3xl p-6 sm:p-8 text-white shadow-2xl border border-red-950/40 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-[#C12223]/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Live Simulator Window Box - Rich Red Background */}
+        <div className="max-w-4xl mx-auto bg-gradient-to-br from-[#8C1316] via-[#A6181B] to-[#B91C1C] rounded-3xl p-6 sm:p-8 text-white shadow-2xl border border-red-500/30 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-[#EF4444]/15 rounded-full blur-3xl pointer-events-none" />
 
           {/* Simulator Top Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-red-900/40 gap-4 relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-red-400/30 gap-4 relative z-10">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#C12223] text-white flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-xl bg-[#EF4444] text-white flex items-center justify-center font-bold">
                 TCS
               </div>
               <div>
                 <h3 className="font-heading font-extrabold text-lg text-white">
-                  GYANAM All India Mock Test Engine
+                  Gyanam All India Mock Test Engine
                 </h3>
-                <p className="text-xs text-red-200/70">
+                <p className="text-xs text-red-100">
                   SSC CGL & IBPS PO Live Simulation Mode
                 </p>
               </div>
             </div>
 
             {testActive && !testSubmitted && (
-              <div className="flex items-center gap-3 bg-[#1F0708] px-4 py-2 rounded-xl border border-red-900/40">
-                <Clock className="w-4 h-4 text-amber-400 animate-spin" />
-                <span className="font-mono font-bold text-sm text-amber-400">
+              <div className="flex items-center gap-3 bg-[#8C1316]/80 px-4 py-2 rounded-xl border border-red-400/30">
+                <Clock className="w-4 h-4 text-amber-300 animate-spin" />
+                <span className="font-mono font-bold text-sm text-amber-300">
                   {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
                 </span>
               </div>
@@ -109,45 +109,47 @@ export const MockTestDashboard: React.FC = () => {
           <div className="py-6 relative z-10">
             {!testActive ? (
               <div className="py-12 text-center space-y-4 max-w-md mx-auto">
-                <div className="w-16 h-16 bg-[#C12223]/20 text-[#DC2626] rounded-2xl flex items-center justify-center mx-auto border border-[#C12223]/30">
-                  <FileText className="w-8 h-8" />
+                <div className="w-16 h-16 bg-white/15 text-white rounded-2xl flex items-center justify-center mx-auto border border-white/20 shadow-lg">
+                  <FileText className="w-8 h-8 text-amber-300" />
                 </div>
                 <h4 className="font-heading font-extrabold text-2xl text-white">
                   Try a 3-Question Mini Live Mock Test
                 </h4>
-                <p className="text-xs text-red-200/70">
+                <p className="text-xs text-red-100/90">
                   Test your real speed & accuracy right now. Get instant score, percentile rank and detailed solution analysis.
                 </p>
                 <button
                   onClick={handleStartTest}
-                  className="px-8 py-4 bg-gradient-to-r from-[#DC2626] to-[#8C1316] text-white font-extrabold text-sm rounded-2xl shadow-xl shadow-[#C12223]/30 hover:scale-105 transition cursor-pointer"
+                  className="px-8 py-4 bg-white text-[#8C1316] hover:bg-red-50 font-black text-sm rounded-2xl shadow-xl transition transform hover:scale-105 cursor-pointer"
                 >
                   Start Live Mini Mock Test Now
                 </button>
               </div>
             ) : testSubmitted ? (
-              <div className="py-8 space-y-6">
-                <div className="p-6 bg-[#1F0708] rounded-2xl border border-red-900/40 text-center space-y-3">
-                  <Trophy className="w-12 h-12 text-amber-400 mx-auto animate-bounce" />
-                  <h4 className="font-heading font-black text-2xl text-white">
+              <div className="py-6 space-y-6">
+                <div className="p-6 sm:p-8 bg-white text-[#1F1A1C] rounded-2xl border border-red-100 text-center space-y-4 shadow-2xl">
+                  <div className="w-16 h-16 bg-[#FFF5F5] text-[#C12223] rounded-2xl flex items-center justify-center mx-auto border border-[#F3DCDD]">
+                    <Trophy className="w-8 h-8 text-amber-500" />
+                  </div>
+                  <h4 className="font-heading font-black text-2xl text-[#1F1A1C]">
                     Mock Test Analysis Report
                   </h4>
-                  <div className="flex justify-center gap-6 pt-2">
-                    <div>
-                      <span className="text-[10px] text-red-200/70 uppercase block">Score</span>
+                  <div className="grid grid-cols-3 gap-4 pt-2 max-w-md mx-auto">
+                    <div className="p-3 bg-[#FFF5F5] rounded-xl border border-[#F3DCDD]">
+                      <span className="text-[10px] text-[#666666] uppercase font-bold block">Score</span>
                       <span className="font-heading font-black text-2xl text-[#27AE60]">
                         {calculateScore()} / 3
                       </span>
                     </div>
-                    <div>
-                      <span className="text-[10px] text-red-200/70 uppercase block">Accuracy</span>
-                      <span className="font-heading font-black text-2xl text-amber-400">
+                    <div className="p-3 bg-[#FFF5F5] rounded-xl border border-[#F3DCDD]">
+                      <span className="text-[10px] text-[#666666] uppercase font-bold block">Accuracy</span>
+                      <span className="font-heading font-black text-2xl text-amber-500">
                         {Math.round((calculateScore() / 3) * 100)}%
                       </span>
                     </div>
-                    <div>
-                      <span className="text-[10px] text-red-200/70 uppercase block">Percentile</span>
-                      <span className="font-heading font-black text-2xl text-[#DC2626]">
+                    <div className="p-3 bg-[#FFF5F5] rounded-xl border border-[#F3DCDD]">
+                      <span className="text-[10px] text-[#666666] uppercase font-bold block">Percentile</span>
+                      <span className="font-heading font-black text-2xl text-[#C12223]">
                         98.6%
                       </span>
                     </div>
@@ -156,47 +158,48 @@ export const MockTestDashboard: React.FC = () => {
 
                 <div className="space-y-3">
                   {sampleQuestions.map((sq, i) => (
-                    <div key={i} className="p-4 bg-[#1F0708] rounded-xl border border-red-900/40 text-xs">
-                      <p className="font-bold text-red-100 mb-1">Q{i + 1}. {sq.q}</p>
-                      <p className="text-red-200/70">
-                        Correct Answer: <strong className="text-[#27AE60]">{sq.opts[sq.ans]}</strong>
+                    <div key={i} className="p-4 bg-white rounded-xl border border-red-100 text-xs shadow-md">
+                      <p className="font-bold text-[#1F1A1C] mb-1">Q{i + 1}. {sq.q}</p>
+                      <p className="text-[#555555]">
+                        Correct Answer: <strong className="text-[#27AE60] font-bold">{sq.opts[sq.ans]}</strong>
                       </p>
                     </div>
                   ))}
                 </div>
 
-                <div className="text-center">
+                <div className="text-center pt-2">
                   <button
                     onClick={handleStartTest}
-                    className="px-6 py-2.5 bg-[#3B0A0C] text-white hover:bg-[#520E10] rounded-xl text-xs font-bold border border-red-800/40 transition cursor-pointer"
+                    className="px-6 py-3 bg-white text-[#8C1316] hover:bg-red-50 rounded-xl text-xs font-extrabold shadow-lg transition cursor-pointer"
                   >
                     Retake Mini Mock
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between text-xs text-red-200/70">
+              <div className="space-y-5">
+                <div className="flex items-center justify-between text-xs text-red-100 font-semibold">
                   <span>Question {currentQ + 1} of 3</span>
-                  <span className="text-[#DC2626] font-bold">{sampleQuestions[currentQ].subject}</span>
+                  <span className="text-amber-300 font-extrabold bg-white/10 px-3 py-1 rounded-full border border-white/20">{sampleQuestions[currentQ].subject}</span>
                 </div>
 
-                <div className="p-5 bg-[#1F0708] rounded-2xl border border-red-900/40">
-                  <p className="font-heading font-bold text-base text-white mb-4">
+                {/* White / Light Question Card */}
+                <div className="p-6 sm:p-8 bg-white rounded-2xl shadow-2xl text-[#1F1A1C]">
+                  <p className="font-heading font-black text-base sm:text-lg text-[#1F1A1C] mb-5 leading-snug">
                     {sampleQuestions[currentQ].q}
                   </p>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {sampleQuestions[currentQ].opts.map((opt, oIdx) => {
                       const isSelected = selectedAnswers[currentQ] === oIdx;
                       return (
                         <button
                           key={oIdx}
                           onClick={() => setSelectedAnswers({ ...selectedAnswers, [currentQ]: oIdx })}
-                          className={`w-full p-3 rounded-xl text-xs font-bold text-left transition border cursor-pointer ${
+                          className={`w-full p-3.5 rounded-xl text-xs font-bold text-left transition border cursor-pointer ${
                             isSelected
-                              ? 'bg-[#C12223] text-white border-[#C12223]'
-                              : 'bg-[#3B0A0C] text-red-100 border-red-900/40 hover:border-red-700'
+                              ? 'bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white border-transparent shadow-md'
+                              : 'bg-gray-50 text-[#1F1A1C] border-gray-200 hover:border-[#C12223] hover:bg-[#FFF5F5] hover:text-[#C12223]'
                           }`}
                         >
                           {opt}
@@ -211,7 +214,7 @@ export const MockTestDashboard: React.FC = () => {
                   <button
                     disabled={currentQ === 0}
                     onClick={() => setCurrentQ(prev => prev - 1)}
-                    className="px-4 py-2 bg-[#3B0A0C] text-red-200 rounded-xl text-xs font-bold disabled:opacity-40 cursor-pointer"
+                    className="px-5 py-2.5 bg-white/15 hover:bg-white/25 text-white border border-white/25 rounded-xl text-xs font-extrabold disabled:opacity-40 cursor-pointer backdrop-blur-md"
                   >
                     Previous
                   </button>
@@ -219,14 +222,14 @@ export const MockTestDashboard: React.FC = () => {
                   {currentQ < 2 ? (
                     <button
                       onClick={() => setCurrentQ(prev => prev + 1)}
-                      className="px-6 py-2 bg-[#DC2626] text-white rounded-xl text-xs font-bold hover:bg-[#B91C1C] transition cursor-pointer"
+                      className="px-7 py-2.5 bg-white text-[#8C1316] hover:bg-red-50 rounded-xl text-xs font-extrabold shadow-lg transition cursor-pointer"
                     >
                       Save & Next
                     </button>
                   ) : (
                     <button
                       onClick={() => setTestSubmitted(true)}
-                      className="px-6 py-2 bg-[#27AE60] text-white rounded-xl text-xs font-bold hover:bg-emerald-600 transition cursor-pointer"
+                      className="px-7 py-2.5 bg-white text-[#C12223] hover:bg-red-50 rounded-xl text-xs font-black shadow-xl border border-white/50 transition cursor-pointer"
                     >
                       Submit Test
                     </button>

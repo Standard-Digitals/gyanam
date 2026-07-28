@@ -15,7 +15,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ onOpenMentorship, onExplor
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="px-3.5 py-1 bg-[#C12223]/10 text-[#C12223] text-xs font-extrabold uppercase rounded-full tracking-wider">
-            Why GYANAM Leads EdTech in India
+            Why Gyanam Leads EdTech in India
           </span>
           <h2 className="font-heading font-black text-3xl sm:text-5xl text-[#1F1A1C] mt-3 tracking-tight">
             Designed Like a Tech Product, <br className="hidden sm:inline" />
@@ -68,7 +68,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ onOpenMentorship, onExplor
           <motion.div
             whileHover={{ y: -4 }}
             transition={{ duration: 0.2 }}
-            className="lg:col-span-4 p-8 bg-gradient-to-br from-[#2D0A0B] to-[#3B0A0C] text-white rounded-3xl border border-red-950/40 shadow-xl relative overflow-hidden group flex flex-col justify-between"
+            className="lg:col-span-4 p-8 bg-gradient-to-br from-[#8C1316] via-[#A6181B] to-[#B91C1C] text-white rounded-3xl border border-red-400/40 shadow-xl relative overflow-hidden group flex flex-col justify-between"
           >
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-2xl bg-white/10 text-[#DC2626] flex items-center justify-center">
@@ -167,7 +167,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ onOpenMentorship, onExplor
             className="lg:col-span-12 p-8 bg-gradient-to-r from-[#FFF5F5] via-white to-[#FFF5F5] rounded-3xl border border-[#C12223]/30 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6"
           >
             <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#DC2626] to-[#8C1316] text-white flex items-center justify-center shrink-0 shadow-lg shadow-[#C12223]/30">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#EF4444] to-[#B91C1C] text-white flex items-center justify-center shrink-0 shadow-lg shadow-[#C12223]/30">
                 <UserCheck className="w-8 h-8" />
               </div>
               <div>
@@ -185,7 +185,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ onOpenMentorship, onExplor
 
             <button
               onClick={onOpenMentorship}
-              className="px-6 py-3.5 bg-gradient-to-r from-[#DC2626] to-[#8C1316] text-white font-extrabold text-sm rounded-xl shadow-lg shadow-[#C12223]/25 hover:scale-105 transition shrink-0 cursor-pointer"
+              className="px-6 py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-extrabold text-sm rounded-xl shadow-lg shadow-[#C12223]/25 hover:scale-105 transition shrink-0 cursor-pointer"
             >
               Book Free Mentorship Session
             </button>

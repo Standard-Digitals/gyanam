@@ -21,7 +21,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({ course, onClose, onEnr
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 bg-[#450A0A]/70 backdrop-blur-md"
         />
 
         {/* Modal Window */}
@@ -40,13 +40,13 @@ export const CourseModal: React.FC<CourseModalProps> = ({ course, onClose, onEnr
           </button>
 
           {/* Header Image & Badge */}
-          <div className="relative h-56 sm:h-64 overflow-hidden bg-slate-900">
+          <div className="relative h-56 sm:h-64 overflow-hidden bg-[#8C1316]">
             <img
               src={course.thumbnail}
               alt={course.title}
               className="w-full h-full object-cover opacity-75"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#8C1316] via-[#8C1316]/60 to-transparent" />
 
             <div className="absolute bottom-6 left-6 right-6 text-white space-y-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -168,7 +168,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({ course, onClose, onEnr
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <button
                   onClick={() => onEnroll(course)}
-                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#C12223] to-[#8C1316] text-white font-bold rounded-2xl text-sm shadow-xl shadow-[#C12223]/30 hover:scale-[1.02] active:scale-[0.98] transition flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold rounded-2xl text-sm shadow-xl shadow-[#C12223]/30 hover:scale-[1.02] active:scale-[0.98] transition flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Enroll Now in Batch <ArrowRight className="w-4 h-4" />
                 </button>

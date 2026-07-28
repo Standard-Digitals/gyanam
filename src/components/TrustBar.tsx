@@ -40,7 +40,7 @@ export const TrustBar: React.FC<TrustBarProps> = ({ selectedCategory, onSelectCa
           <div className="absolute right-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-l from-white to-transparent pointer-events-none" />
 
           {/* Marquee Animated Track - Pauses on Hover */}
-          <div className="animate-marquee-track flex items-center gap-3 py-1">
+          <div className="animate-marquee-left flex items-center gap-3 py-1">
             {categoriesList.map((cat, index) => {
               const isSelected = selectedCategory === cat.id;
               return (
@@ -49,7 +49,7 @@ export const TrustBar: React.FC<TrustBarProps> = ({ selectedCategory, onSelectCa
                   onClick={() => onSelectCategory(cat.id)}
                   className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 flex items-center gap-2 shrink-0 border cursor-pointer ${
                     isSelected
-                      ? 'bg-gradient-to-r from-[#C12223] to-[#8C1316] text-white border-transparent shadow-lg shadow-[#C12223]/20 scale-105'
+                      ? 'bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white border-transparent shadow-lg shadow-[#C12223]/20 scale-105'
                       : 'bg-[#FFF5F5] text-[#555555] border-[#F3DCDD] hover:border-[#C12223] hover:text-[#C12223] hover:bg-white'
                   }`}
                 >

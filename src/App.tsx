@@ -10,6 +10,7 @@ import { LearningProcess } from './components/LearningProcess';
 import { CurrentAffairs } from './components/CurrentAffairs';
 import { MockTestDashboard } from './components/MockTestDashboard';
 import { SuccessStories } from './components/SuccessStories';
+import { YouTubeCollageSection } from './components/YouTubeCollageSection';
 import { Mentors } from './components/Mentors';
 import { MobileApp } from './components/MobileApp';
 import { FreeResources } from './components/FreeResources';
@@ -106,7 +107,7 @@ export default function App() {
           onEnrollCourse={(course) => handleEnrollCourse(course)}
         />
 
-        {/* Why GYANAM + Savings Calculator */}
+        {/* Why Gyanam + Savings Calculator */}
         <WhyGyanam />
 
         {/* Learning Process Timeline */}
@@ -118,8 +119,13 @@ export default function App() {
         {/* Mock Test Simulator */}
         <MockTestDashboard />
 
-        {/* Success Stories & Hall of Fame */}
+        {/* Success Stories & Hall of Fame (Photo Marquee) */}
         <SuccessStories
+          onPlayVideo={(story) => setSelectedVideoStory(story)}
+        />
+
+        {/* YouTube Video Collage Hub */}
+        <YouTubeCollageSection
           onPlayVideo={(story) => setSelectedVideoStory(story)}
         />
 

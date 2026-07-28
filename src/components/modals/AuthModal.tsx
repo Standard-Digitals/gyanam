@@ -43,7 +43,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 bg-[#450A0A]/70 backdrop-blur-md"
         />
 
         {/* Modal Window */}
@@ -62,7 +62,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
           </button>
 
           {/* Header Banner */}
-          <div className="bg-gradient-to-r from-[#C12223] to-[#8C1316] p-6 text-white text-center relative overflow-hidden">
+          <div className="bg-gradient-to-r from-[#EF4444] to-[#B91C1C] p-6 text-white text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-white/10 backdrop-blur-3xl" />
             <div className="relative z-10">
               <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-3 border border-white/30 p-1">
@@ -123,7 +123,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                 <button
                   type="submit"
                   disabled={phone.length < 10}
-                  className="w-full py-3.5 bg-gradient-to-r from-[#C12223] to-[#8C1316] text-white font-bold rounded-xl text-sm shadow-lg shadow-[#C12223]/25 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold rounded-xl text-sm shadow-lg shadow-[#C12223]/25 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Send OTP <ArrowRight className="w-4 h-4" />
                 </button>
@@ -185,7 +185,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
 
                 <button
                   type="submit"
-                  className="w-full py-3.5 bg-gradient-to-r from-[#C12223] to-[#8C1316] text-white font-bold rounded-xl text-sm shadow-lg shadow-[#C12223]/25 hover:scale-[1.02] transition cursor-pointer"
+                  className="w-full py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold rounded-xl text-sm shadow-lg shadow-[#C12223]/25 hover:scale-[1.02] transition cursor-pointer"
                 >
                   Verify & Continue
                 </button>

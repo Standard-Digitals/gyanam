@@ -37,7 +37,7 @@ export const MentorshipModal: React.FC<MentorshipModalProps> = ({ isOpen, onClos
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 bg-[#450A0A]/70 backdrop-blur-md"
         />
 
         {/* Modal Window */}
@@ -50,20 +50,20 @@ export const MentorshipModal: React.FC<MentorshipModalProps> = ({ isOpen, onClos
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-[#888888] hover:text-[#1F1A1C] rounded-full transition z-20 cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition z-20 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
 
           {/* Header */}
-          <div className="p-6 bg-gradient-to-br from-[#1A0506] to-[#3B0A0C] text-white relative">
-            <span className="px-3 py-1 bg-[#C12223] text-white text-[10px] font-extrabold uppercase rounded-full inline-block mb-2">
+          <div className="p-6 bg-gradient-to-br from-[#8C1316] via-[#A6181B] to-[#B91C1C] text-white relative">
+            <span className="px-3 py-1 bg-white/20 border border-white/20 text-white text-[10px] font-extrabold uppercase rounded-full inline-block mb-2 shadow-sm">
               1-on-1 Free Mentorship
             </span>
             <h3 className="font-heading font-extrabold text-2xl text-white">
               Book Your Free Govt Exam Counseling Call
             </h3>
-            <p className="text-white/70 text-xs mt-1">
+            <p className="text-red-100/90 text-xs mt-1">
               Talk directly with an ex-officer or top ranker to design your 2026 preparation roadmap.
             </p>
           </div>
@@ -160,7 +160,7 @@ export const MentorshipModal: React.FC<MentorshipModalProps> = ({ isOpen, onClos
 
                 <button
                   type="submit"
-                  className="w-full py-3.5 bg-gradient-to-r from-[#C12223] to-[#8C1316] text-white font-bold rounded-xl text-sm shadow-lg shadow-[#C12223]/25 hover:scale-[1.02] active:scale-[0.98] transition mt-2 cursor-pointer"
+                  className="w-full py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold rounded-xl text-sm shadow-lg shadow-[#C12223]/25 hover:scale-[1.02] active:scale-[0.98] transition mt-2 cursor-pointer"
                 >
                   Confirm Free Session
                 </button>
