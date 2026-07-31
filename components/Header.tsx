@@ -227,7 +227,9 @@ export const Header: React.FC<HeaderProps> = ({
               onMouseEnter={() => handleMouseEnter('currentAffairs')}
               onMouseLeave={handleMouseLeave}
             >
-              <button className="flex items-center gap-1.5 hover:text-[#C12223] transition py-1 font-semibold whitespace-nowrap cursor-pointer">
+              <button 
+                onClick={() => { setActiveDropdown(null); router.push('/current-affairs'); }}
+              className="flex items-center gap-1.5 hover:text-[#C12223] transition py-1 font-semibold whitespace-nowrap cursor-pointer">
                 <span>Current Affairs</span>
                 <span className="bg-[#C12223] text-white text-[9px] font-black px-1.5 py-0.5 rounded shrink-0">
                   DAILY
@@ -284,7 +286,10 @@ export const Header: React.FC<HeaderProps> = ({
               onMouseEnter={() => handleMouseEnter('downloads')}
               onMouseLeave={handleMouseLeave}
             >
-              <button className="flex items-center gap-1.5 hover:text-[#C12223] transition py-1 font-semibold whitespace-nowrap cursor-pointer">
+              <button 
+                onClick={() => { setActiveDropdown(null); router.push('/study-material'); }}
+                className="flex items-center gap-1.5 hover:text-[#C12223] transition py-1 font-semibold whitespace-nowrap cursor-pointer"
+              >
                 <span>Study Material</span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDropdown === 'downloads' ? 'rotate-180 text-[#C12223]' : 'text-gray-400'}`} />
               </button>
@@ -302,10 +307,10 @@ export const Header: React.FC<HeaderProps> = ({
                       <Download className="w-3.5 h-3.5" /> Free PDF & PYQ Portal
                     </div>
                     <ul className="space-y-1 text-xs font-semibold text-[#444444]">
-                      <li><a href="#free-resources" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Handwritten Subject Notes PDF</a></li>
-                      <li><a href="#free-resources" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Previous 10 Years Solved PYQs</a></li>
-                      <li><a href="#free-resources" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Official Syllabus & Exam Pattern</a></li>
-                      <li><a href="#free-resources" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Formula Sheets & eBooks</a></li>
+                      <li><button onClick={() => { setActiveDropdown(null); router.push('/study-material?category=PDF Notes'); }} className="w-full text-left hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition cursor-pointer">Handwritten Subject Notes PDF</button></li>
+                      <li><button onClick={() => { setActiveDropdown(null); router.push('/study-material?category=PYQ Paper'); }} className="w-full text-left hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition cursor-pointer">Previous 10 Years Solved PYQs</button></li>
+                      <li><button onClick={() => { setActiveDropdown(null); router.push('/study-material?category=Syllabus PDF'); }} className="w-full text-left hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition cursor-pointer">Official Syllabus & Exam Pattern</button></li>
+                      <li><button onClick={() => { setActiveDropdown(null); router.push('/study-material?category=Formula Sheet'); }} className="w-full text-left hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition cursor-pointer">Formula Sheets & Speed Math</button></li>
                     </ul>
                   </motion.div>
                 )}
@@ -538,9 +543,9 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
                 {activeMobileSub === 'study' && (
                   <div className="pl-4 py-2 space-y-2 text-xs font-medium text-[#555555] bg-[#FFF5F5] rounded-xl border border-[#C12223]/15 my-1">
-                    <a href="#free-resources" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-[#C12223]">Handwritten PDF Notes</a>
-                    <a href="#free-resources" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-[#C12223]">Previous Year Papers (PYQ)</a>
-                    <a href="#free-resources" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-[#C12223]">Syllabus & eBooks</a>
+                    <button onClick={() => { setMobileMenuOpen(false); router.push('/study-material?category=PDF Notes'); }} className="block w-full text-left py-1 hover:text-[#C12223] cursor-pointer">Handwritten PDF Notes</button>
+                    <button onClick={() => { setMobileMenuOpen(false); router.push('/study-material?category=PYQ Paper'); }} className="block w-full text-left py-1 hover:text-[#C12223] cursor-pointer">Previous Year Papers (PYQ)</button>
+                    <button onClick={() => { setMobileMenuOpen(false); router.push('/study-material?category=Syllabus PDF'); }} className="block w-full text-left py-1 hover:text-[#C12223] cursor-pointer">Syllabus & eBooks</button>
                   </div>
                 )}
               </div>

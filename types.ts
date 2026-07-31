@@ -100,12 +100,18 @@ export interface DailyQuizQuestion {
 export interface FreeResource {
   id: string;
   title: string;
-  type: 'PDF Notes' | 'PYQ Paper' | 'Current Affairs Magazine' | 'Formula Sheet';
+  type: 'PDF Notes' | 'PYQ Paper' | 'Current Affairs Magazine' | 'Formula Sheet' | 'Syllabus PDF' | 'NCERT Gist';
   category: string;
   fileSize: string;
   downloadsCount: number;
   rating: number;
   description: string;
+  language?: string;
+  pagesCount?: number;
+  chapters?: string[];
+  updatedDate?: string;
+  targetExams?: string[];
+  isHot?: boolean;
 }
 
 export interface BlogPost {
