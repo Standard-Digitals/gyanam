@@ -112,6 +112,12 @@ export interface FreeResource {
   updatedDate?: string;
   targetExams?: string[];
   isHot?: boolean;
+  originalPrice?: number;
+  price?: number;
+  reviewsCount?: number;
+  author?: string;
+  badge?: string;
+  coverBg?: string;
 }
 
 export interface BlogPost {

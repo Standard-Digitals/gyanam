@@ -821,7 +821,13 @@ export const FREE_RESOURCES: FreeResource[] = [
     chapters: ['National News & PIB Summaries', 'Economy, RBI & Banking Updates', 'Assam & NE Gazette Highlights', 'Defense & Science Technology', '200 Practice MCQs with Keys'],
     updatedDate: '25 July 2026',
     targetExams: ['SSC CGL', 'IBPS PO', 'Assam ADRE 3.0', 'UPSC Prelims'],
-    isHot: true
+    isHot: true,
+    originalPrice: 299,
+    price: 0,
+    reviewsCount: 1420,
+    author: 'Gyanm Current Affairs Editorial Board',
+    badge: 'BESTSELLER E-BOOK',
+    coverBg: 'from-red-600 to-red-800'
   },
   {
     id: 'res-2',
@@ -837,7 +843,13 @@ export const FREE_RESOURCES: FreeResource[] = [
     chapters: ['Quantitative Aptitude Shifts 2021-2025', 'General Intelligence & Reasoning', 'English Comprehension & Grammar', 'General Awareness TCS Trend Analysis'],
     updatedDate: '15 July 2026',
     targetExams: ['SSC CGL', 'SSC CHSL', 'SSC CPO', 'SSC MTS'],
-    isHot: true
+    isHot: true,
+    originalPrice: 499,
+    price: 0,
+    reviewsCount: 2890,
+    author: 'Gyanm SSC Research Wing',
+    badge: '10 YEARS SOLVED',
+    coverBg: 'from-rose-600 to-red-900'
   },
   {
     id: 'res-3',
@@ -853,7 +865,13 @@ export const FREE_RESOURCES: FreeResource[] = [
     chapters: ['Ahom Kingdom & Battles (Saraighat, Itakhuli)', 'Freedom Movement in Assam & Martyrs', 'Assam Geography, Brahmaputra & Tributaries', 'Assam Art, Culture, Bihu & Festivals'],
     updatedDate: '20 July 2026',
     targetExams: ['Assam ADRE 3.0 Grade III/IV', 'Assam Police SI', 'APSC CCE', 'Assam TET'],
-    isHot: true
+    isHot: true,
+    originalPrice: 399,
+    price: 0,
+    reviewsCount: 1850,
+    author: 'Prof. J. Baruah & Gyanm Assam Team',
+    badge: 'ASSAM SPECIAL',
+    coverBg: 'from-red-700 to-amber-900'
   },
   {
     id: 'res-4',
@@ -868,7 +886,13 @@ export const FREE_RESOURCES: FreeResource[] = [
     pagesCount: 42,
     chapters: ['Vedic Multiplication & Square Roots', 'Percentage, Profit & Loss Golden Formulas', 'Algebra & Geometry Theorem Summary', 'Data Interpretation Quick Chart Hacks'],
     updatedDate: '10 July 2026',
-    targetExams: ['SSC CGL', 'IBPS PO/Clerk', 'SBI PO', 'RRB NTPC']
+    targetExams: ['SSC CGL', 'IBPS PO/Clerk', 'SBI PO', 'RRB NTPC'],
+    originalPrice: 199,
+    price: 0,
+    reviewsCount: 980,
+    author: 'Er. R. Sharma (Maths HOD)',
+    badge: 'SPEED MATHS',
+    coverBg: 'from-red-600 to-orange-700'
   },
   {
     id: 'res-5',
@@ -883,7 +907,13 @@ export const FREE_RESOURCES: FreeResource[] = [
     pagesCount: 96,
     chapters: ['Preamble & Fundamental Rights (Art 12-35)', 'Directive Principles & Fundamental Duties', 'Parliamentary System & President Powers', 'Judiciary & Landmark Supreme Court Cases'],
     updatedDate: '18 July 2026',
-    targetExams: ['UPSC CSE', 'APSC CCE', 'SSC CGL', 'CDS / NDA']
+    targetExams: ['UPSC CSE', 'APSC CCE', 'SSC CGL', 'CDS / NDA'],
+    originalPrice: 349,
+    price: 0,
+    reviewsCount: 1120,
+    author: 'Dr. A. K. Verma (UPSC Mentor)',
+    badge: 'MIND MAP EDITION',
+    coverBg: 'from-[#B91C1C] to-[#7F1D1D]'
   },
   {
     id: 'res-6',
@@ -898,7 +928,13 @@ export const FREE_RESOURCES: FreeResource[] = [
     pagesCount: 160,
     chapters: ['Prelims Memory Based Papers 2021-2025', 'Mains Reasoning Puzzles & Seating Arrangements', 'Data Analysis & Interpretation Solutions', 'Banking Awareness Static & Dynamic Notes'],
     updatedDate: '12 July 2026',
-    targetExams: ['IBPS PO', 'SBI PO', 'IBPS Clerk', 'RBI Grade B']
+    targetExams: ['IBPS PO', 'SBI PO', 'IBPS Clerk', 'RBI Grade B'],
+    originalPrice: 450,
+    price: 0,
+    reviewsCount: 1640,
+    author: 'Gyanm Banking Expert Panel',
+    badge: 'BANKING EXCLUSIVE',
+    coverBg: 'from-red-600 to-rose-950'
   },
   {
     id: 'res-7',
@@ -913,7 +949,13 @@ export const FREE_RESOURCES: FreeResource[] = [
     pagesCount: 18,
     chapters: ['Class III Post Weightage & Computer Test Format', 'Class IV Syllabus & Qualification Benchmarks', 'Assam Employment Exchange Guidelines'],
     updatedDate: '22 July 2026',
-    targetExams: ['Assam ADRE 3.0 SLRC']
+    targetExams: ['Assam ADRE 3.0 SLRC'],
+    originalPrice: 149,
+    price: 0,
+    reviewsCount: 2310,
+    author: 'State Exam Advisory Board',
+    badge: 'OFFICIAL SLRC BLUEPRINT',
+    coverBg: 'from-red-800 to-[#581C87]'
   },
   {
     id: 'res-8',
@@ -928,7 +970,13 @@ export const FREE_RESOURCES: FreeResource[] = [
     pagesCount: 180,
     chapters: ['Indus Valley & Vedic Period Summary', 'Mughal Empire & British Expansion', 'Physical Geography, Monsoon & Soils of India'],
     updatedDate: '08 July 2026',
-    targetExams: ['UPSC CSE', 'APSC CCE', 'SSC CGL', 'Railway RRB NTPC']
+    targetExams: ['UPSC CSE', 'APSC CCE', 'SSC CGL', 'Railway RRB NTPC'],
+    originalPrice: 399,
+    price: 0,
+    reviewsCount: 1780,
+    author: 'Gyanm NCERT Research Division',
+    badge: 'NCERT ESSENTIALS',
+    coverBg: 'from-red-700 to-stone-900'
   }
 ];
 
