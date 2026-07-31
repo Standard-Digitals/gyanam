@@ -827,7 +827,7 @@ export const FREE_RESOURCES: FreeResource[] = [
     reviewsCount: 1420,
     author: 'Gyanm Current Affairs Editorial Board',
     badge: 'BESTSELLER E-BOOK',
-    coverBg: 'from-red-600 to-red-800'
+    coverBg: 'linear-gradient(to bottom right, #dc2626, #991b1b)'
   },
   {
     id: 'res-2',
@@ -849,7 +849,7 @@ export const FREE_RESOURCES: FreeResource[] = [
     reviewsCount: 2890,
     author: 'Gyanm SSC Research Wing',
     badge: '10 YEARS SOLVED',
-    coverBg: 'from-rose-600 to-red-900'
+    coverBg: 'linear-gradient(to bottom right, #e11d48, #7f1d1d)'
   },
   {
     id: 'res-3',
@@ -871,7 +871,7 @@ export const FREE_RESOURCES: FreeResource[] = [
     reviewsCount: 1850,
     author: 'Prof. J. Baruah & Gyanm Assam Team',
     badge: 'ASSAM SPECIAL',
-    coverBg: 'from-red-700 to-amber-900'
+    coverBg: 'linear-gradient(to bottom right, #b91c1c, #78350f)'
   },
   {
     id: 'res-4',
@@ -892,7 +892,7 @@ export const FREE_RESOURCES: FreeResource[] = [
     reviewsCount: 980,
     author: 'Er. R. Sharma (Maths HOD)',
     badge: 'SPEED MATHS',
-    coverBg: 'from-red-600 to-orange-700'
+    coverBg: 'linear-gradient(to bottom right, #dc2626, #c2410c)'
   },
   {
     id: 'res-5',
@@ -913,7 +913,7 @@ export const FREE_RESOURCES: FreeResource[] = [
     reviewsCount: 1120,
     author: 'Dr. A. K. Verma (UPSC Mentor)',
     badge: 'MIND MAP EDITION',
-    coverBg: 'from-[#B91C1C] to-[#7F1D1D]'
+    coverBg: 'linear-gradient(to bottom right, #b91c1c, #7f1d1d)'
   },
   {
     id: 'res-6',
@@ -934,7 +934,7 @@ export const FREE_RESOURCES: FreeResource[] = [
     reviewsCount: 1640,
     author: 'Gyanm Banking Expert Panel',
     badge: 'BANKING EXCLUSIVE',
-    coverBg: 'from-red-600 to-rose-950'
+    coverBg: 'linear-gradient(to bottom right, #dc2626, #4c0519)'
   },
   {
     id: 'res-7',
@@ -955,7 +955,7 @@ export const FREE_RESOURCES: FreeResource[] = [
     reviewsCount: 2310,
     author: 'State Exam Advisory Board',
     badge: 'OFFICIAL SLRC BLUEPRINT',
-    coverBg: 'from-red-800 to-[#581C87]'
+    coverBg: 'linear-gradient(to bottom right, #991b1b, #581c87)'
   },
   {
     id: 'res-8',
@@ -976,7 +976,7 @@ export const FREE_RESOURCES: FreeResource[] = [
     reviewsCount: 1780,
     author: 'Gyanm NCERT Research Division',
     badge: 'NCERT ESSENTIALS',
-    coverBg: 'from-red-700 to-stone-900'
+    coverBg: 'linear-gradient(to bottom right, #b91c1c, #1c1917)'
   }
 ];
 

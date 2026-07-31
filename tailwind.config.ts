@@ -5,6 +5,12 @@ const config: Config = {
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './features/**/*.{ts,tsx}',
+    './data/**/*.{ts,tsx}',
+  ],
+  safelist: [
+    { pattern: /^from-/ },
+    { pattern: /^to-/ },
+    { pattern: /^via-/ },
   ],
   theme: {
     extend: {

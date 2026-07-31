@@ -355,7 +355,7 @@ export const StudyMaterialPage: React.FC = () => {
                 const spotlightItem = FREE_RESOURCES[spotlightIndex % FREE_RESOURCES.length];
 
                 return (
-                  <div className="bg-gradient-to-br from-red-950 via-slate-900 to-red-950 p-5 rounded-3xl border-2 border-amber-400/50 shadow-2xl space-y-4 relative overflow-hidden group">
+                  <div className="bg-gradient-to-br from-red-950 via-slate-900/5 to-red-950 p-5 rounded-3xl border-2 border-amber-400/50 shadow-2xl space-y-4 relative overflow-hidden group">
                     
                     {/* Top Deal Banner Stripe */}
                     <div className="flex items-center justify-between border-b border-white/15 pb-3">
@@ -392,7 +392,7 @@ export const StudyMaterialPage: React.FC = () => {
                     <div className="flex items-center gap-4">
                       
                       {/* 3D E-Book Cover Image / Graphic */}
-                      <div className={`w-28 sm:w-32 h-40 rounded-2xl bg-gradient-to-br ${spotlightItem.coverBg || 'from-red-600 to-red-900'} p-3 text-white flex flex-col justify-between shadow-2xl relative border border-white/20 shrink-0 transform group-hover:scale-105 transition duration-300`}>
+                      <div className="w-28 sm:w-32 h-40 rounded-2xl p-3 text-white flex flex-col justify-between shadow-2xl relative border border-white/20 shrink-0 transform group-hover:scale-105 transition duration-300" style={{ background: spotlightItem.coverBg || 'linear-gradient(to bottom right, #dc2626, #991b1b)' }}>
                         {/* Book Spine Shadow */}
                         <div className="absolute top-0 bottom-0 left-0 w-2.5 bg-black/30 border-r border-white/20" />
                         
@@ -795,7 +795,7 @@ export const StudyMaterialPage: React.FC = () => {
                     >
                       
                       {/* E-BOOK MOCKUP HEADER THUMBNAIL */}
-                      <div className={`bg-gradient-to-br ${res.coverBg || 'from-red-600 to-red-800'} p-5 text-white relative flex flex-col justify-between min-h-[160px]`}>
+                      <div className="p-5 text-white relative flex flex-col justify-between min-h-[160px]" style={{ background: res.coverBg || 'linear-gradient(to bottom right, #dc2626, #991b1b)' }}>
                         
                         {/* Book Spine Texture Line */}
                         <div className="absolute top-0 bottom-0 left-0 w-3 bg-black/20 border-r border-white/20" />
@@ -947,7 +947,7 @@ export const StudyMaterialPage: React.FC = () => {
                     >
                       <div className="flex items-start gap-4 flex-1">
                         {/* Book Icon Cover Badge */}
-                        <div className={`w-14 h-16 rounded-xl bg-gradient-to-br ${res.coverBg || 'from-red-600 to-red-800'} text-white flex flex-col items-center justify-center shrink-0 shadow-sm p-1 text-center`}>
+                        <div className="w-14 h-16 rounded-xl text-white flex flex-col items-center justify-center shrink-0 shadow-sm p-1 text-center" style={{ background: res.coverBg || 'linear-gradient(to bottom right, #dc2626, #991b1b)' }}>
                           <BookOpen className="w-6 h-6 text-amber-300 mb-1" />
                           <span className="text-[9px] font-black uppercase tracking-tight line-clamp-1">{res.type}</span>
                         </div>
