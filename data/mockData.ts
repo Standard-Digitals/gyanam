@@ -1,4 +1,4 @@
-import { Course, SuccessStory, Mentor, CurrentAffairItem, DailyQuizQuestion, FreeResource, BlogPost, FAQItem } from '@/types';
+import { Course, SuccessStory, Mentor, CurrentAffairItem, DailyQuizQuestion, FreeResource, BlogPost, FAQItem } from '../types';
 
 export const EXAM_CATEGORIES = [
   { id: 'all', name: 'All Exams', icon: 'Sparkles', count: '100+ Courses' },
@@ -578,47 +578,188 @@ export const MENTORS: Mentor[] = [
 export const CURRENT_AFFAIRS_ITEMS: CurrentAffairItem[] = [
   {
     id: 'ca-1',
-    title: 'RBI Keeps Repo Rate Unchanged at 6.5%: Implications for Banking Exams',
+    slug: 'rbi-repo-rate-unchanged-6-point-5-percent-monetary-policy',
+    title: 'RBI Keeps Repo Rate Unchanged at 6.5%: Complete Monetary Policy Breakdown',
     category: 'Economy',
-    date: 'Today, 25 July 2026',
-    readTime: '3 min read',
-    summary: 'The Monetary Policy Committee (MPC) of the Reserve Bank of India announced its latest decision regarding interest rates and inflation target.',
+    date: '25 July 2026',
+    readTime: '4 min read',
+    summary: 'The Monetary Policy Committee (MPC) of the Reserve Bank of India announced its bi-monthly decision, maintaining key interest rates to ensure durable alignment of inflation with target.',
     bullets: [
-      'Repo Rate maintained at 6.50% for 8th consecutive cycle.',
-      'Reverse Repo Rate stands at 3.35%, MSF & Bank Rate at 6.75%.',
+      'Repo Rate maintained at 6.50% for the 8th consecutive cycle.',
+      'Standing Deposit Facility (SDF) rate stands at 6.25%, MSF & Bank Rate at 6.75%.',
       'Real GDP growth projection for FY27 retained at 7.2%.',
-      'Crucial takeaway for IBPS PO, SBI PO & SSC CGL Economics portion.'
+      'CPI Inflation projection estimated at 4.5% for the financial year.'
     ],
-    impForExams: ['IBPS PO', 'SBI PO', 'SSC CGL', 'UPSC Prelims', 'Assam ADRE']
+    impForExams: ['IBPS PO', 'SBI PO', 'SSC CGL', 'UPSC Prelims', 'Assam ADRE'],
+    thumbnail: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=800',
+    sourceName: 'RBI Official Press Release & PIB India',
+    author: 'Dr. V. K. Nanda & GYANM Banking Team',
+    syllabusTag: 'GS Paper III - Indian Economy & Banking Operations',
+    backgroundContext: 'The Reserve Bank of India (RBI) Monetary Policy Committee (MPC) met from July 23 to 25, 2026. After detailed assessment of global financial headwinds and domestic growth-inflation dynamics, the 6-member committee voted 5:1 to keep the policy Repo Rate unchanged at 6.50%. The stance remains focused on "Withdrawal of Accommodation" to anchor inflation expectations toward the 4% target.',
+    fullContent: [
+      '1. Key Interest Rates Snapshot: Repo Rate = 6.50%, Reverse Repo Rate = 3.35%, SDF = 6.25%, Marginal Standing Facility (MSF) = 6.75%, Bank Rate = 6.75%, Cash Reserve Ratio (CRR) = 4.50%, Statutory Liquidity Ratio (SLR) = 18.00%.',
+      '2. Inflation Dynamics: Headline CPI inflation moderated to 4.8% in recent months, but food price volatility due to erratic monsoon distribution continues to pose upside risks to headline trajectory.',
+      '3. Growth Outlook: India remains the fastest-growing major economy globally. Urban demand continues to be resilient, while rural consumption is showing steady signs of recovery boosted by good Kharif sowing.',
+      '4. Financial Stability & Liquidity: The RBI Governor emphasized that Indian banks maintain robust capital adequacy ratios (CRAR) and liquidity buffers. Non-Performing Assets (NPAs) hit a multi-year low of 2.8% gross NPA.'
+    ],
+    keyTakeaways: [
+      'Monetary Policy Committee consists of 6 members (3 from RBI, 3 appointed by Central Govt).',
+      'Section 45ZB of the RBI Act 1934 provides for the constitution of the MPC.',
+      'Flexible Inflation Targeting framework mandates maintaining CPI at 4% with a tolerance band of +/- 2% (2% to 6%).'
+    ],
+    mcqQuestion: {
+      question: 'Which section of the Reserve Bank of India Act, 1934 provides for the statutory constitution of the Monetary Policy Committee (MPC)?',
+      options: ['Section 45ZB', 'Section 22', 'Section 17', 'Section 42(1)'],
+      correctAnswer: 0,
+      explanation: 'Under Section 45ZB of the RBI Act 1934, the Central Government is empowered to constitute a six-member Monetary Policy Committee.'
+    }
   },
   {
     id: 'ca-2',
-    title: 'Assam Govt Announces 15,000 New Vacancies for ADRE 3.0 & Police Recruitment',
-    category: 'State Exams',
-    date: 'Yesterday, 24 July 2026',
-    readTime: '2 min read',
-    summary: 'The Cabinet meeting approved the launch of SLRC ADRE 3.0 notification covering Grade III, IV and Forest Guard cadres.',
+    slug: 'assam-govt-announces-15000-vacancies-adre-3-point-0-slrc',
+    title: 'Assam Govt Cabinet Approves 15,000 New Vacancies for ADRE 3.0 & Police Recruitment',
+    category: 'Assam & NE',
+    date: '24 July 2026',
+    readTime: '3 min read',
+    summary: 'The Assam State Cabinet approved the roadmap for SLRC ADRE 3.0 notification covering Grade III, Grade IV, Police SI, and Forest Guard posts.',
     bullets: [
-      'Official notification expected in August 2026.',
-      'Age relaxation granted up to 40 years for open category.',
-      'Domicile requirement & Employment Exchange registration mandatory.',
-      'GYANM to launch dedicated Free Special Mock Tests series.'
+      'Official ADRE 3.0 advertisement expected in August 2026.',
+      'Upper age relaxation extended up to 40 years for open category applicants.',
+      'Mandatory registration with Assam Employment Exchange & state domicile.',
+      'GYANM Assam special study modules & Assamese test series launched.'
     ],
-    impForExams: ['Assam ADRE 3.0', 'Assam Police SI', 'APDCL', 'Assam TET']
+    impForExams: ['Assam ADRE 3.0', 'Assam Police SI', 'APDCL', 'Assam TET', 'APSC'],
+    thumbnail: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&q=80&w=800',
+    sourceName: 'Assam Govt Press Release & DIPR Assam',
+    author: 'Pranab Kumar Das (Assam Exam Specialist)',
+    syllabusTag: 'Assam State GK & SLRC Exam Pattern 2026',
+    backgroundContext: 'The State Level Recruitment Commission (SLRC) in Assam was established under the Assam Direct Recruitment Commission for Analogous Posts in Class-III and Class-IV Act, 2021. Following the successful completion of ADRE 1.0 and 2.0, the government is expediting ADRE 3.0 to fill critical vacancies across health, education, revenue, and police departments.',
+    fullContent: [
+      '1. Post Breakup: Grade III (Bachelor Degree & Computer posts) ~ 7,500 seats; Grade IV (8th/10th pass) ~ 5,000 seats; Assam Police & Forest Battalion ~ 2,500 seats.',
+      '2. Exam Pattern: Single stage OMC/OOMR written test followed by skill test/computer proficiency test for Class III and physical standard test (PST/PET) for police cadres.',
+      '3. Medium of Instruction: Question papers will be available in Assamese, Bodo, Bengali, Hindi, and English.',
+      '4. Preparation Strategy: Special emphasis on Assam History (Ahom Dynasty, Freedom Movement in Assam), Assam Geography, Brahmaputra Basin, Wildlife Sanctuaries, and National Parks.'
+    ],
+    keyTakeaways: [
+      'ADRE SLRC established under Assam Act XXI of 2021.',
+      'Assam has 7 National Parks (Kaziranga, Manas, Dibru-Saikhowa, Nameri, Orang, Raimona, Dihing Patkai).',
+      'Assam Employment Exchange card is strictly compulsory at the time of online application.'
+    ],
+    mcqQuestion: {
+      question: 'Which is the 7th and latest National Park declared in Assam?',
+      options: ['Dihing Patkai', 'Raimona', 'Orang', 'Nameri'],
+      correctAnswer: 0,
+      explanation: 'Dihing Patkai was notified as the 7th National Park of Assam in June 2021, shortly after Raimona was declared as the 6th.'
+    }
   },
   {
     id: 'ca-3',
+    slug: 'isro-launches-earth-observation-satellite-eos-09-pslv-c59',
     title: 'ISRO Successfully Launches Earth Observation Satellite EOS-09 via PSLV-C59',
     category: 'Science & Tech',
     date: '23 July 2026',
     readTime: '4 min read',
-    summary: 'Indian Space Research Organisation marked another milestone in space exploration with precise orbit injection.',
+    summary: 'ISRO marked another milestone with the flawless orbit insertion of EOS-09 aboard the Workhorse rocket PSLV-C59 from Sriharikota.',
     bullets: [
-      'Launched from Satish Dhawan Space Centre, Sriharikota.',
-      'Payload includes hyper-spectral imaging for disaster management & agriculture.',
-      'Expected questions in SSC CGL General Awareness & UPSC Science & Tech.'
+      'Launched from First Launch Pad at Satish Dhawan Space Centre (SDSC-SHAR).',
+      'Advanced Thermal Infrared & Hyperspectral Payload for agricultural monitoring.',
+      'Expected high-yield questions for SSC CGL Tier 1, CDS & UPSC Science & Tech.'
     ],
-    impForExams: ['SSC CGL', 'RRB NTPC', 'CDS', 'UPSC', 'State PSC']
+    impForExams: ['SSC CGL', 'RRB NTPC', 'CDS', 'UPSC', 'State PSC'],
+    thumbnail: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&q=80&w=800',
+    sourceName: 'ISRO Official Bulletin & Department of Space',
+    author: 'GYANM Science & Defense Desk',
+    syllabusTag: 'GS Paper III - Space Technology & Defense Innovations',
+    backgroundContext: 'The Polar Satellite Launch Vehicle (PSLV) completed its 61st flight (PSLV-C59). The mission carried EOS-09 into a Sun-Synchronous Polar Orbit (SSPO) at an altitude of 535 km. The satellite provides high-resolution temporal imaging for flood forecasting, crop yield estimation, and coastal erosion monitoring.',
+    fullContent: [
+      '1. Mission Specifications: PSLV flew in XL configuration with 6 strap-on motors. Total satellite mass is 1,480 kg with a design operational life of 5 years.',
+      '2. Applications: Real-time disaster mapping, forest fire detection, mineral exploration, and border surveillance.',
+      '3. Co-passenger Payloads: Included two student micro-satellites developed under IN-SPACe university partnership initiatives.',
+      '4. Science Takeaway: PSLV is a four-stage launch vehicle using alternate solid and liquid propulsion stages (S1 Solid, S2 Liquid Vikas Engine, S3 Solid, S4 Liquid PS-4).'
+    ],
+    keyTakeaways: [
+      'PSLV is a 4-stage rocket developed by ISRO using solid (HTPB) and liquid (UDMH + N2O4) propellants.',
+      'Current ISRO Chairman is S. Somanath.',
+      'Satish Dhawan Space Centre is situated on Sriharikota Island, Andhra Pradesh (Pulicat Lake).'
+    ],
+    mcqQuestion: {
+      question: 'Which propellant combination is used in the liquid engines (Vikas Engine) of ISRO rockets like PSLV and LVM3?',
+      options: ['UDMH and Nitrogen Tetroxide (N2O4)', 'Liquid Hydrogen and Liquid Oxygen', 'Kerosene and Liquid Oxygen', 'HTPB and Ammonium Perchlorate'],
+      correctAnswer: 0,
+      explanation: 'The Vikas engine uses Unsymmetrical Dimethylhydrazine (UDMH) as fuel and Nitrogen Tetroxide (N2O4) as oxidizer.'
+    }
+  },
+  {
+    id: 'ca-4',
+    slug: 'india-host-quad-summit-2026-new-delhi-maritime-security',
+    title: 'India to Host 2026 QUAD Leaders Summit in New Delhi: Maritime Security Focus',
+    category: 'International',
+    date: '22 July 2026',
+    readTime: '3 min read',
+    summary: 'Prime Minister Narendra Modi announced that India will host the Quad Leaders Summit featuring Leaders from US, Australia, Japan, and India.',
+    bullets: [
+      'Core focus: Indo-Pacific maritime domain awareness & critical technology supply chains.',
+      'IPMDA initiative expansion across Indian Ocean region.',
+      'Joint HADR (Humanitarian Assistance & Disaster Relief) exercises announced.'
+    ],
+    impForExams: ['UPSC CSE', 'SSC CGL', 'Defence CDS/NDA', 'APSC', 'Banking GA'],
+    thumbnail: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&q=80&w=800',
+    sourceName: 'Ministry of External Affairs (MEA India)',
+    author: 'GYANM UPSC Editorial Desk',
+    syllabusTag: 'GS Paper II - Bilateral, Regional & Global Groupings involving India',
+    backgroundContext: 'The Quadrilateral Security Dialogue (QUAD) comprises India, the United States, Australia, and Japan. First initiated informally in 2007 by former Japanese PM Shinzo Abe, the Quad was revived in 2017 to ensure a free, open, inclusive, and resilient Indo-Pacific region.',
+    fullContent: [
+      '1. Key Pillars: Maritime Security, Climate Action, Infrastructure Investment, Critical & Emerging Technologies (5G, Semiconductors, AI), and Health Security.',
+      '2. IPMDA Expansion: The Indo-Pacific Partnership for Maritime Domain Awareness will provide satellite-based AIS tracking data to island nations.',
+      '3. Cyber Security Working Group: Joint standards for securing critical infrastructure against ransomware attacks.'
+    ],
+    keyTakeaways: [
+      'QUAD member nations: India, USA, Japan, Australia.',
+      'Malabar Exercise is the annual multilateral naval warfare exercise conducted by QUAD navies.',
+      'First in-person QUAD summit was hosted by US President Joe Biden at Washington D.C. in 2021.'
+    ],
+    mcqQuestion: {
+      question: 'Which annual naval exercise is jointly conducted by the member nations of the QUAD grouping?',
+      options: ['Malabar Exercise', 'Varuna Exercise', 'Yudh Abhyas', 'Jimex Exercise'],
+      correctAnswer: 0,
+      explanation: 'Exercise Malabar began as a bilateral naval exercise between India and US in 1992, later expanded to include Japan and Australia.'
+    }
+  },
+  {
+    id: 'ca-5',
+    slug: 'pm-surya-ghar-muft-bijli-yojana-achieves-1-crore-registrations',
+    title: 'PM-Surya Ghar: Muft Bijli Yojana Crosses 1 Crore Applicant Threshold',
+    category: 'Schemes',
+    date: '21 July 2026',
+    readTime: '3 min read',
+    summary: 'Ministry of New and Renewable Energy (MNRE) confirmed unprecedented public enthusiasm for solar rooftop installations under the flagship scheme.',
+    bullets: [
+      'Provides up to 300 units of free electricity monthly for 1 crore households.',
+      'Subsidies up to ₹78,000 for 3 kW rooftop solar systems.',
+      'Massive expected questions in Government Schemes section for all competitive exams.'
+    ],
+    impForExams: ['SSC CGL', 'IBPS PO', 'Assam ADRE', 'UPSC', 'Railway RRB'],
+    thumbnail: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&q=80&w=800',
+    sourceName: 'Ministry of New & Renewable Energy (MNRE)',
+    author: 'GYANM Schemes & Policy Desk',
+    syllabusTag: 'GS Paper II & III - Welfare Schemes & Renewable Energy Infrastructure',
+    backgroundContext: 'PM-Surya Ghar: Muft Bijli Yojana was officially launched in February 2024 with a total financial outlay of ₹75,021 crore. The scheme aims to increase solar rooftop capacity and empower residential households to generate their own electricity, selling surplus power back to DISCOMs.',
+    fullContent: [
+      '1. Subsidy Structure: ₹30,000 per kW for systems up to 2 kW; ₹18,000 per kW for additional capacity up to 3 kW. Maximum subsidy capped at ₹78,000.',
+      '2. Collateral-free Loans: Low-interest bank loans (around 7%) available without collateral for installing rooftop panels.',
+      '3. Model Solar Villages: Scheme provisions for developing one Model Solar Village in every district across India.'
+    ],
+    keyTakeaways: [
+      'Total financial outlay: ₹75,021 Crore.',
+      'Target: Installation of rooftop solar in 1 Crore (10 Million) households.',
+      'Nodal Ministry: Ministry of New and Renewable Energy (MNRE).'
+    ],
+    mcqQuestion: {
+      question: 'What is the maximum central financial assistance (subsidy) provided for a 3 kW rooftop solar system under PM-Surya Ghar Yojana?',
+      options: ['₹78,000', '₹50,000', '₹1,00,000', '₹60,000'],
+      correctAnswer: 0,
+      explanation: 'Under PM-Surya Ghar Yojana, a subsidy of ₹60,000 is given for 2 kW systems and an additional ₹18,000 for 3 kW, making a maximum of ₹78,000.'
+    }
   }
 ];
 

@@ -249,28 +249,28 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                     <ul className="space-y-1 text-xs font-semibold text-[#444444]">
                       <li>
-                        <a href="#current-affairs" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] flex items-center justify-between transition">
+                        <button onClick={() => { setActiveDropdown(null); router.push('/current-affairs?tab=news'); }} className="w-full text-left hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] flex items-center justify-between transition cursor-pointer">
                           <span>Today's News Analysis</span>
                           <span className="text-[9px] bg-[#27AE60]/10 text-[#27AE60] font-extrabold px-1.5 py-0.5 rounded">7:00 AM</span>
-                        </a>
+                        </button>
                       </li>
                       <li>
-                        <a href="#current-affairs" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] flex items-center justify-between transition">
+                        <button onClick={() => { setActiveDropdown(null); router.push('/current-affairs?tab=quiz'); }} className="w-full text-left hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] flex items-center justify-between transition cursor-pointer">
                           <span>Daily 5-MCQ Live Test</span>
                           <span className="text-[9px] bg-[#C12223]/10 text-[#C12223] font-extrabold px-1.5 py-0.5 rounded">Live</span>
-                        </a>
+                        </button>
                       </li>
                       <li>
-                        <a href="#free-resources" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] flex items-center justify-between transition">
+                        <button onClick={() => { setActiveDropdown(null); router.push('/current-affairs?tab=pdf'); }} className="w-full text-left hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] flex items-center justify-between transition cursor-pointer">
                           <span>Monthly PDF Booklet</span>
                           <span className="text-[9px] bg-gray-100 text-gray-700 font-extrabold px-1.5 py-0.5 rounded">PDF</span>
-                        </a>
+                        </button>
                       </li>
                       <li>
-                        <a href="#current-affairs" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] flex items-center justify-between transition">
+                        <button onClick={() => { setActiveDropdown(null); router.push('/current-affairs?tab=assam'); }} className="w-full text-left hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] flex items-center justify-between transition cursor-pointer">
                           <span>Assam & State Special CA</span>
                           <span className="text-[9px] bg-[#C12223]/10 text-[#C12223] font-extrabold px-1.5 py-0.5 rounded">ADRE</span>
-                        </a>
+                        </button>
                       </li>
                     </ul>
                   </motion.div>
@@ -511,7 +511,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div>
                 <button
                   onClick={() => setActiveMobileSub(activeMobileSub === 'ca' ? null : 'ca')}
-                  className="w-full flex items-center justify-between py-2 text-left font-bold text-[#1F1A1C]"
+                  className="w-full flex items-center justify-between py-2 text-left font-bold text-[#1F1A1C] cursor-pointer"
                 >
                   <span className="flex items-center gap-1.5">
                     Daily Current Affairs
@@ -521,9 +521,9 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
                 {activeMobileSub === 'ca' && (
                   <div className="pl-4 py-2 space-y-2 text-xs font-medium text-[#555555] bg-[#FFF5F5] rounded-xl border border-[#C12223]/15 my-1">
-                    <a href="#current-affairs" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-[#C12223]">Daily News & Analysis</a>
-                    <a href="#current-affairs" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-[#C12223]">Daily 5-MCQ Live Test</a>
-                    <a href="#free-resources" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-[#C12223]">Monthly PDF CA Booklet</a>
+                    <button onClick={() => { setMobileMenuOpen(false); router.push('/current-affairs?tab=news'); }} className="block w-full text-left py-1 hover:text-[#C12223] cursor-pointer">Daily News & Analysis</button>
+                    <button onClick={() => { setMobileMenuOpen(false); router.push('/current-affairs?tab=quiz'); }} className="block w-full text-left py-1 hover:text-[#C12223] cursor-pointer">Daily 5-MCQ Live Test</button>
+                    <button onClick={() => { setMobileMenuOpen(false); router.push('/current-affairs?tab=pdf'); }} className="block w-full text-left py-1 hover:text-[#C12223] cursor-pointer">Monthly PDF CA Booklet</button>
                   </div>
                 )}
               </div>

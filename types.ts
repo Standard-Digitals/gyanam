@@ -65,13 +65,27 @@ export interface Mentor {
 
 export interface CurrentAffairItem {
   id: string;
+  slug?: string;
   title: string;
-  category: 'National' | 'Economy' | 'State Exams' | 'Defense' | 'Science & Tech';
+  category: 'National' | 'Economy' | 'State Exams' | 'Defense' | 'Science & Tech' | 'International' | 'Assam & NE' | 'Schemes';
   date: string;
   readTime: string;
   summary: string;
   bullets: string[];
   impForExams: string[];
+  thumbnail?: string;
+  fullContent?: string[];
+  keyTakeaways?: string[];
+  backgroundContext?: string;
+  mcqQuestion?: {
+    question: string;
+    options: string[];
+    correctAnswer: number;
+    explanation: string;
+  };
+  syllabusTag?: string;
+  sourceName?: string;
+  author?: string;
 }
 
 export interface DailyQuizQuestion {
