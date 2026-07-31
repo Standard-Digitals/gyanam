@@ -102,8 +102,8 @@ export const CurrentAffairsDetailPage: React.FC<{ id: string }> = ({ id }) => {
             className="w-full h-full object-cover object-center opacity-30 scale-105 filter brightness-75 contrast-125 blur-sm"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#6B1113] via-[#6B1113]/90 to-[#6B1113]/85" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#6B1113]/60 via-transparent to-[#6B1113]/95" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#8C1316] via-[#8C1316]/90 to-[#6B1113]/85" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#8C1316]/60 via-transparent to-[#6B1113]/95" />
         </div>
 
         <div className="max-w-[1100px] mx-auto space-y-5 relative z-10">
@@ -279,7 +279,7 @@ export const CurrentAffairsDetailPage: React.FC<{ id: string }> = ({ id }) => {
               </div>
 
               {/* Key Exam Takeaways Box */}
-              <div className="bg-gradient-to-br from-[#1F1A1C] to-[#2D0B0D] text-white p-6 rounded-2xl space-y-3">
+              <div className="bg-gradient-to-br from-[#8C1316] to-[#8C1316] text-white p-6 rounded-2xl space-y-3">
                 <div className="flex items-center gap-2 text-amber-400 text-xs font-black uppercase tracking-wider">
                   <Award className="w-4 h-4" /> High-Yield Exam Key Takeaways
                 </div>
@@ -436,7 +436,7 @@ export const CurrentAffairsDetailPage: React.FC<{ id: string }> = ({ id }) => {
             </div>
 
             {/* SIDEBAR WIDGET 2: FEATURED COURSE PROMO */}
-            <div className="bg-gradient-to-br from-[#1F1A1C] via-[#331113] to-[#8C1316] text-white p-6 rounded-2xl shadow-md space-y-4">
+            <div className="bg-gradient-to-br from-[#8C1316]/90 via-[#8C1316]/80 to-[#8C1316] text-white p-6 rounded-2xl shadow-md space-y-4">
               <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded bg-amber-400 text-amber-950">
                 🔥 Recommended Batch
               </span>

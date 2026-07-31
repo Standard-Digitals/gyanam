@@ -435,7 +435,7 @@ export const CurrentAffairsPage: React.FC = () => {
             <div className="lg:col-span-4 space-y-6">
               
               {/* WIDGET 1: DAILY 5-MCQ QUIZ CARD */}
-              <div className="bg-gradient-to-br from-[#1F1A1C] to-[#3A0F11] text-white p-6 rounded-2xl border border-red-900/50 shadow-md space-y-4 relative overflow-hidden">
+              <div className="bg-gradient-to-br from-[#8C1316]/90 via-[#8C1316]/80 to-[#8C1316] text-white p-6 rounded-2xl border border-red-900/50 shadow-md space-y-4 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
                 
                 <div className="flex items-center justify-between">
