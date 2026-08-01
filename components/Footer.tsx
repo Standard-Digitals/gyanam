@@ -70,6 +70,8 @@ export const Footer: React.FC = () => {
               Company
             </h4>
             <ul className="space-y-2.5 text-xs">
+              <li><a href="/about" className="hover:text-white transition">About Us</a></li>
+              <li><a href="/contact" className="hover:text-white transition">Contact Us</a></li>
               <li><a href="#why-Gyanam" className="hover:text-white transition">Why Gyanam Tech</a></li>
               <li><a href="#mentors" className="hover:text-white transition">Our Faculty Experts</a></li>
               <li><a href="#success-stories" className="hover:text-white transition">Selection Stories</a></li>

@@ -317,9 +317,11 @@ export const Header: React.FC<HeaderProps> = ({
               </AnimatePresence>
             </div>
 
-            {/* 4. MOCK TESTS */}
-            <a href="#mock-tests" className="hover:text-[#C12223] transition py-2 font-semibold whitespace-nowrap shrink-0">
-              Mock Tests
+            <a href="/about" className="hover:text-[#C12223] transition py-2 font-semibold whitespace-nowrap shrink-0">
+              About Us
+            </a>
+            <a href="/contact" className="hover:text-[#C12223] transition py-2 font-semibold whitespace-nowrap shrink-0">
+              Contact Us
             </a>
 
             {/* 5. MORE / RESOURCES DROPDOWN */}
@@ -346,6 +348,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <Layers className="w-3.5 h-3.5" /> Information & Support
                     </div>
                     <ul className="space-y-1 text-xs font-semibold text-[#444444]">
+                      <li><a href="#mentors" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Mock Tests</a></li>
                       <li><a href="#mentors" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Faculty & Mentors</a></li>
                       <li><a href="#blog" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Exam Official Notifications</a></li>
                       <li><a href="#success-stories" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Toppers' Hall of Fame</a></li>

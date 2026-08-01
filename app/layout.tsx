@@ -3,6 +3,8 @@ import './globals.css';
 import { SiteShell } from '@/components/SiteShell';
 import { buildMetadata } from '@/lib/metadata';
 import { SITE } from '@/lib/siteConfig';
+import { ScrollToTop } from '@/components/ScrollToTop';
+import { FloatingQrWidget } from '@/components/FloatingQrWidget';
 
 export const metadata: Metadata = buildMetadata({
   title: SITE.tagline,
@@ -20,6 +22,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body suppressHydrationWarning>
         <SiteShell>{children}</SiteShell>
+              <ScrollToTop />
+                    <FloatingQrWidget />
       </body>
     </html>
   );

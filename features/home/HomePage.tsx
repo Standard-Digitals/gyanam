@@ -23,8 +23,6 @@ import { AuthModal } from '@/components/modals/AuthModal';
 import { CourseModal } from '@/components/modals/CourseModal';
 import { MentorshipModal } from '@/components/modals/MentorshipModal';
 import { VideoModal } from '@/components/modals/VideoModal';
-import { ScrollToTop } from '@/components/ScrollToTop';
-import { FloatingQrWidget } from '@/components/FloatingQrWidget';
 import { Course, SuccessStory } from '@/types';
 import { COURSES_DATA } from '@/data/mockData';
 
@@ -94,8 +92,6 @@ export function HomePage() {
       <CourseModal course={selectedCourse} onClose={() => setSelectedCourse(null)} onEnroll={() => handleOpenAuth('signup')} />
       <MentorshipModal isOpen={mentorshipOpen} onClose={() => setMentorshipOpen(false)} />
       <VideoModal story={selectedVideoStory} onClose={() => setSelectedVideoStory(null)} />
-      <ScrollToTop />
-      <FloatingQrWidget />
     </>
   );
 }
