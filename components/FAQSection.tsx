@@ -1,7 +1,6 @@
-'use client';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { FAQS_DATA } from '@/data/mockData';
+import { FAQS_DATA } from '../data/mockData';
 import { ChevronDown, HelpCircle, Phone, Search } from 'lucide-react';
 
 export const FAQSection: React.FC = () => {
@@ -31,7 +30,7 @@ export const FAQSection: React.FC = () => {
             Frequently Asked Questions
           </h2>
           <p className="text-sm text-[#555555] mt-2">
-            Got questions regarding Gyanam courses, mock tests or batches? We’re here to help.
+            Got questions regarding GYANM courses, mock tests or batches? We’re here to help.
           </p>
         </div>
 
@@ -100,14 +99,23 @@ export const FAQSection: React.FC = () => {
         </div>
 
         {/* Still Have Questions Box */}
-        <div className="mt-12 p-6 bg-[#FFF5F5] rounded-3xl border border-[#F3DCDD] max-w-xl mx-auto text-center space-y-3">
-          <HelpCircle className="w-8 h-8 text-[#C12223] mx-auto" />
-          <h4 className="font-heading font-bold text-base text-[#1F1A1C]">
-            Still have questions? Speak to a Counselor.
+        <div className="mt-12 p-6 sm:p-8 bg-[#FFF5F5] rounded-3xl border border-[#F3DCDD] max-w-2xl mx-auto text-center space-y-4">
+          <HelpCircle className="w-10 h-10 text-[#C12223] mx-auto" />
+          <h4 className="font-heading font-black text-lg text-[#1F1A1C]">
+            Need More Specific Help or Order Tracking?
           </h4>
           <p className="text-xs text-[#555555]">
-            Call Gyanam Student Helpdesk directly: <a href="tel:9117343434" className="font-bold text-[#C12223]">9117 34 34 34</a> (9 AM – 8 PM)
+            Call GYANM Student Helpdesk directly at <a href="tel:919117343434" className="font-bold text-[#C12223]">9117 34 34 34</a> or open our full interactive resolution desk.
           </p>
+          <div className="pt-1">
+            <a
+              href="/helpdesk"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#C12223] hover:bg-[#A6181B] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg transition cursor-pointer"
+            >
+              <span>Explore Full 24/7 Helpdesk & Ticket Portal</span>
+              <span>→</span>
+            </a>
+          </div>
         </div>
 
       </div>
