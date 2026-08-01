@@ -350,9 +350,6 @@ export const Header: React.FC<HeaderProps> = ({
                     <ul className="space-y-1 text-xs font-semibold text-[#444444]">
                       <li><a href="/daily-quiz" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Daily Quiz</a></li>
                       <li><a href="/downloads" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Downloads</a></li>
-                      <li><a href="#mentors" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Faculty & Mentors</a></li>
-                      <li><a href="#blog" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Exam Official Notifications</a></li>
-                      <li><a href="#success-stories" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Toppers' Hall of Fame</a></li>
                       <li><a href="/faq" className="hover:text-[#C12223] p-2 rounded-xl hover:bg-[#FFF5F5] block transition">Helpdesk & FAQs</a></li>
                     </ul>
                   </motion.div>
