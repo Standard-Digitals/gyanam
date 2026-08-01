@@ -100,7 +100,7 @@ export interface DailyQuizQuestion {
 export interface FreeResource {
   id: string;
   title: string;
-  type: 'PDF Notes' | 'PYQ Paper' | 'Current Affairs Magazine' | 'Formula Sheet' | 'Syllabus PDF' | 'NCERT Gist';
+  type: 'Book' | 'PYQ Paper' | 'Question Bank' | 'Magazine' | 'Current Affairs Magazine' | 'Course Material' | 'PDF Notes' | 'Formula Sheet' | 'Syllabus PDF' | 'NCERT Gist';
   category: string;
   fileSize: string;
   downloadsCount: number;
@@ -118,6 +118,13 @@ export interface FreeResource {
   author?: string;
   badge?: string;
   coverBg?: string;
+  coverImage?: string;
+  images?: string[];
+  publisher?: string;
+  isbn?: string;
+  edition?: string;
+  weight?: string;
+  inStock?: boolean;
 }
 
 export interface BlogPost {
