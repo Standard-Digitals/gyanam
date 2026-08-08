@@ -5,13 +5,15 @@ import { buildMetadata } from '@/lib/metadata';
 import { SITE } from '@/lib/siteConfig';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { FloatingQrWidget } from '@/components/FloatingQrWidget';
+import { getAllCourses } from '@/lib/data/courses';
 
 export const metadata: Metadata = buildMetadata({
   title: SITE.tagline,
   path: '',
 });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const courses = await getAllCourses();
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -21,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body suppressHydrationWarning>
-        <SiteShell>{children}</SiteShell>
+        <SiteShell courses={courses}>{children}</SiteShell>
               <ScrollToTop />
                     <FloatingQrWidget />
       </body>

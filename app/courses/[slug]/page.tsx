@@ -1,17 +1,19 @@
 import type { Metadata } from 'next';
-import { COURSES_DATA } from '@/data/mockData';
+import { notFound } from 'next/navigation';
+import { getCourseBySlug, getRelatedCourses, getAllCourseSlugs } from '@/lib/data/courses';
 import { buildMetadata } from '@/lib/metadata';
 import CourseDetailClient from './CourseDetailClient';
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return COURSES_DATA.map((c) => ({ slug: c.slug }));
+export async function generateStaticParams() {
+  const slugs = await getAllCourseSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const course = COURSES_DATA.find((c) => c.slug === slug);
+  const course = await getCourseBySlug(slug);
 
   if (!course) {
     return buildMetadata({ title: 'Course Not Found', noIndex: true });
@@ -28,5 +30,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const { slug } = await params;
-  return <CourseDetailClient slug={slug} />;
+  const course = await getCourseBySlug(slug);
+  if (!course) notFound();
+  const relatedCourses = await getRelatedCourses(course.id);
+  return <CourseDetailClient course={course} relatedCourses={relatedCourses} />;
 }

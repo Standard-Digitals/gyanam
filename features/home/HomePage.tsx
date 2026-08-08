@@ -24,9 +24,8 @@ import { CourseModal } from '@/components/modals/CourseModal';
 import { MentorshipModal } from '@/components/modals/MentorshipModal';
 import { VideoModal } from '@/components/modals/VideoModal';
 import { Course, SuccessStory } from '@/types';
-import { COURSES_DATA } from '@/data/mockData';
 
-export function HomePage() {
+export function HomePage({ courses }: { courses: Course[] }) {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -59,6 +58,7 @@ export function HomePage() {
           onExploreMockTests={() => document.getElementById('mock-tests')?.scrollIntoView({ behavior: 'smooth' })}
         />
         <CourseSection
+          courses={courses}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
           onSelectCourse={(course) => router.push(`/courses/${course.slug || course.id}`)}
@@ -83,8 +83,9 @@ export function HomePage() {
       <SearchModal
         isOpen={searchOpen}
         onClose={() => setSearchOpen(false)}
+        courses={courses}
         onSelectCourse={(id) => {
-          const found = COURSES_DATA.find(c => c.id === id || c.slug === id);
+          const found = courses.find(c => c.id === id || c.slug === id);
           if (found) router.push(`/courses/${found.slug || found.id}`);
         }}
       />

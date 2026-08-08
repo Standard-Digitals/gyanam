@@ -1,11 +1,12 @@
 'use client';
 import React from 'react';
 import { motion } from 'motion/react';
-import { COURSES_DATA, EXAM_CATEGORIES } from '@/data/mockData';
+import { EXAM_CATEGORIES } from '@/data/mockData';
 import { Course } from '@/types';
 import { Star, Users, Clock, ArrowRight, ShieldCheck, Sparkles, BookOpen } from 'lucide-react';
 
 interface CourseSectionProps {
+  courses: Course[];
   selectedCategory: string;
   onSelectCategory: (catId: string) => void;
   onSelectCourse: (course: Course) => void;
@@ -13,14 +14,15 @@ interface CourseSectionProps {
 }
 
 export const CourseSection: React.FC<CourseSectionProps> = ({
+  courses,
   selectedCategory,
   onSelectCategory,
   onSelectCourse,
   onEnrollCourse
 }) => {
   const filteredCourses = selectedCategory === 'all'
-    ? COURSES_DATA
-    : COURSES_DATA.filter(c => c.category === selectedCategory);
+    ? courses
+    : courses.filter(c => c.category === selectedCategory);
 
   return (
     <section id="courses" className="py-20 bg-white border-t border-[#F3DCDD]">

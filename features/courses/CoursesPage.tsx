@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { COURSES_DATA, EXAM_CATEGORIES } from '../../data/mockData';
+import { EXAM_CATEGORIES } from '../../data/mockData';
 import { Course } from '../../types';
 import { 
   Search, Filter, Star, Users, Clock, BookOpen, ArrowRight, CheckCircle, 
@@ -11,7 +11,7 @@ import {
   Award, RefreshCw, ChevronDown, Percent, ArrowLeft
 } from 'lucide-react';
 
-export const CoursePage: React.FC = () => {
+export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
   const router = useRouter();
   const onEnrollCourse = (_course?: Course) => router.push('/?enroll=true');
   const onOpenMentorship = () => router.push('/?mentorship=true');
@@ -63,7 +63,7 @@ export const CoursePage: React.FC = () => {
 
   // Filtered & Sorted Courses
   const filteredCourses = useMemo(() => {
-    return COURSES_DATA.filter(course => {
+    return courses.filter(course => {
       // Category filter
       const matchesCat = selectedCategory === 'all' || course.category === selectedCategory;
 
@@ -98,7 +98,7 @@ export const CoursePage: React.FC = () => {
       }
       return (b.popular ? 1 : 0) - (a.popular ? 1 : 0) || b.studentsEnrolled - a.studentsEnrolled;
     });
-  }, [selectedCategory, selectedLanguage, priceRange, searchQuery, sortBy]);
+  }, [courses, selectedCategory, selectedLanguage, priceRange, searchQuery, sortBy]);
 
   // Coupon Applier
   const handleApplyCoupon = (e: React.FormEvent) => {

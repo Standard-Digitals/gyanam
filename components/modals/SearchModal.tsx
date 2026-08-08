@@ -2,20 +2,22 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, X, BookOpen, FileText, ArrowRight, Sparkles, Award } from 'lucide-react';
-import { COURSES_DATA, CURRENT_AFFAIRS_ITEMS, FREE_RESOURCES } from '../../data/mockData';
+import { CURRENT_AFFAIRS_ITEMS, FREE_RESOURCES } from '../../data/mockData';
+import type { Course } from '../../types';
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectCourse: (courseId: string) => void;
+  courses: Course[];
 }
 
-export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSelectCourse }) => {
+export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSelectCourse, courses }) => {
   const [query, setQuery] = useState('');
 
   if (!isOpen) return null;
 
-  const filteredCourses = COURSES_DATA.filter(
+  const filteredCourses = courses.filter(
     c => c.title.toLowerCase().includes(query.toLowerCase()) || c.category.toLowerCase().includes(query.toLowerCase()) || c.targetExam.toLowerCase().includes(query.toLowerCase())
   );
 

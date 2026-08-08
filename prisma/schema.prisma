@@ -63,3 +63,154 @@ model Lead {
   @@index([createdAt])
   @@index([phone])
 }
+
+model Course {
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  title             String
+  category          String
+  targetExam        String
+  badge             String?
+  rating            Float
+  reviewsCount      Int
+  studentsEnrolled  Int
+  instructor        Json
+  duration          String
+  lessonsCount      Int
+  language          String
+  originalPrice     Int
+  discountPrice     Int
+  features          String[]
+  thumbnail         String
+  popular           Boolean  @default(false)
+  syllabusOverview  Json
+  startDate         String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([category])
+}
+
+model Mentor {
+  id                  String   @id @default(cuid())
+  name                String
+  title               String
+  experienceYears     Int
+  qualification       String
+  exRole              String?
+  subject             String
+  selectionsMentored  Int
+  rating              Float
+  image               String
+  bio                 String
+  createdAt           DateTime @default(now())
+}
+
+model SuccessStory {
+  id                String   @id @default(cuid())
+  studentName       String
+  examCleared       String
+  rank              String
+  year              Int
+  photoUrl          String
+  videoUrl          String?
+  youtubeUrl        String?
+  youtubeViews      String?
+  videoDuration     String?
+  hasVideo          Boolean  @default(false)
+  testimonial       String
+  previousAttempts  String
+  hometown          String
+  badge             String
+  category          String
+  rollNumber        String?
+  score             String?
+  createdAt         DateTime @default(now())
+}
+
+model CurrentAffairItem {
+  id                String   @id @default(cuid())
+  slug              String?  @unique
+  title             String
+  category          String
+  date              String
+  readTime          String
+  summary           String
+  bullets           String[]
+  impForExams       String[]
+  thumbnail         String?
+  fullContent       String[]
+  keyTakeaways      String[]
+  backgroundContext String?
+  mcqQuestion       Json?
+  syllabusTag       String?
+  sourceName        String?
+  author            String?
+  createdAt         DateTime @default(now())
+
+  @@index([category])
+  @@index([createdAt])
+}
+
+model DailyQuizQuestion {
+  id             Int      @id @default(autoincrement())
+  question       String
+  options        String[]
+  correctAnswer  Int
+  explanation    String
+  examTag        String
+  createdAt      DateTime @default(now())
+}
+
+model FreeResource {
+  id               String   @id @default(cuid())
+  title            String
+  type             String
+  category         String
+  fileSize         String
+  downloadsCount   Int      @default(0)
+  rating           Float
+  description      String
+  language         String?
+  pagesCount       Int?
+  chapters         String[]
+  updatedDate      String?
+  targetExams      String[]
+  isHot            Boolean  @default(false)
+  originalPrice    Int?
+  price            Int?
+  reviewsCount     Int?
+  author           String?
+  badge            String?
+  coverBg          String?
+  coverImage       String?
+  images           String[]
+  publisher        String?
+  isbn             String?
+  edition          String?
+  weight           String?
+  inStock          Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  @@index([category])
+}
+
+model BlogPost {
+  id        String   @id @default(cuid())
+  title     String
+  category  String
+  date      String
+  readTime  String
+  author    String
+  excerpt   String
+  imageUrl  String
+  createdAt DateTime @default(now())
+}
+
+model FAQItem {
+  id        String   @id @default(cuid())
+  category  String
+  question  String
+  answer    String
+  createdAt DateTime @default(now())
+}

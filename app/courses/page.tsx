@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { buildMetadata } from '@/lib/metadata';
+import { getAllCourses } from '@/lib/data/courses';
 import CoursesClient from './CoursesClient';
 
 export const metadata: Metadata = buildMetadata({
@@ -10,6 +11,7 @@ export const metadata: Metadata = buildMetadata({
   keywords: ['SSC CGL 2026', 'IBPS PO coaching', 'UPSC foundation batch', 'Assam ADRE preparation', 'RRB NTPC online course'],
 });
 
-export default function Page() {
-  return <CoursesClient />;
+export default async function Page() {
+  const courses = await getAllCourses();
+  return <CoursesClient courses={courses} />;
 }

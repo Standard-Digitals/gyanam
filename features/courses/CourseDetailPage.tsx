@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { COURSES_DATA } from '../../data/mockData';
 import { Course } from '../../types';
 import { 
   ArrowLeft, Star, Users, Clock, BookOpen, CheckCircle, PlayCircle, Download, 
@@ -13,8 +12,8 @@ import {
 } from 'lucide-react';
 
 interface CourseDetailPageProps {
-  courseSlug?: string;
-  courseId?: string;
+  course: Course;
+  relatedCourses: Course[];
   onBackToCourses?: () => void;
   onBackToHome?: () => void;
   onSelectCourseBySlug?: (slug: string) => void;
@@ -23,8 +22,8 @@ interface CourseDetailPageProps {
 }
 
 export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
-  courseSlug,
-  courseId,
+  course,
+  relatedCourses,
   onBackToCourses,
   onBackToHome,
   onSelectCourseBySlug,
@@ -34,8 +33,6 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   const router = useRouter();
   const handleEnroll = (course: Course) => { if (onEnrollCourse) onEnrollCourse(course); else router.push('/?enroll=true'); };
   const handleMentorship = () => { if (onOpenMentorship) onOpenMentorship(); else router.push('/?mentorship=true'); };
-
-  const effectiveSlug = courseSlug;
 
   const handleBackToCourses = () => {
     if (onBackToCourses) onBackToCourses();
@@ -51,19 +48,6 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
     if (onSelectCourseBySlug) onSelectCourseBySlug(slug);
     else router.push(`/courses/${slug}`);
   };
-
-  // Find course by slug or ID, or fallback to first course
-  const course = useMemo(() => {
-    if (effectiveSlug) {
-      const found = COURSES_DATA.find(c => c.slug === effectiveSlug || c.id === effectiveSlug);
-      if (found) return found;
-    }
-    if (courseId) {
-      const found = COURSES_DATA.find(c => c.id === courseId);
-      if (found) return found;
-    }
-    return COURSES_DATA[0];
-  }, [effectiveSlug, courseId]);
 
   // Tab State
   const [activeTab, setActiveTab] = useState<'overview' | 'syllabus' | 'faculty' | 'reviews' | 'faq'>('overview');
@@ -81,11 +65,6 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
 
   // Toast Notification for Brochure Download
   const [downloadToast, setDownloadToast] = useState<string | null>(null);
-
-  // Related Courses (In same category or popular)
-  const relatedCourses = useMemo(() => {
-    return COURSES_DATA.filter(c => c.id !== course.id).slice(0, 3);
-  }, [course]);
 
   // Fee calculation with coupon
   const discountAmount = appliedCoupon ? Math.round(course.discountPrice * 0.1) : 0;
