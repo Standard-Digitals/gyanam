@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id         String   @id @default(cuid())
+  phone      String   @unique
+  name       String?
+  email      String?
+  targetExam String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model OtpSession {
+  id        String   @id @default(cuid())
+  phone     String
+  otpHash   String
+  purpose   String   @default("login")
+  attempts  Int      @default(0)
+  verified  Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+}
+
+enum LeadSource {
+  HERO_QUERY
+  CONTACT_FORM
+  MENTORSHIP
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  CLOSED
+}
+
+model Lead {
+  id         String     @id @default(cuid())
+  fullName   String
+  phone      String
+  email      String?
+  targetExam String?
+  mode       String?
+  center     String?
+  message    String?
+  source     LeadSource
+  status     LeadStatus @default(NEW)
+  createdAt  DateTime   @default(now())
+
+  @@index([createdAt])
+  @@index([phone])
+}

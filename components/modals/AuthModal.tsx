@@ -16,23 +16,62 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState(['', '', '', '']);
   const [targetExam, setTargetExam] = useState('SSC CGL');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [devOtp, setDevOtp] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone.length >= 10) {
+    if (phone.length !== 10) return;
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, purpose: mode }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send OTP');
+      setDevOtp(data.devOtp ?? null);
       setStep('otp');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStep('success');
-    setTimeout(() => {
-      onClose();
-      setStep('phone');
-    }, 2000);
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone,
+          otp: otp.join(''),
+          purpose: mode,
+          ...(mode === 'signup' ? { targetExam } : {}),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Invalid OTP');
+      setStep('success');
+      setTimeout(() => {
+        onClose();
+        setStep('phone');
+        setOtp(['', '', '', '']);
+      }, 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -121,12 +160,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                   </div>
                 )}
 
+                {error && (
+                  <p className="text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
+                )}
+
                 <button
                   type="submit"
-                  disabled={phone.length < 10}
+                  disabled={phone.length !== 10 || isSubmitting}
                   className="w-full py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold rounded-xl text-sm shadow-lg shadow-[#C12223]/25 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Send OTP <ArrowRight className="w-4 h-4" />
+                  {isSubmitting ? 'Sending OTP...' : (<>Send OTP <ArrowRight className="w-4 h-4" /></>)}
                 </button>
 
                 <div className="text-center pt-2">
@@ -164,6 +207,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                   <p className="text-xs text-[#555555] mt-1">
                     Sent 4-digit OTP to <span className="font-bold text-[#1F1A1C]">+91 {phone}</span>
                   </p>
+                  {devOtp && (
+                    <p className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 mt-2 inline-block">
+                      DEV MODE — OTP: {devOtp}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex justify-center gap-3 my-4">
@@ -184,11 +232,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                   ))}
                 </div>
 
+                {error && (
+                  <p className="text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold rounded-xl text-sm shadow-lg shadow-[#C12223]/25 hover:scale-[1.02] transition cursor-pointer"
+                  disabled={isSubmitting || otp.some(d => !d)}
+                  className="w-full py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold rounded-xl text-sm shadow-lg shadow-[#C12223]/25 hover:scale-[1.02] transition cursor-pointer disabled:opacity-50"
                 >
-                  Verify & Continue
+                  {isSubmitting ? 'Verifying...' : 'Verify & Continue'}
                 </button>
 
                 <button

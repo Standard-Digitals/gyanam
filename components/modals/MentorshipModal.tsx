@@ -20,8 +20,25 @@ export const MentorshipModal: React.FC<MentorshipModalProps> = ({ isOpen, onClos
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.phone.length !== 10) return;
+    try {
+      await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: formData.name,
+          phone: formData.phone,
+          targetExam: formData.exam,
+          mode: formData.preferredTime,
+          center: formData.city,
+          source: 'MENTORSHIP',
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to submit lead', err);
+    }
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);

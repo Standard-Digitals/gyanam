@@ -28,16 +28,28 @@ export default function ContactPage() {
   const [submittedRef, setSubmittedRef] = useState<string | null>(null);
   const [selectedBranchTab, setSelectedBranchTab] = useState<string>('chandigarh');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.phone) return;
+    if (!formData.fullName || formData.phone.length !== 10) return;
 
     setIsSubmitting(true);
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-      const refId = 'GYN-' + Math.floor(100000 + Math.random() * 900000);
-      setSubmittedRef(refId);
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          phone: formData.phone,
+          email: formData.email,
+          targetExam: formData.targetExam,
+          mode: formData.preferredMode,
+          center: formData.nearestCenter,
+          message: formData.message,
+          source: 'CONTACT_FORM',
+        }),
+      });
+      const data = await res.json();
+      setSubmittedRef(data.refId || 'GYN-000000');
       setFormData({
         fullName: '',
         phone: '',
@@ -47,7 +59,11 @@ export default function ContactPage() {
         nearestCenter: 'Chandigarh (Sector 34)',
         message: ''
       });
-    }, 800);
+    } catch (err) {
+      console.error('Failed to submit lead', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactMethods = [

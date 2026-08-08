@@ -111,14 +111,29 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
     setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
   };
 
-  const handleQuerySubmit = (e: React.FormEvent) => {
+  const handleQuerySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!queryName.trim() || !queryPhone.trim()) return;
+    if (!queryName.trim() || queryPhone.trim().length !== 10) return;
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: queryName,
+          phone: queryPhone,
+          targetExam: queryExam,
+          mode: queryMode,
+          source: 'HERO_QUERY',
+        }),
+      });
       setQuerySubmitted(true);
-    }, 600);
+    } catch (err) {
+      console.error('Failed to submit lead', err);
+      setQuerySubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const currentBanner = banners[currentSlide];
