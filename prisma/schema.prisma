@@ -255,3 +255,12 @@ model DownloadLog {
 
   @@index([resourceId])
 }
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         String   @default("editor")
+  createdAt    DateTime @default(now())
+}
