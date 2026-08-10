@@ -23,9 +23,29 @@ import { AuthModal } from '@/components/modals/AuthModal';
 import { CourseModal } from '@/components/modals/CourseModal';
 import { MentorshipModal } from '@/components/modals/MentorshipModal';
 import { VideoModal } from '@/components/modals/VideoModal';
-import { Course, SuccessStory } from '@/types';
+import { Course, SuccessStory, Mentor, BlogPost, FAQItem, CurrentAffairItem, DailyQuizQuestion, FreeResource } from '@/types';
 
-export function HomePage({ courses }: { courses: Course[] }) {
+interface HomePageProps {
+  courses: Course[];
+  mentors: Mentor[];
+  blogPosts: BlogPost[];
+  faqs: FAQItem[];
+  successStories: SuccessStory[];
+  currentAffairs: CurrentAffairItem[];
+  quizQuestions: DailyQuizQuestion[];
+  resources: FreeResource[];
+}
+
+export function HomePage({
+  courses,
+  mentors,
+  blogPosts,
+  faqs,
+  successStories,
+  currentAffairs,
+  quizQuestions,
+  resources,
+}: HomePageProps) {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -66,15 +86,15 @@ export function HomePage({ courses }: { courses: Course[] }) {
         />
         <WhyGyanam />
         <LearningProcess />
-        <CurrentAffairs />
+        <CurrentAffairs items={currentAffairs} quizQuestions={quizQuestions} />
         <MockTestDashboard />
-        <SuccessStories onPlayVideo={(story) => setSelectedVideoStory(story)} />
+        <SuccessStories stories={successStories} onPlayVideo={(story) => setSelectedVideoStory(story)} />
         <YouTubeCollageSection onPlayVideo={(story) => setSelectedVideoStory(story)} />
-        <Mentors onOpenMentorship={() => setMentorshipOpen(true)} />
+        <Mentors mentors={mentors} onOpenMentorship={() => setMentorshipOpen(true)} />
         <MobileApp />
-        <FreeResources />
-        <BlogSection />
-        <FAQSection />
+        <FreeResources resources={resources} />
+        <BlogSection posts={blogPosts} />
+        <FAQSection faqs={faqs} />
         <FinalCTA
           onStartLearning={() => handleOpenAuth('signup')}
           onOpenMentorship={() => setMentorshipOpen(true)}
@@ -84,6 +104,8 @@ export function HomePage({ courses }: { courses: Course[] }) {
         isOpen={searchOpen}
         onClose={() => setSearchOpen(false)}
         courses={courses}
+        currentAffairs={currentAffairs}
+        resources={resources}
         onSelectCourse={(id) => {
           const found = courses.find(c => c.id === id || c.slug === id);
           if (found) router.push(`/courses/${found.slug || found.id}`);

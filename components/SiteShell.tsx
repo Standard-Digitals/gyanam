@@ -6,9 +6,16 @@ import { Footer } from '@/components/Footer';
 import { SearchModal } from '@/components/modals/SearchModal';
 import { AuthModal } from '@/components/modals/AuthModal';
 import { MentorshipModal } from '@/components/modals/MentorshipModal';
-import type { Course } from '@/types';
+import type { Course, CurrentAffairItem, FreeResource } from '@/types';
 
-export function SiteShell({ children, courses }: { children: React.ReactNode; courses: Course[] }) {
+interface SiteShellProps {
+  children: React.ReactNode;
+  courses: Course[];
+  currentAffairs: CurrentAffairItem[];
+  resources: FreeResource[];
+}
+
+export function SiteShell({ children, courses, currentAffairs, resources }: SiteShellProps) {
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -36,6 +43,8 @@ export function SiteShell({ children, courses }: { children: React.ReactNode; co
         isOpen={searchOpen}
         onClose={() => setSearchOpen(false)}
         courses={courses}
+        currentAffairs={currentAffairs}
+        resources={resources}
         onSelectCourse={(id) => {
           const found = courses.find(c => c.id === id || c.slug === id);
           if (found) router.push(`/courses/${found.slug || found.id}`);

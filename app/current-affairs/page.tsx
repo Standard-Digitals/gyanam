@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import { buildMetadata } from '@/lib/metadata';
+import { getAllCurrentAffairs } from '@/lib/data/currentAffairs';
+import { getDailyQuizWidgetQuestions } from '@/lib/data/dailyQuizWidget';
+import { getAllFreeResources } from '@/lib/data/resources';
 import CurrentAffairsClient from './CurrentAffairsClient';
 
 export const metadata: Metadata = buildMetadata({
@@ -9,6 +12,11 @@ export const metadata: Metadata = buildMetadata({
   path: '/current-affairs',
 });
 
-export default function Page() {
-  return <CurrentAffairsClient />;
+export default async function Page() {
+  const [items, quizQuestions, resources] = await Promise.all([
+    getAllCurrentAffairs(),
+    getDailyQuizWidgetQuestions(),
+    getAllFreeResources(),
+  ]);
+  return <CurrentAffairsClient items={items} quizQuestions={quizQuestions} resources={resources} />;
 }

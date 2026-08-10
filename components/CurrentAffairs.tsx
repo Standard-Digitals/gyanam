@@ -1,10 +1,15 @@
 'use client';
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { CURRENT_AFFAIRS_ITEMS, DAILY_QUIZ_QUESTIONS } from '@/data/mockData';
+import type { CurrentAffairItem, DailyQuizQuestion } from '@/types';
 import { Sparkles, BookOpen, CheckCircle, Flame, Download, HelpCircle, ArrowRight, RefreshCw } from 'lucide-react';
 
-export const CurrentAffairs: React.FC = () => {
+interface CurrentAffairsProps {
+  items: CurrentAffairItem[];
+  quizQuestions: DailyQuizQuestion[];
+}
+
+export const CurrentAffairs: React.FC<CurrentAffairsProps> = ({ items, quizQuestions }) => {
   const [activeTab, setActiveTab] = useState<'news' | 'quiz'>('news');
   const [quizAnswers, setQuizAnswers] = useState<{ [qId: number]: number }>({});
   const [showResults, setShowResults] = useState(false);
@@ -15,7 +20,7 @@ export const CurrentAffairs: React.FC = () => {
 
   const calculateScore = () => {
     let score = 0;
-    DAILY_QUIZ_QUESTIONS.forEach(q => {
+    quizQuestions.forEach(q => {
       if (quizAnswers[q.id] === q.correctAnswer) {
         score += 1;
       }
@@ -69,7 +74,7 @@ export const CurrentAffairs: React.FC = () => {
         {/* Tab Content: News & Analysis */}
         {activeTab === 'news' && (
           <div className="grid lg:grid-cols-3 gap-8">
-            {CURRENT_AFFAIRS_ITEMS.map(item => (
+            {items.map(item => (
               <motion.div
                 key={item.id}
                 whileHover={{ y: -4 }}
@@ -146,7 +151,7 @@ export const CurrentAffairs: React.FC = () => {
             </div>
 
             <div className="space-y-6">
-              {DAILY_QUIZ_QUESTIONS.map((q, qIdx) => (
+              {quizQuestions.map((q, qIdx) => (
                 <div key={q.id} className="p-5 bg-[#FFF5F5] rounded-2xl border border-[#F3DCDD]">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold text-[#C12223]">Question {qIdx + 1} of 5</span>

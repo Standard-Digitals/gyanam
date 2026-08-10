@@ -1,10 +1,10 @@
 'use client';
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { FREE_RESOURCES } from '@/data/mockData';
+import type { FreeResource } from '@/types';
 import { Download, FileText, CheckCircle2, Star, Sparkles, ArrowRight } from 'lucide-react';
 
-export const FreeResources: React.FC = () => {
+export const FreeResources: React.FC<{ resources: FreeResource[] }> = ({ resources }) => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const handleDownload = (resId: string) => {
@@ -34,7 +34,7 @@ export const FreeResources: React.FC = () => {
 
         {/* Resources Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {FREE_RESOURCES.map(res => (
+          {resources.map(res => (
             <motion.div
               key={res.id}
               whileHover={{ y: -4 }}

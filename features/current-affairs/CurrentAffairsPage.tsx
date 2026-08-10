@@ -2,17 +2,23 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { CURRENT_AFFAIRS_ITEMS, DAILY_QUIZ_QUESTIONS, FREE_RESOURCES } from '../../data/mockData';
-import { 
-  Calendar, Clock, BookOpen, Download, Share2, Bookmark, CheckCircle, 
-  ArrowLeft, ArrowRight, Search, Filter, Sparkles, FileText, HelpCircle, 
+import type { CurrentAffairItem, DailyQuizQuestion, FreeResource } from '../../types';
+import {
+  Calendar, Clock, BookOpen, Download, Share2, Bookmark, CheckCircle,
+  ArrowLeft, ArrowRight, Search, Filter, Sparkles, FileText, HelpCircle,
   Layers, Award, Tag, Bell, Check, ChevronRight, ExternalLink, Zap,
   Flame, RefreshCw, ThumbsUp, MessageSquare
 } from 'lucide-react';
 
 const sscBankBanner = 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=1600';
 
-export const CurrentAffairsPage: React.FC = () => {
+interface CurrentAffairsPageProps {
+  items: CurrentAffairItem[];
+  quizQuestions: DailyQuizQuestion[];
+  resources: FreeResource[];
+}
+
+export const CurrentAffairsPage: React.FC<CurrentAffairsPageProps> = ({ items, quizQuestions, resources }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -71,7 +77,7 @@ export const CurrentAffairsPage: React.FC = () => {
   };
 
   // Filter items logic
-  const filteredArticles = CURRENT_AFFAIRS_ITEMS.filter((item) => {
+  const filteredArticles = items.filter((item) => {
     const matchesCategory = 
       selectedCategory === 'All' ? true :
       selectedCategory === 'Assam' ? (item.category === 'Assam & NE' || item.category === 'State Exams' || item.impForExams.some(e => e.includes('Assam'))) :
@@ -96,7 +102,7 @@ export const CurrentAffairsPage: React.FC = () => {
 
   const handleQuizSubmit = () => {
     let score = 0;
-    DAILY_QUIZ_QUESTIONS.forEach(q => {
+    quizQuestions.forEach(q => {
       if (selectedAnswers[q.id] === q.correctAnswer) {
         score += 2; // +2 for correct
       }
@@ -567,7 +573,7 @@ export const CurrentAffairsPage: React.FC = () => {
 
               {/* Quiz Questions List */}
               <div className="space-y-8">
-                {DAILY_QUIZ_QUESTIONS.map((q, idx) => {
+                {quizQuestions.map((q, idx) => {
                   const isAnswered = selectedAnswers[q.id] !== undefined;
                   const selectedOpt = selectedAnswers[q.id];
                   const isCorrect = selectedOpt === q.correctAnswer;
@@ -670,7 +676,7 @@ export const CurrentAffairsPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {FREE_RESOURCES.filter(r => r.type === 'Current Affairs Magazine' || r.category.includes('Current Affairs')).concat([
+                {resources.filter(r => r.type === 'Current Affairs Magazine' || r.category.includes('Current Affairs')).concat([
                   {
                     id: 'ca-pdf-july-2026',
                     title: 'July 2026 Complete Current Affairs Monthly Digest',
@@ -745,7 +751,7 @@ export const CurrentAffairsPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {CURRENT_AFFAIRS_ITEMS.filter(item => bookmarkedIds.includes(item.id)).map(item => (
+                  {items.filter(item => bookmarkedIds.includes(item.id)).map(item => (
                     <div key={item.id} className="p-5 rounded-xl border border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-xs font-bold text-gray-400">

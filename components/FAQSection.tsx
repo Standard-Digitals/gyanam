@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { FAQS_DATA } from '../data/mockData';
+import { FAQItem } from '../types';
 import { ChevronDown, HelpCircle, Phone, Search } from 'lucide-react';
 
-export const FAQSection: React.FC = () => {
+export const FAQSection: React.FC<{ faqs: FAQItem[] }> = ({ faqs }) => {
   const [openId, setOpenId] = useState<string>('faq-1');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('All');
 
   const categories = ['All', 'General', 'Courses & Batches', 'Mock Tests', 'App & Access', 'Payments'];
 
-  const filteredFaqs = FAQS_DATA.filter(faq => {
+  const filteredFaqs = faqs.filter(faq => {
     const matchesCat = activeCategory === 'All' || faq.category === activeCategory;
     const matchesSearch = faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           faq.answer.toLowerCase().includes(searchQuery.toLowerCase());

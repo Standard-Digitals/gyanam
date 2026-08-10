@@ -1,17 +1,19 @@
 import type { Metadata } from 'next';
-import { CURRENT_AFFAIRS_ITEMS } from '@/data/mockData';
+import { notFound } from 'next/navigation';
+import { getCurrentAffairByIdOrSlug, getAllCurrentAffairIds, getAllCurrentAffairs } from '@/lib/data/currentAffairs';
 import { buildMetadata } from '@/lib/metadata';
 import CurrentAffairsDetailClient from './CurrentAffairsDetailClient';
 
 type Props = { params: Promise<{ id: string }> };
 
-export function generateStaticParams() {
-  return CURRENT_AFFAIRS_ITEMS.map((item) => ({ id: item.id }));
+export async function generateStaticParams() {
+  const ids = await getAllCurrentAffairIds();
+  return ids.map((id) => ({ id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const article = CURRENT_AFFAIRS_ITEMS.find((item) => item.id === id || item.slug === id);
+  const article = await getCurrentAffairByIdOrSlug(id);
 
   if (!article) {
     return buildMetadata({ title: 'Article Not Found', noIndex: true });
@@ -27,5 +29,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const { id } = await params;
-  return <CurrentAffairsDetailClient id={id} />;
+  const article = await getCurrentAffairByIdOrSlug(id);
+  if (!article) notFound();
+  const allItems = await getAllCurrentAffairs();
+  const otherArticles = allItems.filter((item) => item.id !== article.id);
+  return <CurrentAffairsDetailClient article={article} otherArticles={otherArticles} />;
 }

@@ -1,10 +1,10 @@
 'use client';
 import React from 'react';
 import { motion } from 'motion/react';
-import { BLOG_POSTS } from '@/data/mockData';
+import { BlogPost } from '@/types';
 import { ArrowRight, Clock, User, Bell } from 'lucide-react';
 
-export const BlogSection: React.FC = () => {
+export const BlogSection: React.FC<{ posts: BlogPost[] }> = ({ posts }) => {
   return (
     <section id="blog" className="py-20 bg-[#FFF5F5]">
       <div className="max-w-[1320px] mx-auto px-4 sm:px-6">
@@ -30,7 +30,7 @@ export const BlogSection: React.FC = () => {
 
         {/* Blog Posts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {BLOG_POSTS.map(post => (
+          {posts.map(post => (
             <motion.div
               key={post.id}
               whileHover={{ y: -4 }}

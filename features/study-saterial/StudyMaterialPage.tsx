@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { FREE_RESOURCES } from '../../data/mockData';
 import { FreeResource } from '../../types';
 import { 
   FileText, Search, Filter, CheckCircle, 
@@ -23,7 +22,7 @@ export interface CartItem {
   unitPrice: number;
 }
 
-export const StudyMaterialPage: React.FC = () => {
+export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ resources: FREE_RESOURCES }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 

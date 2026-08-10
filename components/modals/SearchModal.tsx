@@ -2,17 +2,18 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, X, BookOpen, FileText, ArrowRight, Sparkles, Award } from 'lucide-react';
-import { CURRENT_AFFAIRS_ITEMS, FREE_RESOURCES } from '../../data/mockData';
-import type { Course } from '../../types';
+import type { Course, CurrentAffairItem, FreeResource } from '../../types';
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectCourse: (courseId: string) => void;
   courses: Course[];
+  currentAffairs: CurrentAffairItem[];
+  resources: FreeResource[];
 }
 
-export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSelectCourse, courses }) => {
+export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSelectCourse, courses, currentAffairs, resources }) => {
   const [query, setQuery] = useState('');
 
   if (!isOpen) return null;
@@ -21,11 +22,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
     c => c.title.toLowerCase().includes(query.toLowerCase()) || c.category.toLowerCase().includes(query.toLowerCase()) || c.targetExam.toLowerCase().includes(query.toLowerCase())
   );
 
-  const filteredCA = CURRENT_AFFAIRS_ITEMS.filter(
+  const filteredCA = currentAffairs.filter(
     ca => ca.title.toLowerCase().includes(query.toLowerCase()) || ca.category.toLowerCase().includes(query.toLowerCase())
   );
 
-  const filteredResources = FREE_RESOURCES.filter(
+  const filteredResources = resources.filter(
     r => r.title.toLowerCase().includes(query.toLowerCase()) || r.category.toLowerCase().includes(query.toLowerCase())
   );
 

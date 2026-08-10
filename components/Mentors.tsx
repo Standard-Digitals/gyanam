@@ -1,7 +1,6 @@
 'use client';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MENTORS } from '@/data/mockData';
 import { Mentor } from '@/types';
 import { 
   Star, Award, Users, Calendar, 
@@ -9,10 +8,11 @@ import {
 } from 'lucide-react';
 
 interface MentorsProps {
+  mentors: Mentor[];
   onOpenMentorship: () => void;
 }
 
-export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
+export const Mentors: React.FC<MentorsProps> = ({ mentors, onOpenMentorship }) => {
   const [selectedFilter, setSelectedFilter] = useState<string>('All');
   const [activeMentorModal, setActiveMentorModal] = useState<Mentor | null>(null);
   const [hoveredMentorId, setHoveredMentorId] = useState<string | null>(null);
@@ -25,7 +25,7 @@ export const Mentors: React.FC<MentorsProps> = ({ onOpenMentorship }) => {
     { id: 'UPSC', label: 'UPSC & Polity' }
   ];
 
-  const filteredMentors = MENTORS.filter(m => {
+  const filteredMentors = mentors.filter(m => {
     if (selectedFilter === 'All') return true;
     if (selectedFilter === 'Quant') return m.subject.toLowerCase().includes('quant') || m.subject.toLowerCase().includes('math');
     if (selectedFilter === 'Reasoning') return m.subject.toLowerCase().includes('reasoning') || m.subject.toLowerCase().includes('banking');

@@ -1,23 +1,23 @@
 'use client';
 import React, { useState } from 'react';
-import { SUCCESS_STORIES } from '@/data/mockData';
 import { SuccessStory } from '@/types';
 import { Award, Sparkles, MapPin, ShieldCheck, CheckCircle2, Eye, Info } from 'lucide-react';
 import { TopperModal } from './modals/TopperModal';
 
 interface SuccessStoriesProps {
+  stories: SuccessStory[];
   onPlayVideo: (story: SuccessStory) => void;
 }
 
-export const SuccessStories: React.FC<SuccessStoriesProps> = ({ onPlayVideo }) => {
+export const SuccessStories: React.FC<SuccessStoriesProps> = ({ stories, onPlayVideo }) => {
   const [filter, setFilter] = useState<string>('All');
   const [selectedTopper, setSelectedTopper] = useState<SuccessStory | null>(null);
 
   const categories = ['All', 'SSC', 'Banking', 'Assam Govt', 'UPSC', 'Railway'];
 
   const filteredStories = filter === 'All'
-    ? SUCCESS_STORIES
-    : SUCCESS_STORIES.filter(s => s.category === filter);
+    ? stories
+    : stories.filter(s => s.category === filter);
 
   // Split stories into two distinct rows for parallax effect
   const halfLength = Math.ceil(filteredStories.length / 2);

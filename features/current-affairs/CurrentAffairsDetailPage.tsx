@@ -2,23 +2,22 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { CURRENT_AFFAIRS_ITEMS } from '../../data/mockData';
 import { CurrentAffairItem } from '../../types';
-import { 
-  ArrowLeft, Calendar, Clock, Bookmark, Share2, Download, CheckCircle, 
-  BookOpen, Tag, Award, Sparkles, HelpCircle, ArrowRight, ThumbsUp, 
+import {
+  ArrowLeft, Calendar, Clock, Bookmark, Share2, Download, CheckCircle,
+  BookOpen, Tag, Award, Sparkles, HelpCircle, ArrowRight, ThumbsUp,
   Copy, Check, FileText, Zap, ChevronRight
 } from 'lucide-react';
 
 const sscBankBanner = 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=1600';
 
-export const CurrentAffairsDetailPage: React.FC<{ id: string }> = ({ id }) => {
-  const router = useRouter();
+interface CurrentAffairsDetailPageProps {
+  article: CurrentAffairItem;
+  otherArticles: CurrentAffairItem[];
+}
 
-  // Find article by id or slug
-  const article: CurrentAffairItem | undefined = CURRENT_AFFAIRS_ITEMS.find(
-    item => item.id === id || item.slug === id
-  ) || CURRENT_AFFAIRS_ITEMS[0]; // fallback to first item if not found
+export const CurrentAffairsDetailPage: React.FC<CurrentAffairsDetailPageProps> = ({ article, otherArticles }) => {
+  const router = useRouter();
 
   // Local interaction states
   const [isBookmarked, setIsBookmarked] = useState<boolean>(() => {
@@ -87,8 +86,6 @@ export const CurrentAffairsDetailPage: React.FC<{ id: string }> = ({ id }) => {
       setUserLiked(true);
     }
   };
-
-  const otherArticles = CURRENT_AFFAIRS_ITEMS.filter(item => item.id !== article.id);
 
   return (
     <div className="min-h-screen bg-[#FFF5F5] text-[#1F1A1C] font-sans pb-20">

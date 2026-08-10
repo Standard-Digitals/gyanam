@@ -6,6 +6,8 @@ import { SITE } from '@/lib/siteConfig';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { FloatingQrWidget } from '@/components/FloatingQrWidget';
 import { getAllCourses } from '@/lib/data/courses';
+import { getAllCurrentAffairs } from '@/lib/data/currentAffairs';
+import { getAllFreeResources } from '@/lib/data/resources';
 
 export const metadata: Metadata = buildMetadata({
   title: SITE.tagline,
@@ -13,7 +15,11 @@ export const metadata: Metadata = buildMetadata({
 });
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const courses = await getAllCourses();
+  const [courses, currentAffairs, resources] = await Promise.all([
+    getAllCourses(),
+    getAllCurrentAffairs(),
+    getAllFreeResources(),
+  ]);
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -23,7 +29,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body suppressHydrationWarning>
-        <SiteShell courses={courses}>{children}</SiteShell>
+        <SiteShell courses={courses} currentAffairs={currentAffairs} resources={resources}>{children}</SiteShell>
               <ScrollToTop />
                     <FloatingQrWidget />
       </body>

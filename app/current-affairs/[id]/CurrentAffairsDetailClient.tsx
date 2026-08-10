@@ -1,6 +1,12 @@
 'use client';
 import { CurrentAffairsDetailPage } from '@/features/current-affairs/CurrentAffairsDetailPage';
+import type { CurrentAffairItem } from '@/types';
 
-export default function CurrentAffairsDetailClient({ id }: { id: string }) {
-  return <CurrentAffairsDetailPage id={id} />;
+interface Props {
+  article: CurrentAffairItem;
+  otherArticles: CurrentAffairItem[];
+}
+
+export default function CurrentAffairsDetailClient({ article, otherArticles }: Props) {
+  return <CurrentAffairsDetailPage article={article} otherArticles={otherArticles} />;
 }
