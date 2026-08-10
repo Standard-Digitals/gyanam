@@ -69,6 +69,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
         onClose();
         setStep('phone');
         setOtp(['', '', '', '']);
+        router.push('/dashboard');
       }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
