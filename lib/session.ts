@@ -34,10 +34,12 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
   }
 }
 
-export const SESSION_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  path: '/',
-  maxAge: SESSION_TTL_SECONDS,
-};
+export function getSessionCookieOptions(secure: boolean) {
+  return {
+    httpOnly: true,
+    secure,
+    sameSite: 'lax' as const,
+    path: '/',
+    maxAge: SESSION_TTL_SECONDS,
+  };
+}

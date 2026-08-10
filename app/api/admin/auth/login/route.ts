@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import { createAdminSessionToken, ADMIN_SESSION_COOKIE, ADMIN_SESSION_COOKIE_OPTIONS } from '@/lib/adminSession';
+import { createAdminSessionToken, ADMIN_SESSION_COOKIE, getAdminSessionCookieOptions } from '@/lib/adminSession';
+import { isHttpsRequest } from '@/lib/isHttps';
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -29,6 +30,6 @@ export async function POST(req: NextRequest) {
   const token = await createAdminSessionToken({ adminId: admin.id, email: admin.email, role: admin.role });
 
   const response = NextResponse.json({ success: true, admin: { email: admin.email, name: admin.name, role: admin.role } });
-  response.cookies.set(ADMIN_SESSION_COOKIE, token, ADMIN_SESSION_COOKIE_OPTIONS);
+  response.cookies.set(ADMIN_SESSION_COOKIE, token, getAdminSessionCookieOptions(isHttpsRequest(req)));
   return response;
 }

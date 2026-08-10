@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { hashOtp, OTP_MAX_ATTEMPTS } from '@/lib/otp';
-import { createSessionToken, SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from '@/lib/session';
+import { createSessionToken, SESSION_COOKIE, getSessionCookieOptions } from '@/lib/session';
+import { isHttpsRequest } from '@/lib/isHttps';
 
 const bodySchema = z.object({
   phone: z.string().regex(/^\d{10}$/),
@@ -53,6 +54,6 @@ export async function POST(req: NextRequest) {
     success: true,
     user: { id: user.id, phone: user.phone, name: user.name, targetExam: user.targetExam },
   });
-  response.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
+  response.cookies.set(SESSION_COOKIE, token, getSessionCookieOptions(isHttpsRequest(req)));
   return response;
 }

@@ -38,13 +38,15 @@ export async function verifyAdminSessionToken(token: string): Promise<AdminSessi
   }
 }
 
-export const ADMIN_SESSION_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  path: '/',
-  maxAge: ADMIN_SESSION_TTL_SECONDS,
-};
+export function getAdminSessionCookieOptions(secure: boolean) {
+  return {
+    httpOnly: true,
+    secure,
+    sameSite: 'lax' as const,
+    path: '/',
+    maxAge: ADMIN_SESSION_TTL_SECONDS,
+  };
+}
 
 export async function getCurrentAdmin(): Promise<AdminSessionPayload | null> {
   const cookieStore = await cookies();
