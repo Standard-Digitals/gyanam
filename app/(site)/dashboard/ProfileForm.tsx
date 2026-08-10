@@ -39,7 +39,6 @@ export default function ProfileForm({ name, phone, targetExam }: { name: string 
 
   return (
     <div className="bg-white p-6 rounded-2xl border border-[#F3DCDD] shadow-sm space-y-3">
-      <h3 className="font-heading font-black text-lg text-[#1F1A1C]">My Profile</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-bold text-[#555555] uppercase tracking-wider mb-1">Full Name</label>

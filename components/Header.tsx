@@ -418,7 +418,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <button
                           onClick={() => {
                             setStudentPortalOpen(false);
-                            if (user) router.push('/dashboard');
+                            if (user) router.push('/dashboard/courses');
                             else onOpenAuth('login');
                           }}
                           className="w-full text-left p-2 rounded-xl hover:bg-[#FFF5F5] hover:text-[#C12223] flex items-center gap-2 cursor-pointer"
@@ -430,7 +430,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <button
                           onClick={() => {
                             setStudentPortalOpen(false);
-                            if (user) router.push('/dashboard');
+                            if (user) router.push('/dashboard/downloads');
                             else onOpenAuth('login');
                           }}
                           className="w-full text-left p-2 rounded-xl hover:bg-[#FFF5F5] hover:text-[#C12223] flex items-center gap-2 cursor-pointer"
@@ -442,7 +442,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <button
                           onClick={() => {
                             setStudentPortalOpen(false);
-                            if (user) router.push('/dashboard');
+                            if (user) router.push('/dashboard/quiz-history');
                             else onOpenAuth('login');
                           }}
                           className="w-full text-left p-2 rounded-xl hover:bg-[#FFF5F5] hover:text-[#C12223] flex items-center gap-2 cursor-pointer"
