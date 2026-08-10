@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import './globals.css';
+import '../globals.css';
 import { SiteShell } from '@/components/SiteShell';
 import { buildMetadata } from '@/lib/metadata';
 import { SITE } from '@/lib/siteConfig';
