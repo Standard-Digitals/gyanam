@@ -5,6 +5,12 @@ import AdminLogoutButton from './AdminLogoutButton';
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard' },
   { href: '/admin/leads', label: 'Leads Inbox' },
+  { href: '/admin/courses', label: 'Courses' },
+  { href: '/admin/mentors', label: 'Mentors' },
+  { href: '/admin/current-affairs', label: 'Current Affairs' },
+  { href: '/admin/quizzes', label: 'Daily Quiz' },
+  { href: '/admin/resources', label: 'Resources' },
+  { href: '/admin/blog', label: 'Blog' },
   { href: '/admin/faq', label: 'FAQ' },
 ];
 
