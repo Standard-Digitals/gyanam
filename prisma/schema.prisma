@@ -214,3 +214,44 @@ model FAQItem {
   answer    String
   createdAt DateTime @default(now())
 }
+
+model Quiz {
+  id               String   @id @default(cuid())
+  title            String
+  subject          String
+  examCategory     String
+  date             String
+  totalQuestions   Int
+  timeLimitMinutes Int
+  totalMarks       Int
+  difficulty       String
+  questions        Json
+  createdAt        DateTime @default(now())
+}
+
+model QuizAttempt {
+  id               String   @id @default(cuid())
+  userId           String
+  quizId           String
+  correctCount     Int
+  incorrectCount   Int
+  unattemptedCount Int
+  obtainedMarks    Float
+  accuracy         Int
+  timeTakenSec     Int
+  submittedAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([quizId])
+  @@index([submittedAt])
+}
+
+model DownloadLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  resourceId   String
+  ipAddress    String?
+  downloadedAt DateTime @default(now())
+
+  @@index([resourceId])
+}

@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import {
   COURSES_DATA,
@@ -10,6 +11,7 @@ import {
   BLOG_POSTS,
   FAQS_DATA,
 } from '../data/mockData';
+import { QUIZZES_SEED } from '../data/dailyQuizSeed';
 
 async function main() {
   for (const c of COURSES_DATA) {
@@ -56,6 +58,12 @@ async function main() {
     await prisma.fAQItem.upsert({ where: { id: f.id }, update: { ...f }, create: { ...f } });
   }
   console.log(`Seeded ${FAQS_DATA.length} FAQ items`);
+
+  for (const q of QUIZZES_SEED) {
+    const data = { ...q, questions: q.questions as unknown as Prisma.InputJsonValue };
+    await prisma.quiz.upsert({ where: { id: q.id }, update: data, create: data });
+  }
+  console.log(`Seeded ${QUIZZES_SEED.length} quizzes`);
 }
 
 main()

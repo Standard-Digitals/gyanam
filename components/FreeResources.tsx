@@ -7,12 +7,16 @@ import { Download, FileText, CheckCircle2, Star, Sparkles, ArrowRight } from 'lu
 export const FreeResources: React.FC<{ resources: FreeResource[] }> = ({ resources }) => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  const handleDownload = (resId: string) => {
+  const handleDownload = async (resId: string) => {
     setDownloadingId(resId);
-    setTimeout(() => {
+    try {
+      await fetch(`/api/resources/${resId}/download`, { method: 'POST' });
+    } catch (err) {
+      console.error('Failed to record download', err);
+    } finally {
       setDownloadingId(null);
       alert('PDF Download started successfully! Check your downloads folder.');
-    }, 1200);
+    }
   };
 
   return (
