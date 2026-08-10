@@ -15,14 +15,22 @@ interface HeaderProps {
   onOpenSearch: () => void;
   onOpenAuth: (mode?: 'login' | 'signup') => void;
   onOpenMentorship: () => void;
+  user: { name: string | null; phone: string } | null;
 }
 
-export const Header: React.FC<HeaderProps> = ({ 
-  onOpenSearch, 
-  onOpenAuth, 
+export const Header: React.FC<HeaderProps> = ({
+  onOpenSearch,
+  onOpenAuth,
   onOpenMentorship,
+  user,
 }) => {
   const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/');
+    router.refresh();
+  };
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -390,8 +398,12 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                       <div>
-                        <h5 className="font-heading font-extrabold text-sm text-[#1F1A1C]">Student Portal</h5>
-                        <p className="text-[10px] text-gray-400">Manage courses, orders & downloads</p>
+                        <h5 className="font-heading font-extrabold text-sm text-[#1F1A1C]">
+                          {user ? (user.name || `+91 ${user.phone}`) : 'Student Portal'}
+                        </h5>
+                        <p className="text-[10px] text-gray-400">
+                          {user ? 'Manage your account' : 'Manage courses, orders & downloads'}
+                        </p>
                       </div>
                       <button
                         onClick={() => setStudentPortalOpen(false)}
@@ -406,7 +418,8 @@ export const Header: React.FC<HeaderProps> = ({
                         <button
                           onClick={() => {
                             setStudentPortalOpen(false);
-                            onOpenAuth('login');
+                            if (user) router.push('/dashboard');
+                            else onOpenAuth('login');
                           }}
                           className="w-full text-left p-2 rounded-xl hover:bg-[#FFF5F5] hover:text-[#C12223] flex items-center gap-2 cursor-pointer"
                         >
@@ -417,7 +430,8 @@ export const Header: React.FC<HeaderProps> = ({
                         <button
                           onClick={() => {
                             setStudentPortalOpen(false);
-                            onOpenAuth('login');
+                            if (user) router.push('/dashboard');
+                            else onOpenAuth('login');
                           }}
                           className="w-full text-left p-2 rounded-xl hover:bg-[#FFF5F5] hover:text-[#C12223] flex items-center gap-2 cursor-pointer"
                         >
@@ -428,25 +442,38 @@ export const Header: React.FC<HeaderProps> = ({
                         <button
                           onClick={() => {
                             setStudentPortalOpen(false);
-                            onOpenAuth('login');
+                            if (user) router.push('/dashboard');
+                            else onOpenAuth('login');
                           }}
                           className="w-full text-left p-2 rounded-xl hover:bg-[#FFF5F5] hover:text-[#C12223] flex items-center gap-2 cursor-pointer"
                         >
-                          <Heart className="w-4 h-4 text-[#C12223]" /> Saved Notes & PYQs
+                          <Heart className="w-4 h-4 text-[#C12223]" /> Quiz History
                         </button>
                       </li>
                     </ul>
 
                     <div className="pt-2 border-t border-gray-100">
-                      <button
-                        onClick={() => {
-                          setStudentPortalOpen(false);
-                          onOpenAuth('login');
-                        }}
-                        className="w-full py-2 bg-[#FFF5F5] border border-[#C12223]/20 text-[#1F1A1C] hover:text-[#C12223] rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <User className="w-3.5 h-3.5 text-[#C12223]" /> Student Login
-                      </button>
+                      {user ? (
+                        <button
+                          onClick={() => {
+                            setStudentPortalOpen(false);
+                            handleLogout();
+                          }}
+                          className="w-full py-2 bg-[#FFF5F5] border border-[#C12223]/20 text-[#C12223] rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          Logout
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setStudentPortalOpen(false);
+                            onOpenAuth('login');
+                          }}
+                          className="w-full py-2 bg-[#FFF5F5] border border-[#C12223]/20 text-[#1F1A1C] hover:text-[#C12223] rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <User className="w-3.5 h-3.5 text-[#C12223]" /> Student Login
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 )}
@@ -557,24 +584,49 @@ export const Header: React.FC<HeaderProps> = ({
             </nav>
 
             <div className="pt-3 border-t border-gray-200 flex flex-col gap-2">
-              <button
-                onClick={() => {
-                  onOpenAuth('login');
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full py-2.5 text-center font-bold text-sm text-[#1F1A1C] bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center gap-2"
-              >
-                <User className="w-4 h-4 text-[#C12223]" /> Student Login
-              </button>
-              <button
-                onClick={() => {
-                  onOpenAuth('signup');
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full py-3 text-center font-bold text-sm text-white bg-gradient-to-r from-[#EF4444] to-[#B91C1C] rounded-xl shadow-md"
-              >
-                Join Now - Start Prep
-              </button>
+              {user ? (
+                <>
+                  <button
+                    onClick={() => {
+                      router.push('/dashboard');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full py-2.5 text-center font-bold text-sm text-[#1F1A1C] bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center gap-2"
+                  >
+                    <User className="w-4 h-4 text-[#C12223]" /> My Dashboard
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full py-2.5 text-center font-bold text-sm text-[#C12223] bg-[#FFF5F5] border border-[#C12223]/20 rounded-xl"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      onOpenAuth('login');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full py-2.5 text-center font-bold text-sm text-[#1F1A1C] bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center gap-2"
+                  >
+                    <User className="w-4 h-4 text-[#C12223]" /> Student Login
+                  </button>
+                  <button
+                    onClick={() => {
+                      onOpenAuth('signup');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full py-3 text-center font-bold text-sm text-white bg-gradient-to-r from-[#EF4444] to-[#B91C1C] rounded-xl shadow-md"
+                  >
+                    Join Now - Start Prep
+                  </button>
+                </>
+              )}
             </div>
           </motion.div>
         )}

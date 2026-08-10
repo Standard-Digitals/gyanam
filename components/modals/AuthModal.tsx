@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useRouter } from 'next/navigation';
 import { X, Phone, Lock, ArrowRight, ShieldCheck, CheckCircle2, Sparkles } from 'lucide-react';
 import { GyanamLogo } from '../GyanamLogo';
 
@@ -11,6 +12,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
+  const router = useRouter();
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
   const [step, setStep] = useState<'phone' | 'otp' | 'success'>('phone');
   const [phone, setPhone] = useState('');
@@ -62,6 +64,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Invalid OTP');
       setStep('success');
+      router.refresh();
       setTimeout(() => {
         onClose();
         setStep('phone');

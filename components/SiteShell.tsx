@@ -13,9 +13,10 @@ interface SiteShellProps {
   courses: Course[];
   currentAffairs: CurrentAffairItem[];
   resources: FreeResource[];
+  user: { name: string | null; phone: string } | null;
 }
 
-export function SiteShell({ children, courses, currentAffairs, resources }: SiteShellProps) {
+export function SiteShell({ children, courses, currentAffairs, resources, user }: SiteShellProps) {
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -33,6 +34,7 @@ export function SiteShell({ children, courses, currentAffairs, resources }: Site
         onOpenSearch={() => setSearchOpen(true)}
         onOpenAuth={handleOpenAuth}
         onOpenMentorship={() => setMentorshipOpen(true)}
+        user={user}
       />
 
       <main>{children}</main>
