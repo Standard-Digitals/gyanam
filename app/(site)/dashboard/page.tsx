@@ -13,14 +13,16 @@ export default async function DashboardOverviewPage() {
   const user = await getCurrentUserProfile();
   if (!user) return null;
 
-  const [quizAttemptsCount, downloadsCount] = await Promise.all([
+  const [quizAttemptsCount, downloadsCount, ordersCount] = await Promise.all([
     prisma.quizAttempt.count({ where: { userId: user.id } }),
     prisma.downloadLog.count({ where: { userId: user.id } }),
+    prisma.order.count({ where: { userId: user.id } }),
   ]);
 
   const stats = [
     { label: 'Quiz Attempts', value: quizAttemptsCount },
     { label: 'Downloads', value: downloadsCount },
+    { label: 'Orders', value: ordersCount },
     { label: 'Enrolled Courses', value: 0 },
   ];
 

@@ -1,11 +1,12 @@
 import Link from 'next/link';
-import { Lock, LayoutDashboard, User, BookOpen, Trophy, Download } from 'lucide-react';
+import { Lock, LayoutDashboard, User, BookOpen, Trophy, Download, Package } from 'lucide-react';
 import { getCurrentUserProfile } from '@/lib/currentUser';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
   { href: '/dashboard/profile', label: 'My Profile', icon: User },
   { href: '/dashboard/courses', label: 'My Courses', icon: BookOpen },
+  { href: '/dashboard/orders', label: 'My Orders', icon: Package },
   { href: '/dashboard/quiz-history', label: 'Quiz History', icon: Trophy },
   { href: '/dashboard/downloads', label: 'Download History', icon: Download },
 ];

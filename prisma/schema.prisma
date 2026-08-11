@@ -264,3 +264,30 @@ model AdminUser {
   role         String   @default("editor")
   createdAt    DateTime @default(now())
 }
+
+model Order {
+  id             String   @id @default(cuid())
+  orderNumber    String   @unique
+  userId         String
+  items          Json
+  subtotal       Int
+  promoCode      String?
+  promoDiscount  Int      @default(0)
+  shippingFee    Int      @default(0)
+  grandTotal     Int
+  deliverySpeed  String
+  paymentMethod  String
+  paymentStatus  String   @default("PENDING")
+  orderStatus    String   @default("PLACED")
+  fullName       String
+  mobile         String
+  email          String
+  addressLine    String
+  pincode        String
+  city           String
+  state          String
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}

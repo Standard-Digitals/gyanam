@@ -297,28 +297,56 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
     setIsCheckoutOpen(true);
   };
 
-  const handleCompleteOrder = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsProcessingPayment(true);
+  const [orderError, setOrderError] = useState<string>('');
 
-    setTimeout(() => {
-      setIsProcessingPayment(false);
-      const generatedOrderId = `GYN-${Math.floor(100000 + Math.random() * 900000)}`;
+  const handleCompleteOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (paymentMethod !== 'cod') {
+      setOrderError('Online payments (UPI/Card/Net Banking) are launching soon. Please select Cash on Delivery for now.');
+      return;
+    }
+
+    setOrderError('');
+    setIsProcessingPayment(true);
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cartItems.map((item) => ({ resourceId: item.resourceId, format: item.format, quantity: item.quantity })),
+          promoCode: appliedPromo?.code,
+          deliverySpeed,
+          paymentMethod: 'cod',
+          address: addressForm,
+        }),
+      });
+      const data = await res.json();
+      if (res.status === 401) {
+        setOrderError('Please login first to place your order.');
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || 'Failed to place order');
+
       const orderObj = {
-        orderId: generatedOrderId,
+        orderId: data.order.orderNumber as string,
         items: [...cartItems],
-        amountPaid: grandTotal,
+        amountPaid: data.order.grandTotal as number,
         savings: (cartOriginalTotal - cartSubtotal) + promoDiscount,
         date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
         address: { ...addressForm },
-        paymentMethod: paymentMethod === 'upi' ? `UPI (${upiId})` : paymentMethod === 'card' ? 'Credit/Debit Card' : paymentMethod === 'netbanking' ? 'Net Banking' : 'Cash on Delivery (COD)'
+        paymentMethod: 'Cash on Delivery (COD)',
       };
 
       setCompletedOrder(orderObj);
       setCartItems([]);
       setCheckoutStep('confirmation');
       showToast('🎉 Order placed successfully!');
-    }, 1800);
+    } catch (err) {
+      setOrderError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   const handleRequestSubmit = (e: React.FormEvent) => {
@@ -1939,10 +1967,10 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
                   {/* Payment Method Selector */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                     {[
-                      { id: 'upi', label: 'UPI / GPay', icon: QrCode },
-                      { id: 'card', label: 'Credit/Debit Card', icon: CreditCard },
-                      { id: 'netbanking', label: 'Net Banking', icon: Lock },
-                      { id: 'cod', label: 'Cash on Delivery', icon: Truck }
+                      { id: 'upi', label: 'UPI / GPay', icon: QrCode, comingSoon: true },
+                      { id: 'card', label: 'Credit/Debit Card', icon: CreditCard, comingSoon: true },
+                      { id: 'netbanking', label: 'Net Banking', icon: Lock, comingSoon: true },
+                      { id: 'cod', label: 'Cash on Delivery', icon: Truck, comingSoon: false }
                     ].map(pm => {
                       const Icon = pm.icon;
                       const active = paymentMethod === pm.id;
@@ -1951,10 +1979,15 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
                           key={pm.id}
                           type="button"
                           onClick={() => setPaymentMethod(pm.id as any)}
-                          className={`p-3 rounded-xl border text-center transition cursor-pointer flex flex-col items-center gap-1.5 ${
+                          className={`relative p-3 rounded-xl border text-center transition cursor-pointer flex flex-col items-center gap-1.5 ${
                             active ? 'border-red-600 bg-red-50 text-red-900 font-black' : 'border-gray-200 text-gray-700 hover:bg-gray-50'
                           }`}
                         >
+                          {pm.comingSoon && (
+                            <span className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-amber-400 text-amber-950 text-[8px] font-black uppercase rounded-full shadow-sm">
+                              Soon
+                            </span>
+                          )}
                           <Icon className={`w-4 h-4 ${active ? 'text-red-600' : 'text-gray-500'}`} />
                           <span className="text-[11px] font-bold">{pm.label}</span>
                         </button>
@@ -2047,6 +2080,10 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
                       <span>₹{grandTotal + (deliverySpeed === 'express' ? 99 : 0)}</span>
                     </div>
                   </div>
+
+                  {orderError && (
+                    <p className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{orderError}</p>
+                  )}
 
                   <div className="flex items-center justify-between gap-3 pt-2">
                     <button

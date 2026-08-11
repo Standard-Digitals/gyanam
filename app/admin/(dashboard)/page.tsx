@@ -1,12 +1,14 @@
 import { prisma } from '@/lib/prisma';
 
 export default async function AdminDashboardPage() {
-  const [totalLeads, newLeads, totalUsers, totalQuizAttempts, totalDownloads] = await Promise.all([
+  const [totalLeads, newLeads, totalUsers, totalQuizAttempts, totalDownloads, totalOrders, pendingOrders] = await Promise.all([
     prisma.lead.count(),
     prisma.lead.count({ where: { status: 'NEW' } }),
     prisma.user.count(),
     prisma.quizAttempt.count(),
     prisma.downloadLog.count(),
+    prisma.order.count(),
+    prisma.order.count({ where: { orderStatus: 'PLACED' } }),
   ]);
 
   const stats = [
@@ -15,6 +17,8 @@ export default async function AdminDashboardPage() {
     { label: 'Registered Students', value: totalUsers },
     { label: 'Quiz Attempts', value: totalQuizAttempts },
     { label: 'Resource Downloads', value: totalDownloads },
+    { label: 'Total Orders', value: totalOrders },
+    { label: 'Orders Pending Dispatch', value: pendingOrders },
   ];
 
   return (
