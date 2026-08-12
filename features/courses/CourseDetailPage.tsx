@@ -106,8 +106,10 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
     else router.push(`/courses/${slug}`);
   };
 
-  // Tab State
-  const [activeTab, setActiveTab] = useState<'overview' | 'syllabus' | 'faculty' | 'reviews' | 'faq'>('overview');
+  // Tab State — open straight to Syllabus (where lectures live) if this course has curriculum added
+  const [activeTab, setActiveTab] = useState<'overview' | 'syllabus' | 'faculty' | 'reviews' | 'faq'>(
+    curriculum.length > 0 ? 'syllabus' : 'overview'
+  );
 
   // Interactive Video Player State
   const [isPlayingDemo, setIsPlayingDemo] = useState<boolean>(false);
