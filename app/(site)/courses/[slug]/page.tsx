@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { getCourseBySlug, getRelatedCourses, getAllCourseSlugs } from '@/lib/data/courses';
 import { getCourseCurriculum } from '@/lib/data/curriculum';
 import { buildMetadata } from '@/lib/metadata';
+import { getCurrentUserProfile } from '@/lib/currentUser';
+import { prisma } from '@/lib/prisma';
 import CourseDetailClient from './CourseDetailClient';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -35,5 +37,11 @@ export default async function Page({ params }: Props) {
   if (!course) notFound();
   const relatedCourses = await getRelatedCourses(course.id);
   const curriculum = await getCourseCurriculum(course.id);
-  return <CourseDetailClient course={course} relatedCourses={relatedCourses} curriculum={curriculum} />;
+
+  const user = await getCurrentUserProfile();
+  const isEnrolled = user
+    ? Boolean(await prisma.enrollment.findUnique({ where: { userId_courseId: { userId: user.id, courseId: course.id } } }))
+    : false;
+
+  return <CourseDetailClient course={course} relatedCourses={relatedCourses} curriculum={curriculum} isEnrolled={isEnrolled} />;
 }

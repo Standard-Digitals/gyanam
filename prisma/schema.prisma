@@ -331,3 +331,16 @@ model Topic {
 
   @@index([chapterId])
 }
+
+model Enrollment {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  paymentType String   @default("FREE")
+  status      String   @default("ACTIVE")
+  enrolledAt  DateTime @default(now())
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+}

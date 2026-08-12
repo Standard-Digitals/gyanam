@@ -29,6 +29,7 @@ interface CourseDetailPageProps {
   course: Course;
   relatedCourses: Course[];
   curriculum?: CurriculumChapter[];
+  isEnrolled?: boolean;
   onBackToCourses?: () => void;
   onBackToHome?: () => void;
   onSelectCourseBySlug?: (slug: string) => void;
@@ -46,6 +47,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   course,
   relatedCourses,
   curriculum = [],
+  isEnrolled = false,
   onBackToCourses,
   onBackToHome,
   onSelectCourseBySlug,
@@ -53,7 +55,40 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   onOpenMentorship,
 }) => {
   const router = useRouter();
-  const handleEnroll = (course: Course) => { if (onEnrollCourse) onEnrollCourse(course); else router.push('/?enroll=true'); };
+  const [enrolled, setEnrolled] = useState(isEnrolled);
+  const [isEnrolling, setIsEnrolling] = useState(false);
+  const [enrollError, setEnrollError] = useState('');
+  const handleEnroll = async (course: Course) => {
+    if (onEnrollCourse) {
+      onEnrollCourse(course);
+      return;
+    }
+    if (enrolled) {
+      router.push('/dashboard/courses');
+      return;
+    }
+    setEnrollError('');
+    setIsEnrolling(true);
+    try {
+      const res = await fetch('/api/enrollments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseId: course.id }),
+      });
+      const data = await res.json();
+      if (res.status === 401) {
+        setEnrollError('Please login first (use the header) to enroll in this batch.');
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || 'Failed to enroll');
+      setEnrolled(true);
+      router.refresh();
+    } catch (err) {
+      setEnrollError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setIsEnrolling(false);
+    }
+  };
   const handleMentorship = () => { if (onOpenMentorship) onOpenMentorship(); else router.push('/?mentorship=true'); };
 
   const handleBackToCourses = () => {
@@ -748,11 +783,22 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
               <div className="space-y-3">
                 <button
                   onClick={() => handleEnroll(course)}
-                  className="w-full py-4 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] hover:opacity-95 text-white font-black text-sm rounded-2xl shadow-xl shadow-[#C12223]/30 transition hover:scale-102 flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
+                  disabled={isEnrolling}
+                  className={`w-full py-4 font-black text-sm rounded-2xl shadow-xl transition hover:scale-102 flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider disabled:opacity-60 ${
+                    enrolled
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30'
+                      : 'bg-gradient-to-r from-[#EF4444] to-[#B91C1C] hover:opacity-95 text-white shadow-[#C12223]/30'
+                  }`}
                 >
-                  <span>Enroll in Batch Now</span>
+                  <span>
+                    {isEnrolling ? 'Enrolling...' : enrolled ? '✓ Enrolled — Go to My Courses' : 'Enroll in Batch Now (Free)'}
+                  </span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
+
+                {enrollError && (
+                  <p className="text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{enrollError}</p>
+                )}
 
                 <button
                   onClick={handleDownloadBrochure}
