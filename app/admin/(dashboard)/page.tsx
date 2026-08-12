@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 
 export default async function AdminDashboardPage() {
-  const [totalLeads, newLeads, totalUsers, totalQuizAttempts, totalDownloads, totalOrders, pendingOrders] = await Promise.all([
+  const [totalLeads, newLeads, totalUsers, totalQuizAttempts, totalDownloads, totalOrders, pendingOrders, openTickets] = await Promise.all([
     prisma.lead.count(),
     prisma.lead.count({ where: { status: 'NEW' } }),
     prisma.user.count(),
@@ -9,6 +9,7 @@ export default async function AdminDashboardPage() {
     prisma.downloadLog.count(),
     prisma.order.count(),
     prisma.order.count({ where: { orderStatus: 'PLACED' } }),
+    prisma.supportTicket.count({ where: { status: 'OPEN' } }),
   ]);
 
   const stats = [
@@ -19,6 +20,7 @@ export default async function AdminDashboardPage() {
     { label: 'Resource Downloads', value: totalDownloads },
     { label: 'Total Orders', value: totalOrders },
     { label: 'Orders Pending Dispatch', value: pendingOrders },
+    { label: 'Open Support Tickets', value: openTickets },
   ];
 
   return (

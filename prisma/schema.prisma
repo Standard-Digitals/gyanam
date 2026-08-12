@@ -291,3 +291,20 @@ model Order {
   @@index([userId])
   @@index([createdAt])
 }
+
+model SupportTicket {
+  id              String   @id @default(cuid())
+  ticketNumber    String   @unique
+  studentName     String
+  phone           String
+  email           String?
+  rollNoOrOrderId String?
+  category        String
+  urgency         String
+  description     String
+  status          String   @default("OPEN")
+  createdAt       DateTime @default(now())
+
+  @@index([phone])
+  @@index([createdAt])
+}

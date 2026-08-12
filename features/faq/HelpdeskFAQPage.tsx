@@ -255,29 +255,54 @@ export default function HelpdeskFAQPage() {
   };
 
   // Handle Ticket Submission
-  const handleTicketSubmit = (e: React.FormEvent) => {
+  const handleTicketSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!ticketForm.studentName || !ticketForm.phone || !ticketForm.description) return;
 
     setTicketSubmitting(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/support/tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ticketForm),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to submit ticket');
+      setGeneratedTicketRef(data.ticketNumber);
+    } catch (err) {
+      console.error('Failed to submit ticket', err);
+    } finally {
       setTicketSubmitting(false);
-      const ticketId = 'GY-TK-' + Math.floor(100000 + Math.random() * 900000);
-      setGeneratedTicketRef(ticketId);
-    }, 800);
+    }
   };
 
   // Handle Quick Actions Search
-  const handleQuickActionSubmit = (e: React.FormEvent) => {
+  const handleQuickActionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!quickActionInput) return;
 
-    if (activeQuickAction === 'order') {
-      setQuickActionResult(`Order #${quickActionInput}: Dispatched via BlueDart Express. AWB: 8810294120. Expected Delivery in 1-2 Days.`);
-    } else if (activeQuickAction === 'reset') {
-      setQuickActionResult(`Password reset link sent to mobile ending in ***${quickActionInput.slice(-4) || '3434'}. Check your SMS / WhatsApp.`);
-    } else if (activeQuickAction === 'receipt') {
-      setQuickActionResult(`Fee Payment Receipt for ${quickActionInput} generated successfully. Click download below to save PDF.`);
+    if (activeQuickAction === 'reset') {
+      setQuickActionResult(`GYANM login uses mobile OTP, not a password — there's nothing to reset. Just enter your mobile number and OTP each time to log in.`);
+      return;
+    }
+
+    if (activeQuickAction === 'order' || activeQuickAction === 'receipt') {
+      try {
+        const res = await fetch(`/api/orders/lookup?query=${encodeURIComponent(quickActionInput)}`);
+        const data = await res.json();
+        if (!data.found) {
+          setQuickActionResult(`No order found for "${quickActionInput}". Please check your Order ID or mobile number and try again.`);
+          return;
+        }
+        const o = data.order;
+        if (activeQuickAction === 'order') {
+          setQuickActionResult(`Order #${o.orderNumber}: Status — ${o.orderStatus}. Payment: ${o.paymentMethod.toUpperCase()} (${o.paymentStatus}).`);
+        } else {
+          setQuickActionResult(`Receipt for Order #${o.orderNumber}: ₹${o.grandTotal} paid via ${o.paymentMethod.toUpperCase()} on ${new Date(o.createdAt).toLocaleDateString()}.`);
+        }
+      } catch (err) {
+        setQuickActionResult('Something went wrong looking up your order. Please try again.');
+      }
     }
   };
 
