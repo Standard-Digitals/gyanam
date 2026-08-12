@@ -140,7 +140,7 @@ export const FloatingQrWidget: React.FC = () => {
                 Scan to Install App
               </h3>
               <p className="text-xs text-[#555555] mb-6">
-                Point your mobile phone camera or Google Lens at this QR code to download Gyanam App instantly.
+                Point your mobile phone camera or Google Lens at this QR code to download Gyanm App instantly.
               </p>
 
               {/* QR Code Graphics Card */}

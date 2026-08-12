@@ -72,7 +72,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-xs">
               <li><a href="/about" className="hover:text-white transition">About Us</a></li>
               <li><a href="/contact" className="hover:text-white transition">Contact Us</a></li>
-              <li><a href="#why-Gyanam" className="hover:text-white transition">Why Gyanam Tech</a></li>
+              <li><a href="#why-Gyanam" className="hover:text-white transition">Why Gyanm Tech</a></li>
               <li><a href="#mentors" className="hover:text-white transition">Our Faculty Experts</a></li>
               <li><a href="#success-stories" className="hover:text-white transition">Selection Stories</a></li>
               <li><a href="#blog" className="hover:text-white transition">Exam Notifications</a></li>
@@ -85,7 +85,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-red-200/70">
-          <p>© 2026 Gyanam (Government Jobs Made Easy). All Rights Reserved.</p>
+          <p>© 2026 Gyanm (Government Jobs Made Easy). All Rights Reserved.</p>
 
           {/* Social Links */}
           <div className="flex items-center gap-4 text-red-100">

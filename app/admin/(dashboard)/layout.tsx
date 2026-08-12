@@ -24,7 +24,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     <div className="min-h-screen bg-[#FFF5F5] flex">
       <aside className="w-60 shrink-0 bg-white border-r border-[#F3DCDD] p-5 flex flex-col justify-between">
         <div>
-          <h1 className="font-heading font-black text-lg text-[#1F1A1C] mb-6">GYANAM Admin</h1>
+          <h1 className="font-heading font-black text-lg text-[#1F1A1C] mb-6">GYANM Admin</h1>
           <nav className="space-y-1">
             {NAV_ITEMS.map((item) => (
               <Link

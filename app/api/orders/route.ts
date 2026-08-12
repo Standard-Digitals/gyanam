@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/currentUser';
 
 const PROMO_CODES: Record<string, { discountPercent: number; maxDiscount: number }> = {
-  GYANAM20: { discountPercent: 20, maxDiscount: 300 },
+  GYANM20: { discountPercent: 20, maxDiscount: 300 },
   WELCOME100: { discountPercent: 15, maxDiscount: 200 },
 };
 

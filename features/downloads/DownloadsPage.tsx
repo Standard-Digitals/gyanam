@@ -25,7 +25,7 @@ export default function DownloadsPage() {
   const downloadsData = [
     {
       id: "dl-1",
-      title: "GYANAM Current Affairs Monthly Magbook - July 2026 Edition",
+      title: "GYANM Current Affairs Monthly Magbook - July 2026 Edition",
       category: "magazine",
       exam: "All Govt Exams",
       fileType: "PDF Document",
@@ -115,7 +115,7 @@ export default function DownloadsPage() {
     },
     {
       id: "dl-7",
-      title: "GYANAM Live CBT Computer Test Simulator Software for Windows PC",
+      title: "GYANM Live CBT Computer Test Simulator Software for Windows PC",
       category: "app",
       exam: "All Govt Exams",
       fileType: "Windows Installer (.exe)",
@@ -130,7 +130,7 @@ export default function DownloadsPage() {
     },
     {
       id: "dl-8",
-      title: "GYANAM Official Learning App for Android (Direct APK Download)",
+      title: "GYANM Official Learning App for Android (Direct APK Download)",
       category: "app",
       exam: "Mobile App",
       fileType: "Android Package (.apk)",
@@ -251,7 +251,7 @@ export default function DownloadsPage() {
             </h1>
 
             <p className="text-red-100/90 text-sm sm:text-base leading-relaxed font-medium">
-              Access GYANAM Academy's curated repository of monthly current affairs magazines, TCS shift-wise question papers, speed math formula sheets, and desktop CBT test software—all free to download.
+              Access GYANM Academy's curated repository of monthly current affairs magazines, TCS shift-wise question papers, speed math formula sheets, and desktop CBT test software—all free to download.
             </p>
           </div>
 
@@ -345,14 +345,14 @@ export default function DownloadsPage() {
               </h2>
 
               <p className="text-xs sm:text-sm text-gray-300 leading-relaxed font-medium max-w-2xl">
-                Download the GYANAM Windows Desktop App to get offline CBT test software. Experience exact countdown timers, question palette colors, sectional limits, and instant scorecard generation without needing constant internet.
+                Download the GYANM Windows Desktop App to get offline CBT test software. Experience exact countdown timers, question palette colors, sectional limits, and instant scorecard generation without needing constant internet.
               </p>
 
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <button
                   onClick={() => handleTriggerDownload({
                     id: 'dl-7',
-                    title: 'GYANAM Windows Desktop CBT Simulator v3.4',
+                    title: 'GYANM Windows Desktop CBT Simulator v3.4',
                     fileUrl: '#'
                   })}
                   className="px-6 py-3.5 bg-red-600 hover:bg-red-700 text-white font-black text-xs rounded-xl shadow-xl transition flex items-center gap-2 cursor-pointer"
@@ -364,7 +364,7 @@ export default function DownloadsPage() {
                 <button
                   onClick={() => handleTriggerDownload({
                     id: 'dl-8',
-                    title: 'GYANAM Android App APK v4.2.1',
+                    title: 'GYANM Android App APK v4.2.1',
                     fileUrl: '#'
                   })}
                   className="px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl border border-white/20 transition flex items-center gap-2 cursor-pointer"
@@ -573,7 +573,7 @@ export default function DownloadsPage() {
                 </div>
               ) : (
                 <p className="text-[11px] text-gray-400 text-center font-medium">
-                  Scanning file for viruses & generating secure GYANAM CDN download link...
+                  Scanning file for viruses & generating secure GYANM CDN download link...
                 </p>
               )}
 

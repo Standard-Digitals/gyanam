@@ -151,7 +151,7 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
           <div className="flex items-center gap-3">
             <span className="w-2.5 h-2.5 rounded-full bg-[#C12223] animate-ping shrink-0" />
             <span className="font-heading font-black text-lg sm:text-xl text-[#1F1A1C] tracking-tight">
-              Gyanam ACADEMY <span className="text-[#C12223]">•</span> BATCHES & OFFERS
+              Gyanm ACADEMY <span className="text-[#C12223]">•</span> BATCHES & OFFERS
             </span>
           </div>
 
@@ -326,7 +326,7 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
                 Have Exam Queries?
               </h3>
               <p className="text-xs text-[#666666] leading-relaxed mb-4 font-medium">
-                Request an instant call back from Gyanam Senior Faculty for fees, batch timings & strategy.
+                Request an instant call back from Gyanm Senior Faculty for fees, batch timings & strategy.
               </p>
 
               {querySubmitted ? (
@@ -509,7 +509,7 @@ export const Hero: React.FC<HeroProps> = ({ onStartLearning, onExploreCourses, o
                 5,00,000+ Aspirants
               </span>
               <span className="text-xs text-[#666666] font-medium mt-1 block">
-                Trust Gyanam Academy
+                Trust GYANM Academy
               </span>
             </div>
           </div>

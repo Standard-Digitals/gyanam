@@ -1,8 +1,8 @@
-# 🎓 GYANAM Academy
+# 🎓 GYANM Academy
 
 > **Government Jobs Made Easy**
 
-GYANAM Academy is a modern EdTech platform built to help students prepare for Government Job examinations through live classes, mock tests, daily current affairs, expert mentorship, and high-quality study resources.
+GYANM Academy is a modern EdTech platform built to help students prepare for Government Job examinations through live classes, mock tests, daily current affairs, expert mentorship, and high-quality study resources.
 
 The platform is designed with a premium user experience, responsive UI, smooth animations, and performance-focused architecture.
 
@@ -231,7 +231,7 @@ Preview production build.
 
 # 📞 Contact
 
-**GYANAM Academy**
+**GYANM Academy**
 
 📞 +91 9117 34 34 34
 
@@ -243,4 +243,4 @@ Preview production build.
 
 ## ❤️ Built for Government Job Aspirants Across India
 
-**GYANAM — Government Jobs Made Easy**
+**GYANM — Government Jobs Made Easy**

@@ -16,7 +16,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ onOpenMentorship, onExplor
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="px-3.5 py-1 bg-[#C12223]/10 text-[#C12223] text-xs font-extrabold uppercase rounded-full tracking-wider">
-            Why Gyanam Leads EdTech in India
+            Why Gyanm Leads EdTech in India
           </span>
           <h2 className="font-heading font-black text-3xl sm:text-5xl text-[#1F1A1C] mt-3 tracking-tight">
             Designed Like a Tech Product, <br className="hidden sm:inline" />

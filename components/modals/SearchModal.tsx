@@ -168,7 +168,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
 
           {/* Footer */}
           <div className="px-6 py-3 bg-[#FFF5F5] border-t border-[#F3DCDD] text-center text-xs text-[#555555]">
-            Need help finding a specific course? Call Gyanam Student Helpline: <strong className="text-[#C12223] font-bold">9117 34 34 34</strong>
+            Need help finding a specific course? Call Gyanm Student Helpline: <strong className="text-[#C12223] font-bold">9117 34 34 34</strong>
           </div>
         </motion.div>
       </div>

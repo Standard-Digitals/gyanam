@@ -88,7 +88,7 @@ export const MockTestDashboard: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-heading font-extrabold text-lg text-white">
-                  Gyanam All India Mock Test Engine
+                  Gyanm All India Mock Test Engine
                 </h3>
                 <p className="text-xs text-red-100">
                   SSC CGL & IBPS PO Live Simulation Mode

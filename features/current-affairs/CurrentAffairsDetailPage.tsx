@@ -22,7 +22,7 @@ export const CurrentAffairsDetailPage: React.FC<CurrentAffairsDetailPageProps> =
   // Local interaction states
   const [isBookmarked, setIsBookmarked] = useState<boolean>(() => {
     try {
-      const saved = localStorage.getItem('Gyanam_ca_bookmarks');
+      const saved = localStorage.getItem('Gyanm_ca_bookmarks');
       const arr = saved ? JSON.parse(saved) : [];
       return article ? arr.includes(article.id) : false;
     } catch {
@@ -59,7 +59,7 @@ export const CurrentAffairsDetailPage: React.FC<CurrentAffairsDetailPageProps> =
 
   const toggleBookmark = () => {
     try {
-      const saved = localStorage.getItem('Gyanam_ca_bookmarks');
+      const saved = localStorage.getItem('Gyanm_ca_bookmarks');
       let arr = saved ? JSON.parse(saved) : [];
       if (isBookmarked) {
         arr = arr.filter((bId: string) => bId !== article.id);
@@ -68,7 +68,7 @@ export const CurrentAffairsDetailPage: React.FC<CurrentAffairsDetailPageProps> =
         arr.push(article.id);
         setIsBookmarked(true);
       }
-      localStorage.setItem('Gyanam_ca_bookmarks', JSON.stringify(arr));
+      localStorage.setItem('Gyanm_ca_bookmarks', JSON.stringify(arr));
     } catch (err) {
       console.error(err);
     }
@@ -144,7 +144,7 @@ export const CurrentAffairsDetailPage: React.FC<CurrentAffairsDetailPageProps> =
             <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-gray-300 pt-1">
               <span className="flex items-center gap-1.5 text-white">
                 <span className="w-6 h-6 rounded-full bg-[#C12223] text-white text-[10px] font-black flex items-center justify-center">G</span>
-                <span>{article.author || 'Gyanam Editorial Desk'}</span>
+                <span>{article.author || 'Gyanm Editorial Desk'}</span>
               </span>
               <span>•</span>
               <span className="flex items-center gap-1 text-gray-300">

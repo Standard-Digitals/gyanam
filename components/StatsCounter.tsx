@@ -25,7 +25,7 @@ export const StatsCounter: React.FC = () => {
             Proven Results & Impact
           </span>
           <h2 className="font-heading font-black text-3xl sm:text-4xl text-white mt-3.5">
-            Numbers That Define Gyanam’s Excellence
+            Numbers That Define Gyanm’s Excellence
           </h2>
           <p className="text-sm text-red-100 font-medium mt-2">
             Empowering students from tier-1 metros to rural towns to crack government exams with confidence.

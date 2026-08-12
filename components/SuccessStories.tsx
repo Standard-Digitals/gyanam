@@ -51,7 +51,7 @@ export const SuccessStories: React.FC<SuccessStoriesProps> = ({ stories, onPlayV
           <div className="space-y-3">
             <span className="px-4 py-1.5 bg-[#C12223]/10 border border-[#F3DCDD] text-[#C12223] text-xs font-black uppercase rounded-full tracking-wider inline-flex items-center gap-1.5 shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Gyanam Hall of Fame • Selection Champions</span>
+              <span>Gyanm Hall of Fame • Selection Champions</span>
             </span>
             <h2 className="font-heading font-black text-3xl sm:text-5xl text-[#1F1A1C] tracking-tight">
               Top Rankers & Verified Performers

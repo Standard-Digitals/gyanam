@@ -24,10 +24,10 @@ export const WhyGyanam: React.FC = () => {
             Smart Decision For Aspirants
           </span>
           <h2 className="font-heading font-black text-3xl sm:text-5xl text-[#1F1A1C] mt-3 tracking-tight">
-            GYANAM Tech vs Traditional Offline Coaching
+            GYANM Tech vs Traditional Offline Coaching
           </h2>
           <p className="text-sm sm:text-base text-[#555555] mt-3">
-            Why over 500,000+ students switch from expensive offline centers to GYANAM.
+            Why over 500,000+ students switch from expensive offline centers to GYANM.
           </p>
         </div>
 
@@ -72,7 +72,7 @@ export const WhyGyanam: React.FC = () => {
             </ul>
           </div>
 
-          {/* GYANAM Tech Platform Box */}
+          {/* GYANM Tech Platform Box */}
           <div className="p-8 bg-gradient-to-br from-[#8C1316] via-[#A6181B] to-[#B91C1C] text-white rounded-3xl border-2 border-red-400 shadow-2xl shadow-[#EF4444]/20 relative">
             <div className="absolute -top-3 right-6 px-4 py-1 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-extrabold text-xs rounded-full uppercase tracking-wider shadow-md">
               ★ 10x Smarter Choice
@@ -80,9 +80,9 @@ export const WhyGyanam: React.FC = () => {
 
             <div className="flex items-center justify-between pb-6 border-b border-white/20 mb-6">
               <div>
-                <span className="text-xs font-bold text-amber-300 uppercase tracking-wider block">GYANAM Technology</span>
+                <span className="text-xs font-bold text-amber-300 uppercase tracking-wider block">GYANM Technology</span>
                 <h3 className="font-heading font-extrabold text-2xl text-white">
-                  GYANAM Digital Learning Hub
+                  GYANM Digital Learning Hub
                 </h3>
               </div>
               <div className="w-10 h-10 rounded-full bg-[#27AE60]/20 flex items-center justify-center text-[#27AE60]">
@@ -124,10 +124,10 @@ export const WhyGyanam: React.FC = () => {
             </div>
             <div>
               <h3 className="font-heading font-extrabold text-xl text-[#1F1A1C]">
-                Calculate Your Preparation Savings with GYANAM
+                Calculate Your Preparation Savings with GYANM
               </h3>
               <p className="text-xs text-[#555555]">
-                See how much money & commute hours you save by choosing GYANAM.
+                See how much money & commute hours you save by choosing GYANM.
               </p>
             </div>
           </div>

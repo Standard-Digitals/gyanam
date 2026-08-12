@@ -141,7 +141,7 @@ export const TopperModal: React.FC<TopperModalProps> = ({ story, onClose, onWatc
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-100">
               <div className="flex items-center gap-2 text-xs text-[#27AE60] font-bold">
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Verified Gyanam Classroom / Online Candidate</span>
+                <span>Verified Gyanm Classroom / Online Candidate</span>
               </div>
 
               <div className="flex items-center gap-2 w-full sm:w-auto">

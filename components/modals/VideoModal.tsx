@@ -61,7 +61,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({ story, onClose }) => {
             {useIframePlayer ? (
               <iframe
                 src={`${embedUrl}?autoplay=1&rel=0&modestbranding=1`}
-                title={`${story.studentName} Gyanam Topper Strategy Interview`}
+                title={`${story.studentName} Gyanm Topper Strategy Interview`}
                 className="w-full h-full border-0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -79,7 +79,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({ story, onClose }) => {
                 <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
                   <span className="px-3 py-1 bg-[#C12223] text-white text-[10px] font-black uppercase rounded-lg flex items-center gap-1.5 shadow-lg tracking-wider">
                     <Youtube className="w-4 h-4 fill-white" />
-                    <span>Gyanam RECORDED LECTURE</span>
+                    <span>Gyanm RECORDED LECTURE</span>
                   </span>
                   {story.videoDuration && (
                     <span className="px-2.5 py-1 bg-black/50 backdrop-blur-md text-amber-300 border border-white/20 text-[10px] font-extrabold rounded-lg">

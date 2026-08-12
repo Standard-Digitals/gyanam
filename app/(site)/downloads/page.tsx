@@ -3,7 +3,7 @@ import DownloadsPage from '@/features/downloads/DownloadsPage';
 import { buildMetadata } from '@/lib/metadata';
 
 export const metadata = buildMetadata({
-  title: 'Free Downloads — GYANAM Academy',
+  title: 'Free Downloads — GYANM Academy',
   path: 'downloads',
 });
 

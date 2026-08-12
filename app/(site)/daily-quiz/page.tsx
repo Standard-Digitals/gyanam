@@ -4,7 +4,7 @@ import { buildMetadata } from '@/lib/metadata';
 import { getAllQuizzes } from '@/lib/data/quizzes';
 
 export const metadata = buildMetadata({
-  title: 'Daily Quiz — GYANAM Academy',
+  title: 'Daily Quiz — GYANM Academy',
   path: 'daily-quiz',
 });
 

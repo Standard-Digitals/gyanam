@@ -3,7 +3,7 @@ import AboutPage from '@/features/about/AboutPage';
 import { buildMetadata } from '@/lib/metadata';
 
 export const metadata = buildMetadata({
-  title: 'About Us — GYANAM is a platform to help you find government jobs',
+  title: 'About Us — GYANM is a platform to help you find government jobs',
   path: 'about',
 });
 

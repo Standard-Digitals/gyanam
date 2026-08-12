@@ -34,7 +34,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-[#FFF5F5] flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl border border-[#F3DCDD] p-8 space-y-6">
         <div className="text-center space-y-1">
-          <h1 className="font-heading font-black text-2xl text-[#1F1A1C]">GYANAM Admin</h1>
+          <h1 className="font-heading font-black text-2xl text-[#1F1A1C]">GYANM Admin</h1>
           <p className="text-xs text-[#555555]">Content & Leads Management Panel</p>
         </div>
 

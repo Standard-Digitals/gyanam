@@ -20,7 +20,7 @@ export const TUTOR_LECTURE_VIDEOS: SuccessStory[] = [
     youtubeUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     testimonial: 'Master speed math techniques, shortcut tricks for quadratic equations, and high-level Data Interpretation concepts for SSC CGL & Bank PO.',
     previousAttempts: 'Faculty Lecture',
-    hometown: 'Gyanam Campus',
+    hometown: 'Gyanm Campus',
     badge: 'Algebra & Quant Masterclass',
     category: 'SSC'
   },
@@ -36,7 +36,7 @@ export const TUTOR_LECTURE_VIDEOS: SuccessStory[] = [
     youtubeUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     testimonial: 'Comprehensive analysis of RBI Monetary Policy, Banking Terms, Union Budget updates, and economic static GK for IBPS PO & SBI Mains.',
     previousAttempts: 'Faculty Lecture',
-    hometown: 'Gyanam Campus',
+    hometown: 'Gyanm Campus',
     badge: 'IBPS PO Banking Strategy',
     category: 'Banking'
   },
@@ -52,7 +52,7 @@ export const TUTOR_LECTURE_VIDEOS: SuccessStory[] = [
     youtubeUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     testimonial: 'Step-by-step logic unraveling for complex Floor Puzzles, Circular Seating Arrangements, Syllogisms, and Coding-Decoding patterns.',
     previousAttempts: 'Faculty Lecture',
-    hometown: 'Gyanam Campus',
+    hometown: 'Gyanm Campus',
     badge: 'Complex Puzzles & Logic',
     category: 'Banking'
   },
@@ -119,7 +119,7 @@ export const YouTubeCollageSection: React.FC<YouTubeCollageSectionProps> = ({ on
             <div className="flex flex-wrap items-center gap-2">
               <span className="px-3.5 py-1 bg-[#C12223] text-white text-xs font-black uppercase rounded-full tracking-wider flex items-center gap-1.5 shadow-md">
                 <Youtube className="w-4 h-4 fill-white" />
-                <span>Gyanam Recorded Lectures</span>
+                <span>Gyanm Recorded Lectures</span>
               </span>
               <span className="px-3 py-1 bg-white text-[#C12223] text-xs font-bold rounded-full border border-[#F3DCDD] shadow-sm">
                 Recorded Video Gallery

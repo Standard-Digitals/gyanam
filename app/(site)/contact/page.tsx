@@ -3,7 +3,7 @@ import ContactPage from '@/features/contact/ContactPage';
 import { buildMetadata } from '@/lib/metadata';
 
 export const metadata = buildMetadata({
-  title: 'Contact Us — GYANAM Academy',
+  title: 'Contact Us — GYANM Academy',
   path: 'contact',
 });
 

@@ -261,14 +261,14 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
     const code = promoInput.trim().toUpperCase();
     if (!code) return;
 
-    if (code === 'GYANaM20') {
-      setAppliedPromo({ code: 'GYANaM20', discountPercent: 20, maxDiscount: 300 });
-      showToast('Promo code GYANaM20 applied! (20% OFF)');
+    if (code === 'GYANM20') {
+      setAppliedPromo({ code: 'GYANM20', discountPercent: 20, maxDiscount: 300 });
+      showToast('Promo code GYANM20 applied! (20% OFF)');
     } else if (code === 'WELCOME100') {
       setAppliedPromo({ code: 'WELCOME100', discountPercent: 15, maxDiscount: 200 });
       showToast('Welcome code applied! (15% OFF)');
     } else {
-      setPromoError('Invalid coupon code. Try GYANaM20 for 20% off.');
+      setPromoError('Invalid coupon code. Try GYANM20 for 20% off.');
     }
   };
 
@@ -358,7 +358,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
       setRequestExam('');
       setRequestEmail('');
       setRequestSubmitted(false);
-      showToast('Book request submitted to Gyanam Publishing cell!');
+      showToast('Book request submitted to Gyanm Publishing cell!');
     }, 3000);
   };
 
@@ -440,7 +440,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
         </div>
         <div className="hidden md:flex items-center gap-2 text-amber-200">
           <span>•</span>
-          <span>Use Code <strong className="bg-amber-400 text-red-950 px-1.5 py-0.5 rounded font-black">GYANaM20</strong> for 20% OFF</span>
+          <span>Use Code <strong className="bg-amber-400 text-red-950 px-1.5 py-0.5 rounded font-black">GYANM20</strong> for 20% OFF</span>
         </div>
         <span className="bg-emerald-400 text-slate-950 px-1.5 sm:px-2 py-0.5 rounded-full text-[8.5px] sm:text-[10px] font-black uppercase tracking-wider shrink-0 whitespace-nowrap">
           100% <span className="hidden xs:inline">Faculty </span>Certified
@@ -465,7 +465,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
               <ChevronRight className="w-3 h-3 opacity-60 shrink-0" />
               <span className="text-amber-300 font-extrabold flex items-center gap-1 truncate">
                 <ShoppingBag className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                <span className="hidden sm:inline">Gyanam Official</span> Bookstore
+                <span className="hidden sm:inline">Gyanm Official</span> Bookstore
               </span>
             </div>
 
@@ -501,7 +501,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
               
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-200 text-[10px] sm:text-[11px] font-black uppercase tracking-wider">
                 <Tag className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300" />
-                <span>GYANaM OFFICIAL EXAM BOOKSTORE</span>
+                <span>GYANM OFFICIAL EXAM BOOKSTORE</span>
               </div>
 
               <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
@@ -974,7 +974,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
                 <ShieldCheck className="w-4 h-4 text-red-600" /> 100% Genuine Publications
               </span>
               <p className="text-gray-600 leading-normal">
-                Directly published and printed by Gyanam Academic Wing. Includes ISBN verification.
+                Directly published and printed by Gyanm Academic Wing. Includes ISBN verification.
               </p>
             </div>
 
@@ -1176,7 +1176,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
                         <ShieldCheck className="w-4 h-4 text-red-600" /> 100% Genuine Publications
                       </span>
                       <p className="text-gray-600 leading-normal text-[10px]">
-                        Directly published and printed by Gyanam Academic Wing.
+                        Directly published and printed by Gyanm Academic Wing.
                       </p>
                     </div>
                   </div>
@@ -1266,7 +1266,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
                 <FileText className="w-12 h-12 text-red-300 mx-auto" />
                 <h3 className="text-lg font-black text-gray-900">No Books Match Your Selected Filters</h3>
                 <p className="text-xs text-gray-500 max-w-md mx-auto">
-                  Try adjusting your search keywords, price filter, or exam categories to discover available Gyanam books.
+                  Try adjusting your search keywords, price filter, or exam categories to discover available Gyanm books.
                 </p>
                 <button
                   onClick={() => {
@@ -1388,7 +1388,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
                           </p>
 
                           <div className="text-[10px] font-bold text-gray-500 flex items-center justify-between pt-1">
-                            <span>By {res.author || 'Gyanam Faculty'}</span>
+                            <span>By {res.author || 'Gyanm Faculty'}</span>
                             <span>{res.pagesCount || 150} Pages</span>
                           </div>
                         </div>
@@ -1474,7 +1474,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
                             <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">
                               {res.category}
                             </span>
-                            <span className="text-[11px] font-bold text-gray-500">By {res.author || 'Gyanam Faculty'}</span>
+                            <span className="text-[11px] font-bold text-gray-500">By {res.author || 'Gyanm Faculty'}</span>
                             <span className="text-[11px] font-black text-amber-600 flex items-center gap-1">
                               <Star className="w-3 h-3 fill-current text-amber-400" /> {res.rating}★
                             </span>
@@ -1720,7 +1720,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        placeholder="Promo code (e.g. GYANaM20)"
+                        placeholder="Promo code (e.g. GYANM20)"
                         value={promoInput}
                         onChange={(e) => setPromoInput(e.target.value)}
                         className="flex-1 px-3 py-1.5 text-xs font-bold uppercase bg-white border border-gray-200 rounded-xl focus:outline-none"
@@ -1805,7 +1805,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <ShoppingBag className="w-6 h-6 text-red-600" />
-                  <h3 className="text-xl font-black text-gray-900">Gyanam Bookstore Checkout</h3>
+                  <h3 className="text-xl font-black text-gray-900">Gyanm Bookstore Checkout</h3>
                 </div>
 
                 {/* Progress Steps */}
@@ -2125,7 +2125,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
                     </span>
                     <h3 className="text-2xl font-black text-gray-900 pt-2">Thank You For Your Order!</h3>
                     <p className="text-xs text-gray-600 max-w-sm mx-auto">
-                      Your books are being packaged at Gyanam Central Warehouse. A dispatch tracking SMS will be sent to <strong>{completedOrder.address.mobile}</strong>.
+                      Your books are being packaged at Gyanm Central Warehouse. A dispatch tracking SMS will be sent to <strong>{completedOrder.address.mobile}</strong>.
                     </p>
                   </div>
 
@@ -2188,7 +2188,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
               {/* Sticky Top Header */}
               <div className="flex items-center justify-between border-b border-gray-100 p-3.5 sm:px-8 sm:py-4 bg-white/95 backdrop-blur-sm z-20 shrink-0">
                 <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-extrabold text-gray-500 truncate">
-                  <span className="text-red-600 hover:underline cursor-pointer shrink-0" onClick={() => setPreviewResource(null)}>Gyanam Store</span>
+                  <span className="text-red-600 hover:underline cursor-pointer shrink-0" onClick={() => setPreviewResource(null)}>Gyanm Store</span>
                   <span>/</span>
                   <span className="text-gray-700 shrink-0">{previewResource.category}</span>
                   <span>/</span>
@@ -2245,7 +2245,7 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
                               {previewResource.badge || 'PRINT EDITION'}
                             </span>
                             <h3 className="text-xl font-black">{previewResource.title}</h3>
-                            <p className="text-xs text-red-200">By {previewResource.author || 'Gyanam Faculty'}</p>
+                            <p className="text-xs text-red-200">By {previewResource.author || 'Gyanm Faculty'}</p>
                           </div>
                         )}
 
@@ -2331,11 +2331,11 @@ export const StudyMaterialPage: React.FC<{ resources: FreeResource[] }> = ({ res
                       <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                         <div>
                           <span className="text-gray-400 font-bold block text-[10px] uppercase">Author / Faculty</span>
-                          <span className="font-extrabold text-gray-800">{previewResource.author || 'Gyanam Faculty'}</span>
+                          <span className="font-extrabold text-gray-800">{previewResource.author || 'Gyanm Faculty'}</span>
                         </div>
                         <div>
                           <span className="text-gray-400 font-bold block text-[10px] uppercase">Publisher</span>
-                          <span className="font-extrabold text-gray-800">{previewResource.publisher || 'Gyanam Academic Wing'}</span>
+                          <span className="font-extrabold text-gray-800">{previewResource.publisher || 'Gyanm Academic Wing'}</span>
                         </div>
                         <div>
                           <span className="text-gray-400 font-bold block text-[10px] uppercase">ISBN Number</span>

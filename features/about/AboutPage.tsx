@@ -65,7 +65,7 @@ export default function AboutPage() {
       experience: "14+ Years in Digital Pedagogy",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
       quote: "Technology must serve clarity, not complexity. We build tools that make every 15 minutes of study count.",
-      achievements: ["Architected GYANAM CBT Engine", "Pioneered TCS Pattern Mock Analytics"]
+      achievements: ["Architected GYANM CBT Engine", "Pioneered TCS Pattern Mock Analytics"]
     },
     {
       name: "Prof. Sunita Devi",
@@ -167,7 +167,7 @@ export default function AboutPage() {
               </h1>
 
               <p className="text-red-100/90 text-sm sm:text-base leading-relaxed max-w-2xl font-medium">
-                GYANAM  is India's premier government job training institution. Built on a foundation of exam-pattern precision, world-class faculty, and relentless student support, we have guided over <strong>45,000+ candidates</strong> into coveted positions in Banking, SSC, Railways, Defense, UPSC, and State Services.
+                GYANM  is India's premier government job training institution. Built on a foundation of exam-pattern precision, world-class faculty, and relentless student support, we have guided over <strong>45,000+ candidates</strong> into coveted positions in Banking, SSC, Railways, Defense, UPSC, and State Services.
               </p>
 
               {/* High Impact Key Numbers */}
@@ -215,7 +215,7 @@ export default function AboutPage() {
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border-2 border-white/20 group">
                 <img 
                   src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=800" 
-                  alt="GYANAM Live Classroom & " 
+                  alt="GYANM Live Classroom & " 
                   className="w-full h-[380px] object-cover group-hover:scale-105 transition duration-500"
                   referrerPolicy="no-referrer"
                 />
@@ -259,7 +259,7 @@ export default function AboutPage() {
             OUR FOUNDATION
           </span>
           <h2 className="font-heading text-2xl sm:text-3xl font-black text-[#1F1A1C]">
-            Why Aspirants Trust GYANAM 
+            Why Aspirants Trust GYANM 
           </h2>
           <p className="text-gray-600 text-xs sm:text-sm font-medium">
             We don't just teach subjects; we instill exam strategy, time management, and psychological readiness.
@@ -641,7 +641,7 @@ export default function AboutPage() {
               Ready to Clear Your Target Government Exam in 2026?
             </h2>
             <p className="text-red-100 text-xs sm:text-sm font-medium">
-              Join thousands of successful officers who transformed their careers with GYANAM 's structured mentorship and TCS mock test series.
+              Join thousands of successful officers who transformed their careers with GYANM 's structured mentorship and TCS mock test series.
             </p>
           </div>
 

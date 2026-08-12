@@ -1,5 +1,5 @@
 export const SITE = {
-  name: 'GYANAM Academy',
+  name: 'GYANM Academy',
   tagline: 'Government Jobs Made Easy',
   url: 'https://gyanam.in',
   twitterHandle: '@GyanamAcademy',

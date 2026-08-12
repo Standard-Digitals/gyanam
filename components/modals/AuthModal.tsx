@@ -114,7 +114,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                 <GyanamLogo className="w-full h-full" />
               </div>
               <h3 className="font-heading font-extrabold text-2xl text-white">
-                {mode === 'login' ? 'Welcome Back to Gyanam' : 'Start Your Prep Journey'}
+                {mode === 'login' ? 'Welcome Back to Gyanm' : 'Start Your Prep Journey'}
               </h3>
               <p className="text-white/80 text-xs mt-1">
                 Access Live Classes, TCS Mock Tests & Personalized Analytics
@@ -285,7 +285,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                   Authentication Successful!
                 </h4>
                 <p className="text-xs text-[#555555]">
-                  Redirecting to your Gyanam Student Learning Dashboard...
+                  Redirecting to your Gyanm Student Learning Dashboard...
                 </p>
               </div>
             )}

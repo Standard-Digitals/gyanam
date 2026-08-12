@@ -81,7 +81,7 @@ export default function ContactPage() {
       desc: "Get instant PDF syllabus, fee structure & notes on WhatsApp",
       value: "+91 9117 35 35 35",
       actionText: "Chat on WhatsApp",
-      actionHref: "https://wa.me/919117353535?text=Hi%20Gyanam%20Team,%20I%20want%20information%20about%20upcoming%20batches."
+      actionHref: "https://wa.me/919117353535?text=Hi%20Gyanm%20Team,%20I%20want%20information%20about%20upcoming%20batches."
     },
     {
       icon: <Mail className="w-6 h-6 text-[#C12223]" />,
@@ -156,7 +156,7 @@ export default function ContactPage() {
 
   const contactFaqs = [
     {
-      q: "How can I book a free demo class at a physical GYANaM center?",
+      q: "How can I book a free demo class at a physical GYANM center?",
       a: "You can fill out the inquiry form on this page or call our student helpline at +91 9117 34 34 34. Our academic counselors will schedule your free 2-day demo class at your preferred center."
     },
     {
@@ -200,7 +200,7 @@ export default function ContactPage() {
             </h1>
 
             <p className="text-red-100/90 text-sm sm:text-base leading-relaxed font-medium">
-              Have questions about batch timings, fee structures, book deliveries, or online test series? Reach out to our academic advisors or visit your nearest GYANaM branch.
+              Have questions about batch timings, fee structures, book deliveries, or online test series? Reach out to our academic advisors or visit your nearest GYANM branch.
             </p>
           </div>
 
@@ -414,7 +414,7 @@ export default function ContactPage() {
               </button>
 
               <p className="text-[11px] text-gray-400 font-medium text-center">
-                🔒 Your contact details are kept strictly confidential under GYANAM Privacy Guarantee.
+                🔒 Your contact details are kept strictly confidential under GYANM Privacy Guarantee.
               </p>
             </form>
           </div>
@@ -443,7 +443,7 @@ export default function ContactPage() {
               </p>
 
               <a
-                href="https://wa.me/919117353535?text=Hi%20Gyanam%20Team,%20I%20want%20information%20about%20upcoming%20batches."
+                href="https://wa.me/919117353535?text=Hi%20Gyanm%20Team,%20I%20want%20information%20about%20upcoming%20batches."
                 target="_blank"
                 rel="noreferrer"
                 className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
@@ -458,7 +458,7 @@ export default function ContactPage() {
               <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
                 <Building2 className="w-6 h-6 text-[#C12223]" />
                 <div>
-                  <h3 className="font-heading font-extrabold text-sm text-[#1F1A1C]">GYANAM National Head Office</h3>
+                  <h3 className="font-heading font-extrabold text-sm text-[#1F1A1C]">GYANM National Head Office</h3>
                   <p className="text-[11px] text-gray-500 font-medium">Chandigarh Educational Hub</p>
                 </div>
               </div>
@@ -516,7 +516,7 @@ export default function ContactPage() {
               ACADEMY BRANCH DIRECTORY
             </span>
             <h2 className="font-heading text-2xl sm:text-3xl font-black text-[#1F1A1C]">
-              Find a GYANAM Center Near You
+              Find a GYANM Center Near You
             </h2>
             <p className="text-gray-600 text-xs sm:text-sm font-medium">
               Walk into any of our centers to speak with senior faculty members and inspect our CBT computer labs.

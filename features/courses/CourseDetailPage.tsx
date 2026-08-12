@@ -115,8 +115,8 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   const [isPlayingDemo, setIsPlayingDemo] = useState<boolean>(false);
 
   // Coupon Engine State
-  const [couponInput, setCouponInput] = useState<string>('GYANAM2026');
-  const [appliedCoupon, setAppliedCoupon] = useState<string | null>('GYANAM2026');
+  const [couponInput, setCouponInput] = useState<string>('GYANM2026');
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>('GYANM2026');
   const [couponMessage, setCouponMessage] = useState<string>('🎉 Early Bird Discount Applied! Extra 10% Off.');
 
   // Open Module Accordions
@@ -148,12 +148,12 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
     const code = couponInput.toUpperCase().trim();
-    if (code === 'GYANAM2026' || code === 'OFFICER20' || code === 'ASSAM10') {
+    if (code === 'GYANM2026' || code === 'OFFICER20' || code === 'ASSAM10') {
       setAppliedCoupon(code);
       setCouponMessage(`🎉 Coupon "${code}" Applied Successfully! 10% Discount added.`);
     } else {
       setAppliedCoupon(null);
-      setCouponMessage('❌ Invalid Coupon Code. Try using GYANAM2026.');
+      setCouponMessage('❌ Invalid Coupon Code. Try using GYANM2026.');
     }
   };
 
@@ -686,7 +686,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
 
                   <div className="p-4 bg-[#FFF5F5] rounded-2xl border border-[#F3DCDD] space-y-1">
                     <h5 className="font-bold text-sm text-[#1F1A1C]">Can I watch recorded lectures offline on mobile?</h5>
-                    <p className="text-[#555555] leading-relaxed">Yes, the GYANAM Android app allows 1-click encrypted offline downloads so you can study without internet.</p>
+                    <p className="text-[#555555] leading-relaxed">Yes, the GYANM Android app allows 1-click encrypted offline downloads so you can study without internet.</p>
                   </div>
 
                   <div className="p-4 bg-[#FFF5F5] rounded-2xl border border-[#F3DCDD] space-y-1">

@@ -39,7 +39,7 @@ export const MobileApp: React.FC = () => {
 
             <h2 className="font-heading font-black text-3xl sm:text-5xl text-white tracking-tight leading-tight">
               Download the Official <br />
-              <span className="gradient-text font-black">Gyanam Mobile App</span>
+              <span className="gradient-text font-black">Gyanm Mobile App</span>
             </h2>
 
             <p className="text-sm sm:text-base text-red-100 max-w-xl font-normal leading-relaxed">
@@ -112,7 +112,7 @@ export const MobileApp: React.FC = () => {
                   <div className="flex items-center justify-between pb-3 border-b border-[#F3DCDD] mb-3">
                     <div className="flex items-center gap-1.5">
                       <GyanamLogo className="w-5 h-5" />
-                      <span className="font-heading font-black text-sm text-[#C12223]">GYANAM App</span>
+                      <span className="font-heading font-black text-sm text-[#C12223]">GYANM App</span>
                     </div>
                     <span className="text-[10px] font-bold text-[#27AE60] bg-[#27AE60]/10 px-2 py-0.5 rounded">ONLINE</span>
                   </div>
