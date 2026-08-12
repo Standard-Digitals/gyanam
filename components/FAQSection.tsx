@@ -30,7 +30,7 @@ export const FAQSection: React.FC<{ faqs: FAQItem[] }> = ({ faqs }) => {
             Frequently Asked Questions
           </h2>
           <p className="text-sm text-[#555555] mt-2">
-            Got questions regarding GYANM courses, mock tests or batches? We’re here to help.
+            Got questions regarding GYANAM courses, mock tests or batches? We’re here to help.
           </p>
         </div>
 
@@ -105,7 +105,7 @@ export const FAQSection: React.FC<{ faqs: FAQItem[] }> = ({ faqs }) => {
             Need More Specific Help or Order Tracking?
           </h4>
           <p className="text-xs text-[#555555]">
-            Call GYANM Student Helpdesk directly at <a href="tel:919117343434" className="font-bold text-[#C12223]">9117 34 34 34</a> or open our full interactive resolution desk.
+            Call GYANAM Student Helpdesk directly at <a href="tel:919117343434" className="font-bold text-[#C12223]">9117 34 34 34</a> or open our full interactive resolution desk.
           </p>
           <div className="pt-1">
             <a

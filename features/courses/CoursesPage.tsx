@@ -103,11 +103,11 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
   // Coupon Applier
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
-    if (couponInput.toUpperCase() === 'GYANM2026' || couponInput.toUpperCase() === 'OFFICER20') {
+    if (couponInput.toUpperCase() === 'GYANAM2026' || couponInput.toUpperCase() === 'OFFICER20') {
       setAppliedCoupon(couponInput.toUpperCase());
       setCouponMsg('🎉 Coupon applied! Extra 10% discount added to all fees.');
     } else {
-      setCouponMsg('❌ Invalid Coupon Code. Try using GYANM2026.');
+      setCouponMsg('❌ Invalid Coupon Code. Try using GYANAM2026.');
     }
   };
 
@@ -158,7 +158,7 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
           <div className="space-y-2 max-w-3xl">
             <span className="px-3 py-1 bg-red-500/20 text-red-200 border border-red-500/30 text-[11px] font-black uppercase rounded-full tracking-wider inline-flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Official GYANM Course Directory</span>
+              <span>Official GYANAM Course Directory</span>
             </span>
             <h1 className="font-heading font-black text-3xl sm:text-5xl text-white tracking-tight">
               All Target Government Exam Batches
@@ -234,7 +234,7 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
                 <Tag className="w-3.5 h-3.5" /> Early Bird Student Discount
               </span>
               <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded border border-emerald-200">
-                Code: GYANM2026
+                Code: GYANAM2026
               </span>
             </div>
 
@@ -243,7 +243,7 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
                 type="text"
                 value={couponInput}
                 onChange={(e) => setCouponInput(e.target.value)}
-                placeholder="Enter GYANM2026"
+                placeholder="Enter GYANAM2026"
                 className="px-3 py-1.5 bg-white border border-[#F3DCDD] rounded-xl text-xs font-bold uppercase focus:outline-none focus:border-[#C12223] flex-1 text-[#1F1A1C]"
               />
               <button
@@ -650,7 +650,7 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
           <div className="space-y-1">
             <span className="text-xs font-black uppercase text-[#C12223] tracking-wider flex items-center gap-1.5">
               <HelpCircle className="w-4 h-4" />
-              <span>Got Questions About GYANM Batches?</span>
+              <span>Got Questions About GYANAM Batches?</span>
             </span>
             <h3 className="font-heading font-black text-2xl text-[#1F1A1C]">
               Frequently Asked Course Admission Questions
@@ -661,7 +661,7 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
             <div className="p-4 bg-[#FFF5F5] rounded-2xl border border-[#F3DCDD] space-y-1.5">
               <h5 className="font-bold text-sm text-[#1F1A1C]">1. How do I join the daily live classes?</h5>
               <p className="text-[#555555] leading-relaxed">
-                Classes are broadcast live via the official GYANM Android / Web app. You get instant access to live chat with faculty to ask doubts during lectures.
+                Classes are broadcast live via the official GYANAM Android / Web app. You get instant access to live chat with faculty to ask doubts during lectures.
               </p>
             </div>
 

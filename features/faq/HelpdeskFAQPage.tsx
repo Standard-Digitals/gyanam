@@ -33,11 +33,11 @@ const EXTENDED_FAQS: ExpandedFAQ[] = [
   {
     id: 'faq-1',
     category: 'Admissions & Batches',
-    question: 'Why is GYANM Academy considered India\'s premier government exam preparation portal?',
-    answer: 'GYANM combines over 14 years of offline classroom heritage with state-of-the-art digital learning: 100% TCS-pattern mock test engines, author-written printed study materials, daily current affairs compendiums, and personal 1-on-1 mentorship from top rankers and ex-government officers.',
+    question: 'Why is GYANAM Academy considered India\'s premier government exam preparation portal?',
+    answer: 'GYANAM combines over 14 years of offline classroom heritage with state-of-the-art digital learning: 100% TCS-pattern mock test engines, author-written printed study materials, daily current affairs compendiums, and personal 1-on-1 mentorship from top rankers and ex-government officers.',
     popular: true,
     helpfulCount: 482,
-    tags: ['about gyanm', 'reputation', 'results']
+    tags: ['about gyanam', 'reputation', 'results']
   },
   {
     id: 'faq-2',
@@ -52,7 +52,7 @@ const EXTENDED_FAQS: ExpandedFAQ[] = [
     id: 'faq-3',
     category: 'Admissions & Batches',
     question: 'Are live classes interactive? What happens if I miss a live class session?',
-    answer: 'Yes! All live online sessions feature real-time two-way voice and chat doubt clarification with senior faculty. If you miss a live class, complete 4K HD recorded backup videos are automatically uploaded to your GYANM App account within 2 hours, alongside downloadable class PDF annotations.',
+    answer: 'Yes! All live online sessions feature real-time two-way voice and chat doubt clarification with senior faculty. If you miss a live class, complete 4K HD recorded backup videos are automatically uploaded to your GYANAM App account within 2 hours, alongside downloadable class PDF annotations.',
     popular: true,
     helpfulCount: 512,
     tags: ['live class', 'recorded backup', 'missed class']
@@ -71,7 +71,7 @@ const EXTENDED_FAQS: ExpandedFAQ[] = [
   {
     id: 'faq-5',
     category: 'Mobile App & Web',
-    question: 'Can I access my GYANM courses on both Android, iOS, and Laptop Web browsers?',
+    question: 'Can I access my GYANAM courses on both Android, iOS, and Laptop Web browsers?',
     answer: 'Absolutely! Single account login works seamlessly across Android phones/tablets, iPhones/iPads, and Desktop Web Browsers. Your video watch history, bookmarked test questions, and quiz progress sync instantly across devices.',
     popular: true,
     helpfulCount: 620,
@@ -80,8 +80,8 @@ const EXTENDED_FAQS: ExpandedFAQ[] = [
   {
     id: 'faq-6',
     category: 'Mobile App & Web',
-    question: 'What should I do if videos buffer or fail to play on the GYANM App?',
-    answer: '1. Ensure your GYANM Mobile App is updated to the latest version from Play Store / App Store.\n2. In the video player settings, lower the video resolution from 1080p to 480p or Auto.\n3. Try clearing the app cache via App Settings > Storage > Clear Cache.\n4. If the issue persists, download the lecture for offline viewing within the app.',
+    question: 'What should I do if videos buffer or fail to play on the GYANAM App?',
+    answer: '1. Ensure your GYANAM Mobile App is updated to the latest version from Play Store / App Store.\n2. In the video player settings, lower the video resolution from 1080p to 480p or Auto.\n3. Try clearing the app cache via App Settings > Storage > Clear Cache.\n4. If the issue persists, download the lecture for offline viewing within the app.',
     popular: true,
     helpfulCount: 410,
     tags: ['video playback', 'buffering', 'app update', 'cache']
@@ -90,7 +90,7 @@ const EXTENDED_FAQS: ExpandedFAQ[] = [
     id: 'faq-7',
     category: 'Mobile App & Web',
     question: 'How do I download lecture notes and class PDF study files?',
-    answer: 'Inside any course section on the GYANM App or Web Portal, open the specific lecture or topic card and click the "Download PDF" icon located below the video player. Downloaded PDFs can be viewed offline or printed.',
+    answer: 'Inside any course section on the GYANAM App or Web Portal, open the specific lecture or topic card and click the "Download PDF" icon located below the video player. Downloaded PDFs can be viewed offline or printed.',
     popular: false,
     helpfulCount: 275,
     tags: ['pdf download', 'notes', 'study material']
@@ -100,7 +100,7 @@ const EXTENDED_FAQS: ExpandedFAQ[] = [
   {
     id: 'faq-8',
     category: 'Mock Test Engine',
-    question: 'Do GYANM Mock Tests accurately replicate the official TCS exam UI?',
+    question: 'Do GYANAM Mock Tests accurately replicate the official TCS exam UI?',
     answer: '100% Yes. Our mock test engine matches the exact color palette, question status palette (Answered, Not Answered, Marked for Review), countdown timers, section switching logic, and keyboard shortcuts used by SSC, RRB Railways, and Banking TCS exam centers.',
     popular: true,
     helpfulCount: 780,
@@ -129,7 +129,7 @@ const EXTENDED_FAQS: ExpandedFAQ[] = [
   {
     id: 'faq-11',
     category: 'Books & Delivery',
-    question: 'How many days does it take to deliver printed GYANM textbooks to my home?',
+    question: 'How many days does it take to deliver printed GYANAM textbooks to my home?',
     answer: 'Printed book orders are dispatched via Express Courier (BlueDart / DTDC / SpeedPost) within 24 hours of purchase. Delivery timelines: Metro cities (2–3 working days), Tier 2/3 towns & Northeast India (4–6 working days). You will receive an SMS and WhatsApp tracking link.',
     popular: true,
     helpfulCount: 590,
@@ -139,7 +139,7 @@ const EXTENDED_FAQS: ExpandedFAQ[] = [
     id: 'faq-12',
     category: 'Books & Delivery',
     question: 'What if I receive a damaged book or misprinted pages?',
-    answer: 'GYANM guarantees a 100% free doorstep replacement. Simply snap 2 clear photos of the damaged cover or misprinted pages and submit a ticket here or message our WhatsApp Helpdesk (+91 9117 35 35 35). Replacement copy is dispatched within 24 hours.',
+    answer: 'GYANAM guarantees a 100% free doorstep replacement. Simply snap 2 clear photos of the damaged cover or misprinted pages and submit a ticket here or message our WhatsApp Helpdesk (+91 9117 35 35 35). Replacement copy is dispatched within 24 hours.',
     popular: false,
     helpfulCount: 185,
     tags: ['damaged book', 'replacement', 'misprint']
@@ -149,7 +149,7 @@ const EXTENDED_FAQS: ExpandedFAQ[] = [
   {
     id: 'faq-13',
     category: 'Payment & EMI',
-    question: 'Which payment options are supported on GYANM? Is No-Cost EMI available?',
+    question: 'Which payment options are supported on GYANAM? Is No-Cost EMI available?',
     answer: 'We accept UPI (GPay, PhonePe, Paytm), All Bank Credit/Debit Cards, NetBanking, and Wallet payments. For flagship long-duration courses, 0% Interest No-Cost EMI is available on major credit cards and Bajaj Finserv EMI cards.',
     popular: true,
     helpfulCount: 440,
@@ -159,7 +159,7 @@ const EXTENDED_FAQS: ExpandedFAQ[] = [
     id: 'faq-14',
     category: 'Payment & EMI',
     question: 'Money was deducted from my account but the course is not unlocked yet. What should I do?',
-    answer: 'Usually bank servers update transaction status within 5 to 15 minutes. If your course is still locked after 15 minutes, please submit your UPI Reference / Bank UTR Number via the Ticket Form below or email payments@gyanm.co.in. Our team will verify and activate your course instantly.',
+    answer: 'Usually bank servers update transaction status within 5 to 15 minutes. If your course is still locked after 15 minutes, please submit your UPI Reference / Bank UTR Number via the Ticket Form below or email payments@gyanam.co.in. Our team will verify and activate your course instantly.',
     popular: true,
     helpfulCount: 670,
     tags: ['payment failure', 'money deducted', 'course activation']
@@ -168,7 +168,7 @@ const EXTENDED_FAQS: ExpandedFAQ[] = [
     id: 'faq-15',
     category: 'Payment & EMI',
     question: 'How can I download my GST Fee Payment Receipt / Tax Invoice?',
-    answer: 'Log into your GYANM App or Web account, go to "My Profile" > "Purchase History" > click "Download GST Invoice". A PDF receipt with full fee breakdown will be saved to your device.',
+    answer: 'Log into your GYANAM App or Web account, go to "My Profile" > "Purchase History" > click "Download GST Invoice". A PDF receipt with full fee breakdown will be saved to your device.',
     popular: false,
     helpfulCount: 310,
     tags: ['fee receipt', 'gst invoice', 'tax receipt']
@@ -178,8 +178,8 @@ const EXTENDED_FAQS: ExpandedFAQ[] = [
   {
     id: 'faq-16',
     category: 'State Exams & Regional',
-    question: 'Does GYANM offer dedicated state exam prep for Assam (ADRE/APSC) and Punjab (Patwari/PPSC)?',
-    answer: 'Yes! GYANM operates dedicated regional content wings. We offer bilingual Assamese/English courses for Assam ADRE 3.0 & APSC, as well as Punjabi/English courses for Punjab Patwari, PPSC, and Punjab Police, prepared by native expert faculty.',
+    question: 'Does GYANAM offer dedicated state exam prep for Assam (ADRE/APSC) and Punjab (Patwari/PPSC)?',
+    answer: 'Yes! GYANAM operates dedicated regional content wings. We offer bilingual Assamese/English courses for Assam ADRE 3.0 & APSC, as well as Punjabi/English courses for Punjab Patwari, PPSC, and Punjab Police, prepared by native expert faculty.',
     popular: true,
     helpfulCount: 520,
     tags: ['assam adre', 'punjab patwari', 'regional language', 'apsc']
@@ -248,7 +248,7 @@ export default function HelpdeskFAQPage() {
 
   // Copy FAQ answer
   const handleCopyAnswer = (faq: ExpandedFAQ) => {
-    const textToCopy = `Q: ${faq.question}\n\nA: ${faq.answer}\n\nRead more at GYANM Student Helpdesk: https://gyanm.co.in/helpdesk`;
+    const textToCopy = `Q: ${faq.question}\n\nA: ${faq.answer}\n\nRead more at GYANAM Student Helpdesk: https://gyanam.co.in/helpdesk`;
     navigator.clipboard.writeText(textToCopy);
     setCopiedFaqId(faq.id);
     setTimeout(() => setCopiedFaqId(null), 2000);
@@ -282,7 +282,7 @@ export default function HelpdeskFAQPage() {
     if (!quickActionInput) return;
 
     if (activeQuickAction === 'reset') {
-      setQuickActionResult(`GYANM login uses mobile OTP, not a password — there's nothing to reset. Just enter your mobile number and OTP each time to log in.`);
+      setQuickActionResult(`GYANAM login uses mobile OTP, not a password — there's nothing to reset. Just enter your mobile number and OTP each time to log in.`);
       return;
     }
 
@@ -329,7 +329,7 @@ export default function HelpdeskFAQPage() {
             
             <div className="inline-flex items-center gap-2 bg-amber-400 text-red-950 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-400/20">
               <LifeBuoy className="w-4 h-4 text-red-800 animate-spin" style={{ animationDuration: '8s' }} />
-              <span>GYANM Student Resolution Desk • 24/7 Knowledge Base</span>
+              <span>GYANAM Student Resolution Desk • 24/7 Knowledge Base</span>
             </div>
 
             <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-[1.15] tracking-tight">
@@ -737,7 +737,7 @@ export default function HelpdeskFAQPage() {
               <p className="text-xs text-gray-500 font-medium">Get PDF syllabus, fee receipts & order tracking on WhatsApp.</p>
               <div className="text-lg font-black text-emerald-700 font-mono">+91 9117 35 35 35</div>
               <a
-                href="https://wa.me/919117353535?text=Hi%20Gyanm%20Helpdesk,%20I%20need%20assistance%20with%20my%20account."
+                href="https://wa.me/919117353535?text=Hi%20Gyanam%20Helpdesk,%20I%20need%20assistance%20with%20my%20account."
                 target="_blank"
                 rel="noreferrer"
                 className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-2 cursor-pointer"
@@ -753,9 +753,9 @@ export default function HelpdeskFAQPage() {
               </div>
               <h3 className="font-heading font-black text-base text-gray-900">Email & Grievance Cell</h3>
               <p className="text-xs text-gray-500 font-medium">For official course invoices, corporate inquiries & escalations.</p>
-              <div className="text-xs font-black text-gray-800 font-mono">support@gyanm.co.in</div>
+              <div className="text-xs font-black text-gray-800 font-mono">support@gyanam.co.in</div>
               <a
-                href="mailto:support@gyanm.co.in"
+                href="mailto:support@gyanam.co.in"
                 className="w-full py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Mail className="w-4 h-4" />
@@ -787,7 +787,7 @@ export default function HelpdeskFAQPage() {
 
               <h3 className="font-heading font-black text-lg text-gray-900">
                 {activeQuickAction === 'order' && 'Track Book Order Status'}
-                {activeQuickAction === 'reset' && 'Reset GYANM App Password'}
+                {activeQuickAction === 'reset' && 'Reset GYANAM App Password'}
                 {activeQuickAction === 'receipt' && 'Download Fee Receipt'}
               </h3>
 
@@ -863,7 +863,7 @@ export default function HelpdeskFAQPage() {
                     Our student support executive will review your ticket and reach out via call / WhatsApp within <strong>2 to 4 hours</strong>.
                   </p>
                   <a
-                    href={`https://wa.me/919117353535?text=Hi%20Gyanm%20Team,%20I%20created%20support%20ticket%20${generatedTicketRef}.%20Please%20check.`}
+                    href={`https://wa.me/919117353535?text=Hi%20Gyanam%20Team,%20I%20created%20support%20ticket%20${generatedTicketRef}.%20Please%20check.`}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase rounded-xl transition shadow-md"
