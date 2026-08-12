@@ -1,7 +1,13 @@
 'use client';
-import { CourseDetailPage } from '@/features/courses/CourseDetailPage';
+import { CourseDetailPage, type CurriculumChapter } from '@/features/courses/CourseDetailPage';
 import type { Course } from '@/types';
 
-export default function CourseDetailClient({ course, relatedCourses }: { course: Course; relatedCourses: Course[] }) {
-  return <CourseDetailPage course={course} relatedCourses={relatedCourses} />;
+interface Props {
+  course: Course;
+  relatedCourses: Course[];
+  curriculum: CurriculumChapter[];
+}
+
+export default function CourseDetailClient({ course, relatedCourses, curriculum }: Props) {
+  return <CourseDetailPage course={course} relatedCourses={relatedCourses} curriculum={curriculum} />;
 }

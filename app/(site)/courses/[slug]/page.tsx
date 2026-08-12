@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getCourseBySlug, getRelatedCourses, getAllCourseSlugs } from '@/lib/data/courses';
+import { getCourseCurriculum } from '@/lib/data/curriculum';
 import { buildMetadata } from '@/lib/metadata';
 import CourseDetailClient from './CourseDetailClient';
 
@@ -33,5 +34,6 @@ export default async function Page({ params }: Props) {
   const course = await getCourseBySlug(slug);
   if (!course) notFound();
   const relatedCourses = await getRelatedCourses(course.id);
-  return <CourseDetailClient course={course} relatedCourses={relatedCourses} />;
+  const curriculum = await getCourseCurriculum(course.id);
+  return <CourseDetailClient course={course} relatedCourses={relatedCourses} curriculum={curriculum} />;
 }

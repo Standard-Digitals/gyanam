@@ -32,3 +32,6 @@ tsconfig.tsbuildinfo
 # Editor
 .vscode/
 .idea/
+
+# User-uploaded lecture videos (VPS-local, not part of source)
+public/uploads/

@@ -11,9 +11,24 @@ import {
   MessageSquare, UserCheck, AlertCircle, RefreshCw
 } from 'lucide-react';
 
+export interface CurriculumTopic {
+  id: string;
+  title: string;
+  videoType: string;
+  videoUrl: string | null;
+  duration: string | null;
+}
+
+export interface CurriculumChapter {
+  id: string;
+  title: string;
+  topics: CurriculumTopic[];
+}
+
 interface CourseDetailPageProps {
   course: Course;
   relatedCourses: Course[];
+  curriculum?: CurriculumChapter[];
   onBackToCourses?: () => void;
   onBackToHome?: () => void;
   onSelectCourseBySlug?: (slug: string) => void;
@@ -21,9 +36,16 @@ interface CourseDetailPageProps {
   onOpenMentorship?: () => void;
 }
 
+function getYouTubeEmbedUrl(url: string): string {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]+)/);
+  const videoId = match ? match[1] : '';
+  return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+}
+
 export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   course,
   relatedCourses,
+  curriculum = [],
   onBackToCourses,
   onBackToHome,
   onSelectCourseBySlug,
@@ -62,6 +84,13 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
 
   // Open Module Accordions
   const [expandedModules, setExpandedModules] = useState<number[]>([0]);
+
+  // Real Curriculum Lecture Player
+  const [expandedChapters, setExpandedChapters] = useState<string[]>(curriculum[0] ? [curriculum[0].id] : []);
+  const [playingTopic, setPlayingTopic] = useState<CurriculumTopic | null>(null);
+  const toggleChapter = (id: string) => {
+    setExpandedChapters((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
+  };
 
   // Toast Notification for Brochure Download
   const [downloadToast, setDownloadToast] = useState<string | null>(null);
@@ -418,6 +447,52 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                     <Download className="w-4 h-4" /> Download PDF Syllabus
                   </button>
                 </div>
+
+                {/* Real Recorded/Live Lecture Curriculum */}
+                {curriculum.length > 0 && (
+                  <div className="space-y-4 border-b border-[#F3DCDD] pb-6 mb-2">
+                    <h4 className="font-heading font-black text-lg text-[#1F1A1C] flex items-center gap-2">
+                      <Video className="w-5 h-5 text-[#C12223]" /> Course Lectures
+                    </h4>
+                    {curriculum.map((chapter) => {
+                      const isOpen = expandedChapters.includes(chapter.id);
+                      return (
+                        <div key={chapter.id} className="border border-[#F3DCDD] rounded-2xl overflow-hidden">
+                          <button
+                            onClick={() => toggleChapter(chapter.id)}
+                            className={`w-full p-4 flex items-center justify-between text-left font-extrabold text-sm cursor-pointer transition ${
+                              isOpen ? 'bg-[#FFF5F5] text-[#C12223]' : 'bg-white text-[#1F1A1C] hover:bg-gray-50'
+                            }`}
+                          >
+                            <span>{chapter.title}</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180 text-[#C12223]' : 'text-gray-400'}`} />
+                          </button>
+                          {isOpen && (
+                            <div className="p-4 bg-white border-t border-[#F3DCDD] space-y-2">
+                              {chapter.topics.map((topic) => (
+                                <button
+                                  key={topic.id}
+                                  onClick={() => topic.videoUrl && setPlayingTopic(topic)}
+                                  disabled={!topic.videoUrl}
+                                  className="w-full flex items-center justify-between p-3 bg-[#FFF5F5] rounded-xl border border-[#F3DCDD] text-xs font-semibold text-[#1F1A1C] hover:border-[#C12223] transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <span className="flex items-center gap-2">
+                                    <PlayCircle className="w-4 h-4 text-[#C12223] shrink-0" />
+                                    {topic.title}
+                                  </span>
+                                  {topic.duration && <span className="text-[10px] text-[#888888]">{topic.duration}</span>}
+                                </button>
+                              ))}
+                              {chapter.topics.length === 0 && (
+                                <p className="text-xs text-[#888888] italic">No lectures added yet.</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Modules Accordion */}
                 <div className="space-y-4">
@@ -795,6 +870,43 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
         </div>
 
       </section>
+
+      {/* Curriculum Lecture Video Player Modal */}
+      <AnimatePresence>
+        {playingTopic && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-3xl bg-black rounded-2xl overflow-hidden shadow-2xl relative"
+            >
+              <div className="flex items-center justify-between p-3 bg-gray-900 text-white">
+                <span className="text-sm font-bold truncate pr-4">{playingTopic.title}</span>
+                <button
+                  onClick={() => setPlayingTopic(null)}
+                  className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold shrink-0 cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+              <div className="aspect-video bg-black">
+                {playingTopic.videoUrl && playingTopic.videoType === 'youtube' ? (
+                  <iframe
+                    src={getYouTubeEmbedUrl(playingTopic.videoUrl)}
+                    title={playingTopic.title}
+                    className="w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : playingTopic.videoUrl ? (
+                  <video src={playingTopic.videoUrl} controls autoPlay className="w-full h-full" />
+                ) : null}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

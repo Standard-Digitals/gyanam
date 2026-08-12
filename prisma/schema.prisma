@@ -308,3 +308,26 @@ model SupportTicket {
   @@index([phone])
   @@index([createdAt])
 }
+
+model Chapter {
+  id        String   @id @default(cuid())
+  courseId  String
+  title     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([courseId])
+}
+
+model Topic {
+  id        String   @id @default(cuid())
+  chapterId String
+  title     String
+  order     Int      @default(0)
+  videoType String
+  videoUrl  String?
+  duration  String?
+  createdAt DateTime @default(now())
+
+  @@index([chapterId])
+}

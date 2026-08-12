@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 
 interface Course {
   id: string;
@@ -269,6 +270,7 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
               <p className="text-xs text-[#555555] mt-1">{c.instructor.name} — {c.instructor.designation}</p>
             </div>
             <div className="flex gap-2 shrink-0">
+              <Link href={`/admin/courses/${c.id}/curriculum`} className="px-3 py-1.5 bg-[#FFF5F5] text-[#C12223] font-bold text-xs rounded-lg cursor-pointer border border-[#C12223]/20">Curriculum</Link>
               <button onClick={() => startEdit(c)} className="px-3 py-1.5 bg-gray-100 text-gray-700 font-bold text-xs rounded-lg cursor-pointer">Edit</button>
               <button onClick={() => handleDelete(c.id)} className="px-3 py-1.5 bg-red-50 text-red-600 font-bold text-xs rounded-lg cursor-pointer">Delete</button>
             </div>
