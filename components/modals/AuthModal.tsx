@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { X, Phone, Lock, ArrowRight, ShieldCheck, CheckCircle2, Sparkles } from 'lucide-react';
@@ -17,6 +17,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
   const [step, setStep] = useState<'phone' | 'otp' | 'success'>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState(['', '', '', '']);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [targetExam, setTargetExam] = useState('SSC CGL');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -222,14 +223,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                   {[0, 1, 2, 3].map(idx => (
                     <input
                       key={idx}
+                      ref={el => { otpInputRefs.current[idx] = el; }}
                       type="text"
+                      inputMode="numeric"
                       maxLength={1}
                       value={otp[idx]}
                       onChange={e => {
-                        const val = e.target.value;
+                        const val = e.target.value.replace(/\D/g, '').slice(-1);
                         const newOtp = [...otp];
                         newOtp[idx] = val;
                         setOtp(newOtp);
+                        if (val && idx < 3) {
+                          otpInputRefs.current[idx + 1]?.focus();
+                        }
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
+                          otpInputRefs.current[idx - 1]?.focus();
+                        }
+                      }}
+                      onPaste={e => {
+                        const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
+                        if (!pasted) return;
+                        e.preventDefault();
+                        const newOtp = ['', '', '', ''];
+                        for (let i = 0; i < pasted.length; i++) newOtp[i] = pasted[i];
+                        setOtp(newOtp);
+                        otpInputRefs.current[Math.min(pasted.length, 3)]?.focus();
                       }}
                       className="w-12 h-14 text-center font-bold text-xl bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl focus:outline-none focus:border-[#C12223] focus:ring-2 focus:ring-[#C12223]/20"
                     />
