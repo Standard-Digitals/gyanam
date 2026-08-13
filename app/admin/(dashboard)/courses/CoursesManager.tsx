@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { Star, Users, PlayCircle } from 'lucide-react';
 
@@ -80,11 +80,17 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
   const [form, setForm] = useState(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+
+  const scrollToForm = () => {
+    setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+  };
 
   const startCreate = () => {
     setEditingId('new');
     setForm(EMPTY_FORM);
     setError(null);
+    scrollToForm();
   };
 
   const startEdit = (c: Course) => {
@@ -113,6 +119,7 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
       startDate: c.startDate,
     });
     setError(null);
+    scrollToForm();
   };
 
   const cancelEdit = () => {
@@ -179,11 +186,15 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this course?')) return;
+    const previous = courses;
     setCourses((prev) => prev.filter((c) => c.id !== id));
     try {
-      await fetch(`/api/admin/courses/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/courses/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Server rejected the delete request');
     } catch (err) {
       console.error('Failed to delete course', err);
+      setCourses(previous);
+      alert('Could not delete this course. Please try again.');
     }
   };
 
@@ -202,7 +213,7 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
       </div>
 
       {editingId !== null && (
-        <div className="bg-white p-5 rounded-2xl border border-[#F3DCDD] shadow-sm space-y-3 max-h-[70vh] overflow-y-auto">
+        <div ref={formRef} className="bg-white p-5 rounded-2xl border border-[#F3DCDD] shadow-sm space-y-3 max-h-[70vh] overflow-y-auto">
           <div className="grid grid-cols-2 gap-3">
             <input type="text" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
             <input type="text" placeholder="Slug (auto if blank)" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
