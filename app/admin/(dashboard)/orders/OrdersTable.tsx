@@ -18,19 +18,19 @@ interface Order {
 const STATUS_OPTIONS = ['PLACED', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
 const STATUS_COLORS: Record<string, string> = {
-  PLACED: 'bg-amber-100 text-amber-800',
+  PLACED: 'bg-[#FBF0DF] text-[#B4590A]',
   CONFIRMED: 'bg-blue-100 text-blue-800',
   SHIPPED: 'bg-purple-100 text-purple-800',
-  DELIVERED: 'bg-emerald-100 text-emerald-800',
-  CANCELLED: 'bg-gray-100 text-gray-600',
+  DELIVERED: 'bg-[#E7F5EE] text-[#127A52]',
+  CANCELLED: 'bg-[#F3EBEA] text-[#8A7A7B]',
 };
 
 const STATUS_DOTS: Record<string, string> = {
-  PLACED: 'bg-amber-500',
+  PLACED: 'bg-[#B4590A]',
   CONFIRMED: 'bg-blue-500',
   SHIPPED: 'bg-purple-500',
-  DELIVERED: 'bg-emerald-500',
-  CANCELLED: 'bg-gray-400',
+  DELIVERED: 'bg-[#127A52]',
+  CANCELLED: 'bg-[#B7A9A9]',
 };
 
 export default function OrdersTable({ orders: initialOrders }: { orders: Order[] }) {

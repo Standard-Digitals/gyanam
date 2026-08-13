@@ -22,8 +22,8 @@ export function PageHeader({
 
 const ACCENTS: Record<string, { bar: string; chip: string; icon: string }> = {
   red: { bar: 'bg-[#C12223]', chip: 'bg-[#FDEAEA]', icon: 'text-[#C12223]' },
-  amber: { bar: 'bg-amber-500', chip: 'bg-amber-50', icon: 'text-amber-600' },
-  emerald: { bar: 'bg-emerald-500', chip: 'bg-emerald-50', icon: 'text-emerald-600' },
+  amber: { bar: 'bg-[#B4590A]', chip: 'bg-[#FBF0DF]', icon: 'text-[#B4590A]' },
+  emerald: { bar: 'bg-[#127A52]', chip: 'bg-[#E7F5EE]', icon: 'text-[#127A52]' },
   blue: { bar: 'bg-blue-500', chip: 'bg-blue-50', icon: 'text-blue-600' },
   violet: { bar: 'bg-violet-500', chip: 'bg-violet-50', icon: 'text-violet-600' },
 };
@@ -33,11 +33,13 @@ export function StatCard({
   value,
   icon: Icon,
   accent = 'red',
+  trend,
 }: {
   label: string;
   value: number | string;
   icon: LucideIcon;
   accent?: keyof typeof ACCENTS;
+  trend?: { pct: number; note: string };
 }) {
   const a = ACCENTS[accent] ?? ACCENTS.red;
   return (
@@ -52,26 +54,34 @@ export function StatCard({
           <Icon size={18} className={a.icon} strokeWidth={2.25} />
         </div>
       </div>
+      {trend && (
+        <div className="flex items-center gap-1.5 mt-2 text-[11px]">
+          <span className={`font-bold ${trend.pct >= 0 ? 'text-[#127A52]' : 'text-[#C12223]'}`}>
+            {trend.pct >= 0 ? '↑' : '↓'} {Math.abs(trend.pct)}%
+          </span>
+          <span className="text-[#888888]">{trend.note}</span>
+        </div>
+      )}
     </div>
   );
 }
 
 const STATUS_TONES: Record<string, string> = {
-  NEW: 'bg-amber-50 text-amber-700 before:bg-amber-500',
-  OPEN: 'bg-amber-50 text-amber-700 before:bg-amber-500',
-  CREATED: 'bg-amber-50 text-amber-700 before:bg-amber-500',
-  PLACED: 'bg-amber-50 text-amber-700 before:bg-amber-500',
-  PENDING: 'bg-amber-50 text-amber-700 before:bg-amber-500',
+  NEW: 'bg-[#FBF0DF] text-[#B4590A] before:bg-[#B4590A]',
+  OPEN: 'bg-[#FBF0DF] text-[#B4590A] before:bg-[#B4590A]',
+  CREATED: 'bg-[#FBF0DF] text-[#B4590A] before:bg-[#B4590A]',
+  PLACED: 'bg-[#FBF0DF] text-[#B4590A] before:bg-[#B4590A]',
+  PENDING: 'bg-[#FBF0DF] text-[#B4590A] before:bg-[#B4590A]',
   CONTACTED: 'bg-blue-50 text-blue-700 before:bg-blue-500',
   PROCESSING: 'bg-blue-50 text-blue-700 before:bg-blue-500',
   SHIPPED: 'bg-blue-50 text-blue-700 before:bg-blue-500',
   IN_PROGRESS: 'bg-blue-50 text-blue-700 before:bg-blue-500',
-  CONVERTED: 'bg-emerald-50 text-emerald-700 before:bg-emerald-500',
-  PAID: 'bg-emerald-50 text-emerald-700 before:bg-emerald-500',
-  DELIVERED: 'bg-emerald-50 text-emerald-700 before:bg-emerald-500',
-  RESOLVED: 'bg-emerald-50 text-emerald-700 before:bg-emerald-500',
-  ACTIVE: 'bg-emerald-50 text-emerald-700 before:bg-emerald-500',
-  CLOSED: 'bg-gray-100 text-gray-600 before:bg-gray-400',
+  CONVERTED: 'bg-[#E7F5EE] text-[#127A52] before:bg-[#127A52]',
+  PAID: 'bg-[#E7F5EE] text-[#127A52] before:bg-[#127A52]',
+  DELIVERED: 'bg-[#E7F5EE] text-[#127A52] before:bg-[#127A52]',
+  RESOLVED: 'bg-[#E7F5EE] text-[#127A52] before:bg-[#127A52]',
+  ACTIVE: 'bg-[#E7F5EE] text-[#127A52] before:bg-[#127A52]',
+  CLOSED: 'bg-[#F3EBEA] text-[#8A7A7B] before:bg-[#B7A9A9]',
   CANCELLED: 'bg-red-50 text-red-700 before:bg-red-500',
   FAILED: 'bg-red-50 text-red-700 before:bg-red-500',
 };

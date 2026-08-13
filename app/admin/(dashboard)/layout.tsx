@@ -1,56 +1,8 @@
 import Link from 'next/link';
-import {
-  LayoutDashboard,
-  Inbox,
-  GraduationCap,
-  LifeBuoy,
-  ShoppingBag,
-  CreditCard,
-  BookOpen,
-  Users,
-  Newspaper,
-  Brain,
-  FolderDown,
-  FileText,
-  HelpCircle,
-  Search,
-} from 'lucide-react';
 import { getCurrentAdmin } from '@/lib/adminSession';
 import AdminLogoutButton from './AdminLogoutButton';
-
-const NAV_GROUPS = [
-  {
-    label: 'Overview',
-    items: [{ href: '/admin', label: 'Dashboard', icon: LayoutDashboard }],
-  },
-  {
-    label: 'Learning Ops',
-    items: [
-      { href: '/admin/leads', label: 'Leads Inbox', icon: Inbox },
-      { href: '/admin/enrollments', label: 'Enrollments', icon: GraduationCap },
-      { href: '/admin/tickets', label: 'Support Tickets', icon: LifeBuoy },
-    ],
-  },
-  {
-    label: 'Commerce',
-    items: [
-      { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
-      { href: '/admin/payments', label: 'Payments', icon: CreditCard },
-    ],
-  },
-  {
-    label: 'Content',
-    items: [
-      { href: '/admin/courses', label: 'Courses', icon: BookOpen },
-      { href: '/admin/mentors', label: 'Mentors', icon: Users },
-      { href: '/admin/current-affairs', label: 'Current Affairs', icon: Newspaper },
-      { href: '/admin/quizzes', label: 'Daily Quiz', icon: Brain },
-      { href: '/admin/resources', label: 'Resources', icon: FolderDown },
-      { href: '/admin/blog', label: 'Blog', icon: FileText },
-      { href: '/admin/faq', label: 'FAQ', icon: HelpCircle },
-    ],
-  },
-];
+import CommandPalette from './_components/CommandPalette';
+import { NAV_GROUPS } from './_components/navConfig';
 
 export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const admin = await getCurrentAdmin();
@@ -58,7 +10,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
 
   return (
     <div className="min-h-screen bg-[#FFF5F5] flex">
-      <aside className="w-64 shrink-0 bg-gradient-to-b from-[#4A0F11] via-[#33090B] to-[#1C0405] flex flex-col justify-between max-h-screen sticky top-0 overflow-y-auto">
+      <aside className="w-64 shrink-0 bg-gradient-to-b from-[#3D1113] to-[#2A0C0D] flex flex-col justify-between max-h-screen sticky top-0 overflow-y-auto">
         <div className="p-5">
           <div className="flex items-center gap-2.5 mb-8 px-1">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#EF4444] to-[#C12223] flex items-center justify-center font-heading font-black text-white text-sm shrink-0">
@@ -110,10 +62,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
 
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-[#F3DCDD] px-8 py-3.5 flex items-center justify-between gap-4">
-          <div className="hidden sm:flex items-center gap-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl px-3 py-2 w-full max-w-xs">
-            <Search size={15} className="text-[#B0989A] shrink-0" />
-            <span className="text-xs text-[#B0989A]">Search students, orders, tickets…</span>
-          </div>
+          <CommandPalette />
           <div className="flex items-center gap-3 ml-auto">
             <div className="w-8 h-8 rounded-full bg-[#FDEAEA] flex items-center justify-center text-[#C12223] text-xs font-black shrink-0">
               {initial}

@@ -14,7 +14,17 @@ import {
 } from 'lucide-react';
 import { PageHeader, StatCard } from './_components/AdminUI';
 
+function calcTrend(thisWeek: number, lastWeek: number): { pct: number; note: string } | undefined {
+  if (lastWeek === 0) return undefined;
+  const pct = Math.round(((thisWeek - lastWeek) / lastWeek) * 1000) / 10;
+  return { pct, note: 'vs last week' };
+}
+
 export default async function AdminDashboardPage() {
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
   const [
     totalLeads,
     newLeads,
@@ -29,6 +39,12 @@ export default async function AdminDashboardPage() {
     recentLeads,
     recentOrders,
     recentEnrollments,
+    leadsThisWeek,
+    leadsLastWeek,
+    enrollmentsThisWeek,
+    enrollmentsLastWeek,
+    ordersThisWeek,
+    ordersLastWeek,
   ] = await Promise.all([
     prisma.lead.count(),
     prisma.lead.count({ where: { status: 'NEW' } }),
@@ -43,8 +59,18 @@ export default async function AdminDashboardPage() {
     prisma.lead.findMany({ orderBy: { createdAt: 'desc' }, take: 5, select: { id: true, fullName: true, createdAt: true } }),
     prisma.order.findMany({ orderBy: { createdAt: 'desc' }, take: 5, select: { id: true, fullName: true, grandTotal: true, createdAt: true } }),
     prisma.enrollment.findMany({ orderBy: { enrolledAt: 'desc' }, take: 5 }),
+    prisma.lead.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+    prisma.lead.count({ where: { createdAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo } } }),
+    prisma.enrollment.count({ where: { enrolledAt: { gte: sevenDaysAgo } } }),
+    prisma.enrollment.count({ where: { enrolledAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo } } }),
+    prisma.order.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+    prisma.order.count({ where: { createdAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo } } }),
   ]);
   const paymentsLive = isRazorpayConfigured();
+
+  const leadsTrend = calcTrend(leadsThisWeek, leadsLastWeek);
+  const enrollmentsTrend = calcTrend(enrollmentsThisWeek, enrollmentsLastWeek);
+  const ordersTrend = calcTrend(ordersThisWeek, ordersLastWeek);
 
   const enrollmentUserIds = [...new Set(recentEnrollments.map((e) => e.userId))];
   const enrollmentCourseIds = [...new Set(recentEnrollments.map((e) => e.courseId))];
@@ -56,13 +82,13 @@ export default async function AdminDashboardPage() {
   const enrollmentCourseMap = new Map(enrollmentCourses.map((c) => [c.id, c]));
 
   const stats = [
-    { label: 'Total Leads', value: totalLeads, icon: Inbox, accent: 'red' as const },
+    { label: 'Total Leads', value: totalLeads, icon: Inbox, accent: 'red' as const, trend: leadsTrend },
     { label: 'New (Unread) Leads', value: newLeads, icon: MailOpen, accent: 'amber' as const },
     { label: 'Registered Students', value: totalUsers, icon: Users, accent: 'blue' as const },
-    { label: 'Course Enrollments', value: totalEnrollments, icon: GraduationCap, accent: 'emerald' as const },
+    { label: 'Course Enrollments', value: totalEnrollments, icon: GraduationCap, accent: 'emerald' as const, trend: enrollmentsTrend },
     { label: 'Quiz Attempts', value: totalQuizAttempts, icon: Brain, accent: 'violet' as const },
     { label: 'Resource Downloads', value: totalDownloads, icon: FolderDown, accent: 'blue' as const },
-    { label: 'Total Orders', value: totalOrders, icon: ShoppingBag, accent: 'red' as const },
+    { label: 'Total Orders', value: totalOrders, icon: ShoppingBag, accent: 'red' as const, trend: ordersTrend },
     { label: 'Orders Pending Dispatch', value: pendingOrders, icon: PackageOpen, accent: 'amber' as const },
     { label: 'Open Support Tickets', value: openTickets, icon: LifeBuoy, accent: 'amber' as const },
     { label: 'Successful Payments', value: totalPayments, icon: CreditCard, accent: 'emerald' as const },
@@ -103,9 +129,27 @@ export default async function AdminDashboardPage() {
         }
       />
 
+      {activity.length > 0 && (
+        <div className="rounded-2xl overflow-hidden flex items-center h-[38px] bg-[#3D1113]">
+          <span className="shrink-0 h-full flex items-center px-3.5 bg-[#E94C3D] text-white font-plexmono text-[10px] font-bold uppercase tracking-wide">
+            Live
+          </span>
+          <div className="flex-1 overflow-hidden">
+            <div className="flex w-max animate-marquee-left [animation-duration:28s]">
+              {[...activity, ...activity].map((a, i) => (
+                <span key={`${a.id}-${i}`} className="text-[#F6E4E2] text-xs px-5 whitespace-nowrap flex items-center gap-2 shrink-0">
+                  {a.text}
+                  <span className="w-1 h-1 rounded-full bg-[#F6E4E2]/40" />
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {stats.map((s) => (
-          <StatCard key={s.label} label={s.label} value={s.value} icon={s.icon} accent={s.accent} />
+          <StatCard key={s.label} label={s.label} value={s.value} icon={s.icon} accent={s.accent} trend={s.trend} />
         ))}
       </div>
 

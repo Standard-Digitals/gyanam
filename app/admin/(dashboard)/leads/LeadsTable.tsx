@@ -16,17 +16,17 @@ interface Lead {
 const STATUS_OPTIONS = ['NEW', 'CONTACTED', 'CONVERTED', 'CLOSED'];
 
 const STATUS_COLORS: Record<string, string> = {
-  NEW: 'bg-amber-100 text-amber-800',
+  NEW: 'bg-[#FBF0DF] text-[#B4590A]',
   CONTACTED: 'bg-blue-100 text-blue-800',
-  CONVERTED: 'bg-emerald-100 text-emerald-800',
-  CLOSED: 'bg-gray-100 text-gray-600',
+  CONVERTED: 'bg-[#E7F5EE] text-[#127A52]',
+  CLOSED: 'bg-[#F3EBEA] text-[#8A7A7B]',
 };
 
 const STATUS_DOTS: Record<string, string> = {
-  NEW: 'bg-amber-500',
+  NEW: 'bg-[#B4590A]',
   CONTACTED: 'bg-blue-500',
-  CONVERTED: 'bg-emerald-500',
-  CLOSED: 'bg-gray-400',
+  CONVERTED: 'bg-[#127A52]',
+  CLOSED: 'bg-[#B7A9A9]',
 };
 
 export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {

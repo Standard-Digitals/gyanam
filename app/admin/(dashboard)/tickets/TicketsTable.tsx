@@ -16,17 +16,17 @@ interface Ticket {
 const STATUS_OPTIONS = ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'];
 
 const STATUS_COLORS: Record<string, string> = {
-  OPEN: 'bg-amber-100 text-amber-800',
+  OPEN: 'bg-[#FBF0DF] text-[#B4590A]',
   IN_PROGRESS: 'bg-blue-100 text-blue-800',
-  RESOLVED: 'bg-emerald-100 text-emerald-800',
-  CLOSED: 'bg-gray-100 text-gray-600',
+  RESOLVED: 'bg-[#E7F5EE] text-[#127A52]',
+  CLOSED: 'bg-[#F3EBEA] text-[#8A7A7B]',
 };
 
 const STATUS_DOTS: Record<string, string> = {
-  OPEN: 'bg-amber-500',
+  OPEN: 'bg-[#B4590A]',
   IN_PROGRESS: 'bg-blue-500',
-  RESOLVED: 'bg-emerald-500',
-  CLOSED: 'bg-gray-400',
+  RESOLVED: 'bg-[#127A52]',
+  CLOSED: 'bg-[#B7A9A9]',
 };
 
 const URGENCY_COLORS: Record<string, string> = {
