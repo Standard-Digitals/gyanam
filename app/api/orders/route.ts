@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/currentUser';
+import { getRazorpayClient, isRazorpayConfigured } from '@/lib/razorpay';
 
 const PROMO_CODES: Record<string, { discountPercent: number; maxDiscount: number }> = {
   GYANM20: { discountPercent: 20, maxDiscount: 300 },
@@ -16,7 +17,7 @@ const bodySchema = z.object({
   })).min(1),
   promoCode: z.string().optional(),
   deliverySpeed: z.enum(['standard', 'express']),
-  paymentMethod: z.literal('cod'),
+  paymentMethod: z.enum(['cod', 'upi', 'card', 'netbanking']),
   address: z.object({
     fullName: z.string().min(1),
     mobile: z.string().regex(/^\d{10}$/),
@@ -74,6 +75,11 @@ export async function POST(req: NextRequest) {
   const grandTotal = Math.max(0, subtotal - promoDiscount + shippingFee);
   const orderNumber = `GYN-${Math.floor(100000 + Math.random() * 900000)}`;
 
+  const isOnlinePayment = paymentMethod !== 'cod';
+  if (isOnlinePayment && !isRazorpayConfigured()) {
+    return NextResponse.json({ error: 'Online payments are not live yet. Please select Cash on Delivery for now.' }, { status: 503 });
+  }
+
   const order = await prisma.order.create({
     data: {
       orderNumber,
@@ -86,11 +92,40 @@ export async function POST(req: NextRequest) {
       grandTotal,
       deliverySpeed,
       paymentMethod,
-      paymentStatus: 'COD_PENDING',
+      paymentStatus: isOnlinePayment ? 'PENDING' : 'COD_PENDING',
       orderStatus: 'PLACED',
       ...address,
     },
   });
 
-  return NextResponse.json({ success: true, order });
+  if (!isOnlinePayment) {
+    return NextResponse.json({ success: true, order });
+  }
+
+  const amountPaise = grandTotal * 100;
+  const razorpay = getRazorpayClient();
+  const razorpayOrder = await razorpay.orders.create({
+    amount: amountPaise,
+    currency: 'INR',
+    receipt: `bookstore_${order.id}`,
+  });
+
+  await prisma.payment.create({
+    data: {
+      razorpayOrderId: razorpayOrder.id,
+      amount: amountPaise,
+      purpose: 'BOOKSTORE_ORDER',
+      referenceId: order.id,
+      userId: session.userId,
+    },
+  });
+
+  return NextResponse.json({
+    success: true,
+    order,
+    razorpayOrderId: razorpayOrder.id,
+    amount: amountPaise,
+    currency: 'INR',
+    keyId: process.env.RAZORPAY_KEY_ID,
+  });
 }

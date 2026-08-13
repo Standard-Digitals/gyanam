@@ -344,3 +344,21 @@ model Enrollment {
   @@index([userId])
   @@index([courseId])
 }
+
+model Payment {
+  id                String   @id @default(cuid())
+  razorpayOrderId   String   @unique
+  razorpayPaymentId String?
+  razorpaySignature String?
+  amount            Int
+  currency          String   @default("INR")
+  status            String   @default("CREATED")
+  purpose           String
+  referenceId       String
+  userId            String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+  @@index([referenceId])
+}

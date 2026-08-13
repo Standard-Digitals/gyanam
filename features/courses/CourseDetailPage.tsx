@@ -58,6 +58,22 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
   const [enrolled, setEnrolled] = useState(isEnrolled);
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [enrollError, setEnrollError] = useState('');
+  const handleFreeEnroll = async (course: Course) => {
+    const res = await fetch('/api/enrollments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ courseId: course.id }),
+    });
+    const data = await res.json();
+    if (res.status === 401) {
+      setEnrollError('Please login first (use the header) to enroll in this batch.');
+      return;
+    }
+    if (!res.ok) throw new Error(data.error || 'Failed to enroll');
+    setEnrolled(true);
+    router.refresh();
+  };
+
   const handleEnroll = async (course: Course) => {
     if (onEnrollCourse) {
       onEnrollCourse(course);
@@ -70,19 +86,48 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
     setEnrollError('');
     setIsEnrolling(true);
     try {
-      const res = await fetch('/api/enrollments', {
+      const res = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ courseId: course.id }),
+        body: JSON.stringify({ purpose: 'COURSE_ENROLLMENT', referenceId: course.id }),
       });
-      const data = await res.json();
+
       if (res.status === 401) {
         setEnrollError('Please login first (use the header) to enroll in this batch.');
         return;
       }
-      if (!res.ok) throw new Error(data.error || 'Failed to enroll');
-      setEnrolled(true);
-      router.refresh();
+
+      if (res.status === 503) {
+        // Payments not live yet on this site - fall back to free enrollment so the flow keeps working.
+        await handleFreeEnroll(course);
+        return;
+      }
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to start payment');
+
+      const { openRazorpayCheckout } = await import('@/lib/razorpayCheckout');
+      await openRazorpayCheckout({
+        razorpayOrderId: data.razorpayOrderId,
+        amount: data.amount,
+        currency: data.currency,
+        keyId: data.keyId,
+        description: `Enrollment: ${course.title}`,
+        onSuccess: async (response) => {
+          const verifyRes = await fetch('/api/payments/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(response),
+          });
+          if (!verifyRes.ok) {
+            setEnrollError('Payment verification failed. If money was deducted, contact support with your payment ID.');
+            return;
+          }
+          setEnrolled(true);
+          router.refresh();
+        },
+        onDismiss: () => setIsEnrolling(false),
+      });
     } catch (err) {
       setEnrollError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {
@@ -793,7 +838,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                   }`}
                 >
                   <span>
-                    {isEnrolling ? 'Enrolling...' : enrolled ? '✓ Enrolled — Go to My Courses' : 'Enroll in Batch Now (Free)'}
+                    {isEnrolling ? 'Enrolling...' : enrolled ? '✓ Enrolled — Go to My Courses' : `Enroll in Batch Now (₹${course.discountPrice.toLocaleString()})`}
                   </span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
