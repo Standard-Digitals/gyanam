@@ -25,6 +25,14 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: 'bg-gray-100 text-gray-600',
 };
 
+const STATUS_DOTS: Record<string, string> = {
+  PLACED: 'bg-amber-500',
+  CONFIRMED: 'bg-blue-500',
+  SHIPPED: 'bg-purple-500',
+  DELIVERED: 'bg-emerald-500',
+  CANCELLED: 'bg-gray-400',
+};
+
 export default function OrdersTable({ orders: initialOrders }: { orders: Order[] }) {
   const [orders, setOrders] = useState(initialOrders);
 
@@ -45,7 +53,7 @@ export default function OrdersTable({ orders: initialOrders }: { orders: Order[]
     <div className="bg-white rounded-2xl border border-[#F3DCDD] shadow-sm overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[#F3DCDD] text-left text-xs uppercase text-[#888888] font-bold">
+          <tr className="border-b border-[#F3DCDD] text-left text-[11px] uppercase text-[#888888] font-bold font-plexmono tracking-wide">
             <th className="px-4 py-3">Order #</th>
             <th className="px-4 py-3">Customer</th>
             <th className="px-4 py-3">City</th>
@@ -57,26 +65,29 @@ export default function OrdersTable({ orders: initialOrders }: { orders: Order[]
         </thead>
         <tbody>
           {orders.map((order) => (
-            <tr key={order.id} className="border-b border-[#F3DCDD] last:border-0">
-              <td className="px-4 py-3 font-black text-[#C12223]">{order.orderNumber}</td>
+            <tr key={order.id} className="border-b border-[#F3DCDD] last:border-0 hover:bg-[#FFF9F9] transition-colors">
+              <td className="px-4 py-3 font-black text-[#C12223] font-plexmono text-xs">{order.orderNumber}</td>
               <td className="px-4 py-3">
                 <p className="font-semibold text-[#1F1A1C]">{order.fullName}</p>
                 <p className="text-xs text-[#888888]">{order.mobile}</p>
               </td>
               <td className="px-4 py-3 text-[#555555] text-xs">{order.city}, {order.state}</td>
-              <td className="px-4 py-3 font-bold text-[#1F1A1C]">₹{order.grandTotal}</td>
+              <td className="px-4 py-3 font-bold text-[#1F1A1C] font-plexmono">₹{order.grandTotal}</td>
               <td className="px-4 py-3 text-xs text-[#555555] uppercase">{order.paymentMethod} ({order.paymentStatus})</td>
               <td className="px-4 py-3 text-[#888888] text-xs">{new Date(order.createdAt).toLocaleDateString()}</td>
               <td className="px-4 py-3">
-                <select
-                  value={order.orderStatus}
-                  onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold border-0 outline-none cursor-pointer ${STATUS_COLORS[order.orderStatus]}`}
-                >
-                  {STATUS_OPTIONS.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
+                <span className="relative inline-block">
+                  <span className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full pointer-events-none ${STATUS_DOTS[order.orderStatus] ?? 'bg-gray-400'}`} />
+                  <select
+                    value={order.orderStatus}
+                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                    className={`pl-6 pr-2.5 py-1 rounded-lg text-xs font-bold border-0 outline-none cursor-pointer ${STATUS_COLORS[order.orderStatus]}`}
+                  >
+                    {STATUS_OPTIONS.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </span>
               </td>
             </tr>
           ))}

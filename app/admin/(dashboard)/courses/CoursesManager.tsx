@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { Star, Users, PlayCircle } from 'lucide-react';
 
 interface Course {
   id: string;
@@ -189,7 +190,10 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading font-black text-2xl text-[#1F1A1C]">Courses Manager</h2>
+        <div>
+          <h2 className="font-heading font-black text-2xl text-[#1F1A1C]">Courses</h2>
+          <p className="text-sm text-[#888888] mt-0.5">{courses.length} course{courses.length === 1 ? '' : 's'}</p>
+        </div>
         {editingId === null && (
           <button onClick={startCreate} className="px-4 py-2.5 bg-[#C12223] text-white font-bold text-xs rounded-xl cursor-pointer">
             + Add Course
@@ -261,22 +265,50 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {courses.map((c) => (
-          <div key={c.id} className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm flex items-start justify-between gap-4">
-            <div>
-              <span className="text-[10px] font-bold text-[#C12223] uppercase">{c.category} · ₹{c.discountPrice} · {c.studentsEnrolled} enrolled</span>
-              <h4 className="font-bold text-sm text-[#1F1A1C]">{c.title}</h4>
-              <p className="text-xs text-[#555555] mt-1">{c.instructor.name} — {c.instructor.designation}</p>
+          <div key={c.id} className="bg-white rounded-2xl border border-[#F3DCDD] shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+            <div className="relative aspect-video bg-[#FFF5F5]">
+              {c.thumbnail ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={c.thumbnail} alt={c.title} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[#D9B4B5]">
+                  <PlayCircle size={32} />
+                </div>
+              )}
+              <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-white/90 text-[#C12223] backdrop-blur-sm">
+                {c.category}
+              </span>
+              {c.popular && (
+                <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-[#C12223] text-white">
+                  Popular
+                </span>
+              )}
             </div>
-            <div className="flex gap-2 shrink-0">
-              <Link href={`/admin/courses/${c.id}/curriculum`} className="px-3 py-1.5 bg-[#FFF5F5] text-[#C12223] font-bold text-xs rounded-lg cursor-pointer border border-[#C12223]/20">Curriculum</Link>
-              <button onClick={() => startEdit(c)} className="px-3 py-1.5 bg-gray-100 text-gray-700 font-bold text-xs rounded-lg cursor-pointer">Edit</button>
-              <button onClick={() => handleDelete(c.id)} className="px-3 py-1.5 bg-red-50 text-red-600 font-bold text-xs rounded-lg cursor-pointer">Delete</button>
+            <div className="p-4 flex flex-col gap-2 flex-1">
+              <h4 className="font-bold text-sm text-[#1F1A1C] leading-snug line-clamp-2">{c.title}</h4>
+              <p className="text-xs text-[#888888]">{c.instructor.name} · {c.instructor.designation}</p>
+              <div className="flex items-center gap-3 text-[11px] text-[#555555] font-plexmono">
+                <span className="flex items-center gap-1"><Star size={12} className="text-amber-500 fill-amber-500" />{c.rating}</span>
+                <span className="flex items-center gap-1"><Users size={12} />{c.studentsEnrolled}</span>
+                <span>{c.duration}</span>
+              </div>
+              <div className="flex items-baseline gap-2 pt-1">
+                <span className="font-plexmono font-bold text-base text-[#1F1A1C]">₹{c.discountPrice}</span>
+                {c.originalPrice > c.discountPrice && (
+                  <span className="font-plexmono text-xs text-[#B0989A] line-through">₹{c.originalPrice}</span>
+                )}
+              </div>
+              <div className="flex gap-2 mt-auto pt-3">
+                <Link href={`/admin/courses/${c.id}/curriculum`} className="flex-1 text-center px-2 py-1.5 bg-[#FFF5F5] text-[#C12223] font-bold text-[11px] rounded-lg cursor-pointer border border-[#C12223]/20">Curriculum</Link>
+                <button onClick={() => startEdit(c)} className="flex-1 px-2 py-1.5 bg-gray-100 text-gray-700 font-bold text-[11px] rounded-lg cursor-pointer">Edit</button>
+                <button onClick={() => handleDelete(c.id)} className="px-2.5 py-1.5 bg-red-50 text-red-600 font-bold text-[11px] rounded-lg cursor-pointer">Delete</button>
+              </div>
             </div>
           </div>
         ))}
-        {courses.length === 0 && <p className="text-center text-sm text-[#888888] py-8">No courses yet.</p>}
+        {courses.length === 0 && <p className="col-span-full text-center text-sm text-[#888888] py-8">No courses yet.</p>}
       </div>
     </div>
   );

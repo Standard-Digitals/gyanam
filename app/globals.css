@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
 
 @layer base {
   body {
@@ -17,6 +17,7 @@
 }
 
 .font-heading { font-family: 'Manrope', sans-serif; }
+.font-plexmono { font-family: 'IBM Plex Mono', monospace; }
 
 .gradient-text {
   background: linear-gradient(135deg, #EF4444 0%, #C12223 50%, #B91C1C 100%);

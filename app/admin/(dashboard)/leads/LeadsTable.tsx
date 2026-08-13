@@ -22,6 +22,13 @@ const STATUS_COLORS: Record<string, string> = {
   CLOSED: 'bg-gray-100 text-gray-600',
 };
 
+const STATUS_DOTS: Record<string, string> = {
+  NEW: 'bg-amber-500',
+  CONTACTED: 'bg-blue-500',
+  CONVERTED: 'bg-emerald-500',
+  CLOSED: 'bg-gray-400',
+};
+
 export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
   const [leads, setLeads] = useState(initialLeads);
 
@@ -42,7 +49,7 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
     <div className="bg-white rounded-2xl border border-[#F3DCDD] shadow-sm overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[#F3DCDD] text-left text-xs uppercase text-[#888888] font-bold">
+          <tr className="border-b border-[#F3DCDD] text-left text-[11px] uppercase text-[#888888] font-bold font-plexmono tracking-wide">
             <th className="px-4 py-3">Name</th>
             <th className="px-4 py-3">Phone</th>
             <th className="px-4 py-3">Exam</th>
@@ -53,24 +60,27 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
         </thead>
         <tbody>
           {leads.map((lead) => (
-            <tr key={lead.id} className="border-b border-[#F3DCDD] last:border-0">
+            <tr key={lead.id} className="border-b border-[#F3DCDD] last:border-0 hover:bg-[#FFF9F9] transition-colors">
               <td className="px-4 py-3 font-semibold text-[#1F1A1C]">{lead.fullName}</td>
               <td className="px-4 py-3 text-[#555555]">{lead.phone}</td>
               <td className="px-4 py-3 text-[#555555]">{lead.targetExam || '—'}</td>
               <td className="px-4 py-3 text-[#555555] text-xs">{lead.source.replace('_', ' ')}</td>
               <td className="px-4 py-3 text-[#888888] text-xs">{new Date(lead.createdAt).toLocaleDateString()}</td>
               <td className="px-4 py-3">
-                <select
-                  value={lead.status}
-                  onChange={(e) => handleStatusChange(lead.id, e.target.value)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold border-0 outline-none cursor-pointer ${STATUS_COLORS[lead.status]}`}
-                >
-                  {STATUS_OPTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
+                <span className="relative inline-block">
+                  <span className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full pointer-events-none ${STATUS_DOTS[lead.status] ?? 'bg-gray-400'}`} />
+                  <select
+                    value={lead.status}
+                    onChange={(e) => handleStatusChange(lead.id, e.target.value)}
+                    className={`pl-6 pr-2.5 py-1 rounded-lg text-xs font-bold border-0 outline-none cursor-pointer ${STATUS_COLORS[lead.status]}`}
+                  >
+                    {STATUS_OPTIONS.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </span>
               </td>
             </tr>
           ))}

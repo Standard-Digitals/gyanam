@@ -97,7 +97,10 @@ export default function BlogManager({ posts: initialPosts }: { posts: Blog[] }) 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading font-black text-2xl text-[#1F1A1C]">Blog Manager</h2>
+        <div>
+          <h2 className="font-heading font-black text-2xl text-[#1F1A1C]">Blog</h2>
+          <p className="text-sm text-[#888888] mt-0.5">{posts.length} post{posts.length === 1 ? '' : 's'}</p>
+        </div>
         {editingId === null && (
           <button onClick={startCreate} className="px-4 py-2.5 bg-[#C12223] text-white font-bold text-xs rounded-xl cursor-pointer">
             + Add Post
@@ -176,7 +179,7 @@ export default function BlogManager({ posts: initialPosts }: { posts: Blog[] }) 
 
       <div className="space-y-2">
         {posts.map((post) => (
-          <div key={post.id} className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm flex items-start justify-between gap-4">
+          <div key={post.id} className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm hover:shadow-md transition-shadow flex items-start justify-between gap-4">
             <div>
               <span className="text-[10px] font-bold text-[#C12223] uppercase">{post.category} · {post.date}</span>
               <h4 className="font-bold text-sm text-[#1F1A1C]">{post.title}</h4>

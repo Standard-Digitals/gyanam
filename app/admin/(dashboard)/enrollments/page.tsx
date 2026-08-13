@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { PageHeader, StatusPill } from '../_components/AdminUI';
 
 export default async function AdminEnrollmentsPage() {
   const enrollments = await prisma.enrollment.findMany({ orderBy: { enrolledAt: 'desc' } });
@@ -13,11 +14,11 @@ export default async function AdminEnrollmentsPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="font-heading font-black text-2xl text-[#1F1A1C]">Enrollments ({enrollments.length})</h2>
+      <PageHeader title="Enrollments" subtitle={`${enrollments.length} total`} />
       <div className="bg-white rounded-2xl border border-[#F3DCDD] shadow-sm overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[#F3DCDD] text-left text-xs uppercase text-[#888888] font-bold">
+            <tr className="border-b border-[#F3DCDD] text-left text-[11px] uppercase text-[#888888] font-bold font-plexmono tracking-wide">
               <th className="px-4 py-3">Student</th>
               <th className="px-4 py-3">Course</th>
               <th className="px-4 py-3">Type</th>
@@ -30,7 +31,7 @@ export default async function AdminEnrollmentsPage() {
               const user = userMap.get(e.userId);
               const course = courseMap.get(e.courseId);
               return (
-                <tr key={e.id} className="border-b border-[#F3DCDD] last:border-0">
+                <tr key={e.id} className="border-b border-[#F3DCDD] last:border-0 hover:bg-[#FFF9F9] transition-colors">
                   <td className="px-4 py-3">
                     <p className="font-semibold text-[#1F1A1C]">{user?.name || 'Unnamed'}</p>
                     <p className="text-xs text-[#888888]">{user?.phone}</p>
@@ -39,7 +40,9 @@ export default async function AdminEnrollmentsPage() {
                   <td className="px-4 py-3">
                     <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-emerald-100 text-emerald-800">{e.paymentType}</span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-[#555555]">{e.status}</td>
+                  <td className="px-4 py-3">
+                    <StatusPill status={e.status} />
+                  </td>
                   <td className="px-4 py-3 text-xs text-[#888888]">{new Date(e.enrolledAt).toLocaleDateString()}</td>
                 </tr>
               );

@@ -157,7 +157,10 @@ export default function QuizzesManager({ quizzes: initialQuizzes }: { quizzes: Q
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading font-black text-2xl text-[#1F1A1C]">Daily Quiz Manager</h2>
+        <div>
+          <h2 className="font-heading font-black text-2xl text-[#1F1A1C]">Daily Quiz</h2>
+          <p className="text-sm text-[#888888] mt-0.5">{quizzes.length} quiz{quizzes.length === 1 ? '' : 'zes'}</p>
+        </div>
         {editingId === null && (
           <button onClick={startCreate} className="px-4 py-2.5 bg-[#C12223] text-white font-bold text-xs rounded-xl cursor-pointer">
             + Add Quiz
@@ -243,7 +246,7 @@ export default function QuizzesManager({ quizzes: initialQuizzes }: { quizzes: Q
 
       <div className="space-y-2">
         {quizzes.map((quiz) => (
-          <div key={quiz.id} className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm flex items-start justify-between gap-4">
+          <div key={quiz.id} className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm hover:shadow-md transition-shadow flex items-start justify-between gap-4">
             <div>
               <span className="text-[10px] font-bold text-[#C12223] uppercase">{quiz.subject} · {quiz.examCategory} · {quiz.questions.length} Qs</span>
               <h4 className="font-bold text-sm text-[#1F1A1C]">{quiz.title}</h4>

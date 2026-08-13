@@ -17,6 +17,7 @@ const config: Config = {
       fontFamily: {
         heading: ['Manrope', 'sans-serif'],
         sans: ['Plus Jakarta Sans', 'sans-serif'],
+        plexmono: ['IBM Plex Mono', 'monospace'],
       },
     },
   },

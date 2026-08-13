@@ -139,7 +139,10 @@ export default function ResourcesManager({ resources: initialResources }: { reso
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading font-black text-2xl text-[#1F1A1C]">Resources Manager</h2>
+        <div>
+          <h2 className="font-heading font-black text-2xl text-[#1F1A1C]">Resources</h2>
+          <p className="text-sm text-[#888888] mt-0.5">{resources.length} resource{resources.length === 1 ? '' : 's'}</p>
+        </div>
         {editingId === null && (
           <button onClick={startCreate} className="px-4 py-2.5 bg-[#C12223] text-white font-bold text-xs rounded-xl cursor-pointer">
             + Add Resource
@@ -188,7 +191,7 @@ export default function ResourcesManager({ resources: initialResources }: { reso
 
       <div className="space-y-2">
         {resources.map((r) => (
-          <div key={r.id} className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm flex items-start justify-between gap-4">
+          <div key={r.id} className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm hover:shadow-md transition-shadow flex items-start justify-between gap-4">
             <div>
               <span className="text-[10px] font-bold text-[#C12223] uppercase">{r.type} · {r.category} · {r.downloadsCount} downloads</span>
               <h4 className="font-bold text-sm text-[#1F1A1C]">{r.title}</h4>

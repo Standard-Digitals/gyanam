@@ -1,12 +1,13 @@
 import { prisma } from '@/lib/prisma';
 import OrdersTable from './OrdersTable';
+import { PageHeader } from '../_components/AdminUI';
 
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({ orderBy: { createdAt: 'desc' } });
 
   return (
     <div className="space-y-6">
-      <h2 className="font-heading font-black text-2xl text-[#1F1A1C]">Orders</h2>
+      <PageHeader title="Orders" subtitle={`${orders.length} total`} />
       <OrdersTable
         orders={orders.map((o) => ({
           id: o.id,
