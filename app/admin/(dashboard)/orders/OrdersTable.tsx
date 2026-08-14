@@ -18,6 +18,8 @@ interface Order {
   paymentStatus: string;
   orderStatus: string;
   createdAt: string;
+  products: string[];
+  productsLabel: string;
 }
 
 const STATUS_OPTIONS = ['PLACED', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
@@ -39,14 +41,15 @@ const STATUS_DOTS: Record<string, string> = {
   CANCELLED: 'bg-[#B7A9A9]',
 };
 
-export default function OrdersTable({ orders: initialOrders }: { orders: Order[] }) {
+export default function OrdersTable({ orders: initialOrders, productOptions }: { orders: Order[]; productOptions: string[] }) {
   const [orders, setOrders] = useState(initialOrders);
   const [statusFilter, setStatusFilter] = useState('');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
+  const [productFilter, setProductFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
-  const activeCount = (statusFilter ? 1 : 0) + (paymentStatusFilter ? 1 : 0) + (dateFrom || dateTo ? 1 : 0);
+  const activeCount = (statusFilter ? 1 : 0) + (paymentStatusFilter ? 1 : 0) + (productFilter ? 1 : 0) + (dateFrom || dateTo ? 1 : 0);
 
   const paymentStatusOptions = useMemo(() => {
     const seen = new Set(orders.map((o) => o.paymentStatus));
@@ -57,16 +60,18 @@ export default function OrdersTable({ orders: initialOrders }: { orders: Order[]
     return orders.filter((o) => {
       if (statusFilter && o.orderStatus !== statusFilter) return false;
       if (paymentStatusFilter && o.paymentStatus !== paymentStatusFilter) return false;
+      if (productFilter && !o.products.includes(productFilter)) return false;
       const day = o.createdAt.slice(0, 10);
       if (dateFrom && day < dateFrom) return false;
       if (dateTo && day > dateTo) return false;
       return true;
     });
-  }, [orders, statusFilter, paymentStatusFilter, dateFrom, dateTo]);
+  }, [orders, statusFilter, paymentStatusFilter, productFilter, dateFrom, dateTo]);
 
   const clearFilters = () => {
     setStatusFilter('');
     setPaymentStatusFilter('');
+    setProductFilter('');
     setDateFrom('');
     setDateTo('');
   };
@@ -74,9 +79,9 @@ export default function OrdersTable({ orders: initialOrders }: { orders: Order[]
   const handleExport = () => {
     downloadCsv(
       'orders.csv',
-      ['Order #', 'Customer', 'Phone', 'City', 'State', 'Amount', 'Payment Method', 'Payment Status', 'Order Status', 'Date'],
+      ['Order #', 'Customer', 'Phone', 'City', 'State', 'Item(s)', 'Amount', 'Payment Method', 'Payment Status', 'Order Status', 'Date'],
       filteredOrders.map((o) => [
-        o.orderNumber, o.fullName, o.mobile, o.city, o.state, o.grandTotal, o.paymentMethod, o.paymentStatus, o.orderStatus, new Date(o.createdAt).toLocaleDateString(),
+        o.orderNumber, o.fullName, o.mobile, o.city, o.state, o.productsLabel, o.grandTotal, o.paymentMethod, o.paymentStatus, o.orderStatus, new Date(o.createdAt).toLocaleDateString(),
       ])
     );
   };
@@ -110,6 +115,12 @@ export default function OrdersTable({ orders: initialOrders }: { orders: Order[]
             onChange={setPaymentStatusFilter}
             options={[{ label: 'All payment statuses', value: '' }, ...paymentStatusOptions.map((s) => ({ label: s, value: s }))]}
           />
+          <FilterSelect
+            label="Item"
+            value={productFilter}
+            onChange={setProductFilter}
+            options={[{ label: 'All items', value: '' }, ...productOptions.map((p) => ({ label: p, value: p }))]}
+          />
           <DateRangeFields from={dateFrom} to={dateTo} onFromChange={setDateFrom} onToChange={setDateTo} />
         </FilterPopover>
         <button onClick={handleExport} className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#F3DCDD] rounded-xl text-xs font-bold text-[#1F1A1C] cursor-pointer">
@@ -124,6 +135,7 @@ export default function OrdersTable({ orders: initialOrders }: { orders: Order[]
             <tr className="border-b border-[#F3DCDD] text-left text-[11px] uppercase text-[#888888] font-bold font-plexmono tracking-wide">
               <th className="px-4 py-3">Order #</th>
               <th className="px-4 py-3">Customer</th>
+              <th className="px-4 py-3">Item(s)</th>
               <th className="px-4 py-3">City</th>
               <th className="px-4 py-3">Amount</th>
               <th className="px-4 py-3">Payment</th>
@@ -139,6 +151,7 @@ export default function OrdersTable({ orders: initialOrders }: { orders: Order[]
                   <p className="font-semibold text-[#1F1A1C]">{order.fullName}</p>
                   <p className="text-xs text-[#888888]">{order.mobile}</p>
                 </td>
+                <td className="px-4 py-3 text-[#555555] text-xs max-w-[220px]">{order.productsLabel || '—'}</td>
                 <td className="px-4 py-3 text-[#555555] text-xs">{order.city}, {order.state}</td>
                 <td className="px-4 py-3 font-bold text-[#1F1A1C] font-plexmono">₹{order.grandTotal}</td>
                 <td className="px-4 py-3 text-xs text-[#555555] uppercase">{order.paymentMethod} ({order.paymentStatus})</td>
@@ -161,7 +174,7 @@ export default function OrdersTable({ orders: initialOrders }: { orders: Order[]
             ))}
             {filteredOrders.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-[#888888] text-sm">
+                <td colSpan={8} className="px-4 py-8 text-center text-[#888888] text-sm">
                   {activeCount > 0 ? 'No orders match these filters.' : 'No orders yet.'}
                 </td>
               </tr>
