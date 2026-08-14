@@ -1,12 +1,25 @@
 import Link from 'next/link';
+import { prisma } from '@/lib/prisma';
 import { getCurrentAdmin } from '@/lib/adminSession';
 import AdminLogoutButton from './AdminLogoutButton';
 import CommandPalette from './_components/CommandPalette';
+import NotificationBell, { type NotificationItem } from './_components/NotificationBell';
 import { NAV_GROUPS } from './_components/navConfig';
 
 export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
-  const admin = await getCurrentAdmin();
+  const [admin, newLeads, openTickets, pendingOrders] = await Promise.all([
+    getCurrentAdmin(),
+    prisma.lead.count({ where: { status: 'NEW' } }),
+    prisma.supportTicket.count({ where: { status: 'OPEN' } }),
+    prisma.order.count({ where: { orderStatus: 'PLACED' } }),
+  ]);
   const initial = admin?.email?.[0]?.toUpperCase() ?? 'A';
+
+  const notifications: NotificationItem[] = [
+    ...(newLeads > 0 ? [{ id: 'leads', icon: 'lead' as const, text: `${newLeads} new lead${newLeads === 1 ? '' : 's'} waiting for follow-up`, href: '/admin/leads' }] : []),
+    ...(openTickets > 0 ? [{ id: 'tickets', icon: 'ticket' as const, text: `${openTickets} support ticket${openTickets === 1 ? '' : 's'} still open`, href: '/admin/tickets' }] : []),
+    ...(pendingOrders > 0 ? [{ id: 'orders', icon: 'order' as const, text: `${pendingOrders} order${pendingOrders === 1 ? '' : 's'} pending dispatch`, href: '/admin/orders' }] : []),
+  ];
 
   return (
     <div className="min-h-screen bg-[#FFF5F5] flex">
@@ -64,6 +77,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
         <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-[#F3DCDD] px-8 py-3.5 flex items-center justify-between gap-4">
           <CommandPalette />
           <div className="flex items-center gap-3 ml-auto">
+            <NotificationBell items={notifications} />
             <div className="w-8 h-8 rounded-full bg-[#FDEAEA] flex items-center justify-center text-[#C12223] text-xs font-black shrink-0">
               {initial}
             </div>

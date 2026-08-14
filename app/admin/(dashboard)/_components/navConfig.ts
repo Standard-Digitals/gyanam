@@ -14,6 +14,13 @@ import {
   HelpCircle,
 } from 'lucide-react';
 
+export const QUICK_ACTIONS = [
+  { href: '/admin/courses', label: 'New Course', sub: 'Create a batch', icon: BookOpen, bg: 'linear-gradient(135deg,#E94C3D,#C12223)' },
+  { href: '/admin/mentors', label: 'Add Mentor', sub: 'Faculty profile', icon: Users, bg: 'linear-gradient(135deg,#4C6EF5,#3B5BDB)' },
+  { href: '/admin/current-affairs', label: 'Publish Article', sub: 'Current affairs', icon: Newspaper, bg: 'linear-gradient(135deg,#F59F00,#E67700)' },
+  { href: '/admin/resources', label: 'New Resource', sub: 'Notes & PYQs', icon: FolderDown, bg: 'linear-gradient(135deg,#0CA5B0,#0B8792)' },
+];
+
 export const NAV_GROUPS = [
   {
     label: 'Overview',
