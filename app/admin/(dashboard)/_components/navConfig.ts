@@ -7,6 +7,7 @@ import {
   CreditCard,
   BookOpen,
   Users,
+  UserRound,
   Newspaper,
   Brain,
   FolderDown,
@@ -30,6 +31,7 @@ export const NAV_GROUPS = [
   {
     label: 'Learning Ops',
     items: [
+      { href: '/admin/students', label: 'Students', icon: UserRound, badgeKey: 'students' },
       { href: '/admin/leads', label: 'Leads Inbox', icon: Inbox },
       { href: '/admin/enrollments', label: 'Enrollments', icon: GraduationCap },
       { href: '/admin/tickets', label: 'Support Tickets', icon: LifeBuoy },

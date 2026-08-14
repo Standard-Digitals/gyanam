@@ -7,13 +7,17 @@ import NotificationBell, { type NotificationItem } from './_components/Notificat
 import { NAV_GROUPS } from './_components/navConfig';
 
 export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
-  const [admin, newLeads, openTickets, pendingOrders] = await Promise.all([
+  const [admin, newLeads, openTickets, pendingOrders, studentsCount] = await Promise.all([
     getCurrentAdmin(),
     prisma.lead.count({ where: { status: 'NEW' } }),
     prisma.supportTicket.count({ where: { status: 'OPEN' } }),
     prisma.order.count({ where: { orderStatus: 'PLACED' } }),
+    prisma.user.count(),
   ]);
   const initial = admin?.email?.[0]?.toUpperCase() ?? 'A';
+
+  const formatCompact = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n));
+  const badges: Record<string, string> = { students: formatCompact(studentsCount) };
 
   const notifications: NotificationItem[] = [
     ...(newLeads > 0 ? [{ id: 'leads', icon: 'lead' as const, text: `${newLeads} new lead${newLeads === 1 ? '' : 's'} waiting for follow-up`, href: '/admin/leads' }] : []),
@@ -44,6 +48,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
                     const Icon = item.icon;
+                    const badge = 'badgeKey' in item ? badges[item.badgeKey as string] : undefined;
                     return (
                       <Link
                         key={item.href}
@@ -52,7 +57,12 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
                       >
                         <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-full bg-[#FF6B6B] opacity-0 group-hover:opacity-60 transition-opacity" />
                         <Icon size={16} strokeWidth={2.25} className="shrink-0" />
-                        <span className="truncate">{item.label}</span>
+                        <span className="truncate flex-1">{item.label}</span>
+                        {badge && (
+                          <span className="shrink-0 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white/10 text-white/70">
+                            {badge}
+                          </span>
+                        )}
                       </Link>
                     );
                   })}
