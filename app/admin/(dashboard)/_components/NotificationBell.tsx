@@ -70,6 +70,15 @@ export default function NotificationBell({ items }: { items: NotificationItem[] 
               <p className="text-center text-xs text-[#8A7A7B] py-8">You're all caught up.</p>
             )}
           </div>
+          <button
+            onClick={() => {
+              setOpen(false);
+              router.push('/admin');
+            }}
+            className="w-full text-center text-[11.5px] font-bold text-[#C12223] border-t border-[#F0E1E0] py-2.5 hover:bg-[#FBF6F4]"
+          >
+            View all activity
+          </button>
         </div>
       )}
     </div>
