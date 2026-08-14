@@ -12,6 +12,7 @@ import {
   FolderDown,
   FileText,
   HelpCircle,
+  ClipboardList,
 } from 'lucide-react';
 
 export const QUICK_ACTIONS = [
@@ -48,6 +49,7 @@ export const NAV_GROUPS = [
       { href: '/admin/mentors', label: 'Mentors', icon: Users },
       { href: '/admin/current-affairs', label: 'Current Affairs', icon: Newspaper },
       { href: '/admin/quizzes', label: 'Daily Quiz', icon: Brain },
+      { href: '/admin/mock-tests', label: 'Mock Tests', icon: ClipboardList },
       { href: '/admin/resources', label: 'Resources', icon: FolderDown },
       { href: '/admin/blog', label: 'Blog', icon: FileText },
       { href: '/admin/faq', label: 'FAQ', icon: HelpCircle },

@@ -81,6 +81,7 @@ const STATUS_TONES: Record<string, string> = {
   DELIVERED: 'bg-[#E7F5EE] text-[#127A52] before:bg-[#127A52]',
   RESOLVED: 'bg-[#E7F5EE] text-[#127A52] before:bg-[#127A52]',
   ACTIVE: 'bg-[#E7F5EE] text-[#127A52] before:bg-[#127A52]',
+  DRAFT: 'bg-gray-100 text-gray-600 before:bg-gray-400',
   CLOSED: 'bg-[#F3EBEA] text-[#8A7A7B] before:bg-[#B7A9A9]',
   CANCELLED: 'bg-red-50 text-red-700 before:bg-red-500',
   FAILED: 'bg-red-50 text-red-700 before:bg-red-500',

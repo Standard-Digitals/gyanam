@@ -246,6 +246,37 @@ model QuizAttempt {
   @@index([submittedAt])
 }
 
+model MockTest {
+  id               String   @id @default(cuid())
+  title            String
+  examCategory     String
+  totalQuestions   Int
+  timeLimitMinutes Int
+  status           String   @default("ACTIVE")
+  questions        Json
+  createdAt        DateTime @default(now())
+
+  @@index([examCategory])
+  @@index([status])
+}
+
+model MockTestAttempt {
+  id               String   @id @default(cuid())
+  userId           String
+  mockTestId       String
+  correctCount     Int
+  incorrectCount   Int
+  unattemptedCount Int
+  obtainedMarks    Float
+  accuracy         Int
+  timeTakenSec     Int
+  submittedAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([mockTestId])
+  @@index([submittedAt])
+}
+
 model DownloadLog {
   id           String   @id @default(cuid())
   userId       String?
