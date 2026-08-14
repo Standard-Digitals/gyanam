@@ -1,7 +1,7 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Star, Users, PlayCircle } from 'lucide-react';
+import { Star, Users, PlayCircle, ArrowUpDown, ChevronDown } from 'lucide-react';
 
 interface Course {
   id: string;
@@ -51,6 +51,16 @@ const EMPTY_FORM = {
 };
 
 const CATEGORIES = ['SSC', 'Banking', 'Railway', 'UPSC', 'Assam Govt', 'State PSC', 'Defence'];
+const CATEGORY_TABS = ['All', ...CATEGORIES];
+
+const SORT_OPTIONS = [
+  { value: 'enrolled', label: 'Most enrolled' },
+  { value: 'rating', label: 'Highest rated' },
+  { value: 'price-low', label: 'Price: Low to High' },
+  { value: 'price-high', label: 'Price: High to Low' },
+  { value: 'newest', label: 'Newest first' },
+] as const;
+type SortValue = (typeof SORT_OPTIONS)[number]['value'];
 
 function slugify(title: string): string {
   return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -80,7 +90,33 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
   const [form, setForm] = useState(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [sortBy, setSortBy] = useState<SortValue>('enrolled');
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
+
+  const displayedCourses = useMemo(() => {
+    const filtered = activeCategory === 'All' ? courses : courses.filter((c) => c.category === activeCategory);
+    const sorted = [...filtered];
+    switch (sortBy) {
+      case 'rating':
+        sorted.sort((a, b) => b.rating - a.rating);
+        break;
+      case 'price-low':
+        sorted.sort((a, b) => a.discountPrice - b.discountPrice);
+        break;
+      case 'price-high':
+        sorted.sort((a, b) => b.discountPrice - a.discountPrice);
+        break;
+      case 'newest':
+        break;
+      case 'enrolled':
+      default:
+        sorted.sort((a, b) => b.studentsEnrolled - a.studentsEnrolled);
+        break;
+    }
+    return sorted;
+  }, [courses, activeCategory, sortBy]);
 
   const scrollToForm = () => {
     setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
@@ -276,8 +312,59 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
         </div>
       )}
 
+      {editingId === null && (
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {CATEGORY_TABS.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
+                  activeCategory === cat
+                    ? 'bg-white text-[#1F1A1C] border border-[#F3DCDD] shadow-sm'
+                    : 'text-[#8A7A7B] hover:text-[#1F1A1C]'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+          <div className="relative">
+            <button
+              onClick={() => setSortMenuOpen((v) => !v)}
+              className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#F3DCDD] rounded-xl text-xs font-bold text-[#1F1A1C]"
+            >
+              <ArrowUpDown size={13} strokeWidth={2.25} />
+              Sort: {SORT_OPTIONS.find((o) => o.value === sortBy)?.label}
+              <ChevronDown size={13} strokeWidth={2.25} className="text-[#8A7A7B]" />
+            </button>
+            {sortMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setSortMenuOpen(false)} />
+                <div className="absolute top-[calc(100%+6px)] right-0 w-48 bg-white border border-[#F3DCDD] rounded-xl shadow-lg z-20 overflow-hidden">
+                  {SORT_OPTIONS.map((o) => (
+                    <button
+                      key={o.value}
+                      onClick={() => {
+                        setSortBy(o.value);
+                        setSortMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold ${
+                        sortBy === o.value ? 'text-[#C12223] bg-[#FBF6F4]' : 'text-[#1F1A1C] hover:bg-[#FBF6F4]'
+                      }`}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {courses.map((c) => (
+        {displayedCourses.map((c) => (
           <div key={c.id} className="bg-white rounded-2xl border border-[#F3DCDD] shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
             <div className="relative aspect-video bg-[#FFF5F5]">
               {c.thumbnail ? (
@@ -319,7 +406,11 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
             </div>
           </div>
         ))}
-        {courses.length === 0 && <p className="col-span-full text-center text-sm text-[#888888] py-8">No courses yet.</p>}
+        {displayedCourses.length === 0 && (
+          <p className="col-span-full text-center text-sm text-[#888888] py-8">
+            {courses.length === 0 ? 'No courses yet.' : `No courses in "${activeCategory}".`}
+          </p>
+        )}
       </div>
     </div>
   );
