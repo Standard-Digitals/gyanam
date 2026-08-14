@@ -1,11 +1,11 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Inbox, LifeBuoy, PackageOpen, type LucideIcon } from 'lucide-react';
+import { Bell, Inbox, LifeBuoy, PackageOpen, GraduationCap, type LucideIcon } from 'lucide-react';
 
 export interface NotificationItem {
   id: string;
-  icon: 'lead' | 'ticket' | 'order';
+  icon: 'lead' | 'ticket' | 'order' | 'enrollment';
   text: string;
   href: string;
 }
@@ -14,6 +14,7 @@ const ICONS: Record<NotificationItem['icon'], LucideIcon> = {
   lead: Inbox,
   ticket: LifeBuoy,
   order: PackageOpen,
+  enrollment: GraduationCap,
 };
 
 export default function NotificationBell({ items }: { items: NotificationItem[] }) {

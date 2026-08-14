@@ -14,6 +14,7 @@ import {
   FileText,
   HelpCircle,
   ClipboardList,
+  Settings,
 } from 'lucide-react';
 
 export const QUICK_ACTIONS = [
@@ -56,5 +57,9 @@ export const NAV_GROUPS = [
       { href: '/admin/blog', label: 'Blog', icon: FileText },
       { href: '/admin/faq', label: 'FAQ', icon: HelpCircle },
     ],
+  },
+  {
+    label: 'System',
+    items: [{ href: '/admin/settings', label: 'Settings', icon: Settings }],
   },
 ];

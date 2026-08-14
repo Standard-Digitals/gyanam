@@ -1,28 +1,33 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { getCurrentAdmin } from '@/lib/adminSession';
-import AdminLogoutButton from './AdminLogoutButton';
+import AccountMenu from './AccountMenu';
 import CommandPalette from './_components/CommandPalette';
 import NotificationBell, { type NotificationItem } from './_components/NotificationBell';
 import { NAV_GROUPS } from './_components/navConfig';
 
 export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
-  const [admin, newLeads, openTickets, pendingOrders, studentsCount] = await Promise.all([
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const [admin, newLeads, openTickets, pendingOrders, newEnrollments, studentsCount, notifPrefs] = await Promise.all([
     getCurrentAdmin(),
     prisma.lead.count({ where: { status: 'NEW' } }),
     prisma.supportTicket.count({ where: { status: 'OPEN' } }),
     prisma.order.count({ where: { orderStatus: 'PLACED' } }),
+    prisma.enrollment.count({ where: { enrolledAt: { gte: since24h } } }),
     prisma.user.count(),
+    prisma.notificationPreference.upsert({ where: { id: 'default' }, update: {}, create: { id: 'default' } }),
   ]);
+  const adminProfile = admin ? await prisma.adminUser.findUnique({ where: { id: admin.adminId }, select: { name: true } }) : null;
   const initial = admin?.email?.[0]?.toUpperCase() ?? 'A';
 
   const formatCompact = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n));
   const badges: Record<string, string> = { students: formatCompact(studentsCount) };
 
   const notifications: NotificationItem[] = [
-    ...(newLeads > 0 ? [{ id: 'leads', icon: 'lead' as const, text: `${newLeads} new lead${newLeads === 1 ? '' : 's'} waiting for follow-up`, href: '/admin/leads' }] : []),
-    ...(openTickets > 0 ? [{ id: 'tickets', icon: 'ticket' as const, text: `${openTickets} support ticket${openTickets === 1 ? '' : 's'} still open`, href: '/admin/tickets' }] : []),
-    ...(pendingOrders > 0 ? [{ id: 'orders', icon: 'order' as const, text: `${pendingOrders} order${pendingOrders === 1 ? '' : 's'} pending dispatch`, href: '/admin/orders' }] : []),
+    ...(notifPrefs.newEnrollments && newEnrollments > 0 ? [{ id: 'enrollments', icon: 'enrollment' as const, text: `${newEnrollments} new enrollment${newEnrollments === 1 ? '' : 's'} in the last 24 hours`, href: '/admin/students' }] : []),
+    ...(notifPrefs.newLeads && newLeads > 0 ? [{ id: 'leads', icon: 'lead' as const, text: `${newLeads} new lead${newLeads === 1 ? '' : 's'} waiting for follow-up`, href: '/admin/leads' }] : []),
+    ...(notifPrefs.openTickets && openTickets > 0 ? [{ id: 'tickets', icon: 'ticket' as const, text: `${openTickets} support ticket${openTickets === 1 ? '' : 's'} still open`, href: '/admin/tickets' }] : []),
+    ...(notifPrefs.pendingOrders && pendingOrders > 0 ? [{ id: 'orders', icon: 'order' as const, text: `${pendingOrders} order${pendingOrders === 1 ? '' : 's'} pending dispatch`, href: '/admin/orders' }] : []),
   ];
 
   return (
@@ -72,14 +77,8 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
           </nav>
         </div>
 
-        <div className="p-4 border-t border-white/10 space-y-2">
-          <div className="flex items-center gap-2.5 px-2 py-1.5">
-            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white text-xs font-bold shrink-0">
-              {initial}
-            </div>
-            {admin && <p className="text-xs text-white/55 truncate">{admin.email}</p>}
-          </div>
-          <AdminLogoutButton />
+        <div className="p-4 border-t border-white/10">
+          {admin && <AccountMenu name={adminProfile?.name ?? ''} email={admin.email} role={admin.role} />}
         </div>
       </aside>
 

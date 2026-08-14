@@ -1,5 +1,11 @@
 import type { LucideIcon } from 'lucide-react';
 
+export const ADMIN_ROLE_LABELS: Record<string, string> = {
+  super: 'Super Admin',
+  editor: 'Content Editor',
+  course_manager: 'Course Manager',
+};
+
 export function PageHeader({
   title,
   subtitle,

@@ -277,6 +277,25 @@ model MockTestAttempt {
   @@index([submittedAt])
 }
 
+model SiteSettings {
+  id            String   @id @default("default")
+  academyName   String   @default("GYANAM Academy")
+  tagline       String   @default("Government Jobs Made Easy")
+  supportEmail  String   @default("help@gyanam.in")
+  supportPhone  String   @default("+91 98765 43210")
+  ogDescription String   @default("Prepare for SSC, Banking, Railway, UPSC, Assam ADRE & State Govt exams with live classes, mock tests, and expert mentorship.")
+  updatedAt     DateTime @updatedAt
+}
+
+model NotificationPreference {
+  id             String   @id @default("default")
+  newEnrollments Boolean  @default(true)
+  newLeads       Boolean  @default(true)
+  openTickets    Boolean  @default(true)
+  pendingOrders  Boolean  @default(true)
+  updatedAt      DateTime @updatedAt
+}
+
 model DownloadLog {
   id           String   @id @default(cuid())
   userId       String?
