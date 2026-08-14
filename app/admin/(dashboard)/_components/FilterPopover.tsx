@@ -5,10 +5,12 @@ import { Filter as FilterIcon, ChevronDown } from 'lucide-react';
 export default function FilterPopover({
   activeCount,
   onClear,
+  onApply,
   children,
 }: {
   activeCount: number;
   onClear: () => void;
+  onApply?: () => void;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -29,8 +31,14 @@ export default function FilterPopover({
           <div className="absolute top-[calc(100%+6px)] right-0 w-64 bg-white border border-[#F3DCDD] rounded-xl shadow-lg z-20 p-3 space-y-3">
             {children}
             <div className="flex gap-2 pt-1">
-              <button onClick={() => setOpen(false)} className="flex-1 px-3 py-1.5 bg-[#C12223] text-white font-bold text-xs rounded-lg cursor-pointer">
-                Done
+              <button
+                onClick={() => {
+                  onApply?.();
+                  setOpen(false);
+                }}
+                className="flex-1 px-3 py-1.5 bg-[#C12223] text-white font-bold text-xs rounded-lg cursor-pointer"
+              >
+                {onApply ? 'Apply' : 'Done'}
               </button>
               {activeCount > 0 && (
                 <button

@@ -1,8 +1,12 @@
 'use client';
 import { useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { Filter as FilterIcon, Download, ChevronDown } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { StatusPill } from '../_components/AdminUI';
+import FilterPopover from '../_components/FilterPopover';
+import FilterSelect from '../_components/FilterSelect';
+import DateRangeFields from '../_components/DateRangeFields';
+import { downloadCsv } from '../_components/exportCsv';
 
 interface EnrollmentRow {
   id: string;
@@ -32,21 +36,30 @@ export default function EnrollmentsManager({
   from,
   to,
   courseId,
+  paymentType,
+  status,
   allCourses,
+  paymentTypeOptions,
+  statusOptions,
   todayISO,
 }: {
   rows: EnrollmentRow[];
   from: string;
   to: string;
   courseId: string;
+  paymentType: string;
+  status: string;
   allCourses: { id: string; title: string }[];
+  paymentTypeOptions: string[];
+  statusOptions: string[];
   todayISO: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [draftCourse, setDraftCourse] = useState(courseId);
+  const [draftType, setDraftType] = useState(paymentType);
+  const [draftStatus, setDraftStatus] = useState(status);
   const [draftFrom, setDraftFrom] = useState(from);
   const [draftTo, setDraftTo] = useState(to);
 
@@ -60,36 +73,33 @@ export default function EnrollmentsManager({
   };
 
   const applyFilters = () => {
-    navigate({ course: draftCourse || null, from: draftFrom || null, to: draftTo || null });
-    setFiltersOpen(false);
+    navigate({
+      course: draftCourse || null,
+      type: draftType || null,
+      status: draftStatus || null,
+      from: draftFrom || null,
+      to: draftTo || null,
+    });
   };
 
   const clearFilters = () => {
     setDraftCourse('');
+    setDraftType('');
+    setDraftStatus('');
     setDraftFrom('');
     setDraftTo('');
-    navigate({ course: null, from: null, to: null });
-    setFiltersOpen(false);
+    navigate({ course: null, type: null, status: null, from: null, to: null });
   };
 
-  const isFiltered = Boolean(from || to || courseId);
-  const activeFilterCount = (from || to ? 1 : 0) + (courseId ? 1 : 0);
+  const isFiltered = Boolean(from || to || courseId || paymentType || status);
+  const activeFilterCount = (from || to ? 1 : 0) + (courseId ? 1 : 0) + (paymentType ? 1 : 0) + (status ? 1 : 0);
 
   const handleExport = () => {
-    const header = ['Student', 'Phone', 'Course', 'Type', 'Status', 'Date'];
-    const lines = rows.map((r) =>
-      [r.studentName, r.phone, r.courseTitle ?? '', r.paymentType, r.status, new Date(r.enrolledAt).toLocaleDateString()]
-        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
-        .join(',')
+    downloadCsv(
+      'enrollments.csv',
+      ['Student', 'Phone', 'Course', 'Type', 'Status', 'Date'],
+      rows.map((r) => [r.studentName, r.phone, r.courseTitle ?? '', r.paymentType, r.status, new Date(r.enrolledAt).toLocaleDateString()])
     );
-    const csv = [header.join(','), ...lines].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'enrollments.csv';
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   return (
@@ -118,64 +128,27 @@ export default function EnrollmentsManager({
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="relative">
-            <button
-              onClick={() => setFiltersOpen((v) => !v)}
-              className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#F3DCDD] rounded-xl text-xs font-bold text-[#1F1A1C] cursor-pointer"
-            >
-              <FilterIcon size={13} strokeWidth={2.25} />
-              Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
-              <ChevronDown size={13} strokeWidth={2.25} className="text-[#8A7A7B]" />
-            </button>
-            {filtersOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setFiltersOpen(false)} />
-                <div className="absolute top-[calc(100%+6px)] right-0 w-64 bg-white border border-[#F3DCDD] rounded-xl shadow-lg z-20 p-3 space-y-3">
-                  <div>
-                    <p className="text-[10px] font-bold text-[#888888] uppercase mb-1">Course</p>
-                    <select
-                      value={draftCourse}
-                      onChange={(e) => setDraftCourse(e.target.value)}
-                      className="w-full px-3 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg text-xs font-semibold"
-                    >
-                      <option value="">All courses</option>
-                      {allCourses.map((c) => (
-                        <option key={c.id} value={c.id}>{c.title}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-[#888888] uppercase mb-1">Date range</p>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="date"
-                        value={draftFrom}
-                        onChange={(e) => setDraftFrom(e.target.value)}
-                        className="w-full px-2 py-1.5 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg text-xs font-semibold"
-                      />
-                      <span className="text-[10px] text-[#8A7A7B] shrink-0">to</span>
-                      <input
-                        type="date"
-                        value={draftTo}
-                        onChange={(e) => setDraftTo(e.target.value)}
-                        className="w-full px-2 py-1.5 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg text-xs font-semibold"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex gap-2 pt-1">
-                    <button onClick={applyFilters} className="flex-1 px-3 py-1.5 bg-[#C12223] text-white font-bold text-xs rounded-lg cursor-pointer">
-                      Apply
-                    </button>
-                    {isFiltered && (
-                      <button onClick={clearFilters} className="px-3 py-1.5 bg-gray-100 text-gray-700 font-bold text-xs rounded-lg cursor-pointer">
-                        Clear
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          <FilterPopover activeCount={activeFilterCount} onApply={applyFilters} onClear={clearFilters}>
+            <FilterSelect
+              label="Course"
+              value={draftCourse}
+              onChange={setDraftCourse}
+              options={[{ label: 'All courses', value: '' }, ...allCourses.map((c) => ({ label: c.title, value: c.id }))]}
+            />
+            <FilterSelect
+              label="Type"
+              value={draftType}
+              onChange={setDraftType}
+              options={[{ label: 'All types', value: '' }, ...paymentTypeOptions.map((t) => ({ label: t, value: t }))]}
+            />
+            <FilterSelect
+              label="Status"
+              value={draftStatus}
+              onChange={setDraftStatus}
+              options={[{ label: 'All statuses', value: '' }, ...statusOptions.map((s) => ({ label: s, value: s }))]}
+            />
+            <DateRangeFields from={draftFrom} to={draftTo} onFromChange={setDraftFrom} onToChange={setDraftTo} />
+          </FilterPopover>
           <button onClick={handleExport} className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#F3DCDD] rounded-xl text-xs font-bold text-[#1F1A1C] cursor-pointer">
             <Download size={13} strokeWidth={2.25} />
             Export
