@@ -15,34 +15,40 @@ const QUICK_RANGES: { label: string; days: number | null }[] = [
 export default async function AdminEnrollmentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; to?: string }>;
+  searchParams: Promise<{ from?: string; to?: string; course?: string }>;
 }) {
   const sp = await searchParams;
   const from = sp.from?.trim() || '';
   const to = sp.to?.trim() || '';
+  const courseId = sp.course?.trim() || '';
 
-  const where: { enrolledAt?: { gte?: Date; lte?: Date } } = {};
+  const where: { enrolledAt?: { gte?: Date; lte?: Date }; courseId?: string } = {};
   if (from || to) {
     where.enrolledAt = {};
     if (from) where.enrolledAt.gte = new Date(`${from}T00:00:00.000Z`);
     if (to) where.enrolledAt.lte = new Date(`${to}T23:59:59.999Z`);
   }
+  if (courseId) where.courseId = courseId;
 
-  const enrollments = await prisma.enrollment.findMany({ where, orderBy: { enrolledAt: 'desc' } });
+  const [enrollments, allCourses] = await Promise.all([
+    prisma.enrollment.findMany({ where, orderBy: { enrolledAt: 'desc' } }),
+    prisma.course.findMany({ select: { id: true, title: true }, orderBy: { title: 'asc' } }),
+  ]);
   const userIds = [...new Set(enrollments.map((e) => e.userId))];
-  const courseIds = [...new Set(enrollments.map((e) => e.courseId))];
+  const enrolledCourseIds = [...new Set(enrollments.map((e) => e.courseId))];
   const [users, courses] = await Promise.all([
     prisma.user.findMany({ where: { id: { in: userIds } } }),
-    prisma.course.findMany({ where: { id: { in: courseIds } } }),
+    prisma.course.findMany({ where: { id: { in: enrolledCourseIds } } }),
   ]);
   const userMap = new Map(users.map((u) => [u.id, u]));
   const courseMap = new Map(courses.map((c) => [c.id, c]));
+  const isFiltered = Boolean(from || to || courseId);
 
   const today = new Date();
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Enrollments" subtitle={`${enrollments.length} total${from || to ? ' · filtered' : ''}`} />
+      <PageHeader title="Enrollments" subtitle={`${enrollments.length} total${isFiltered ? ' · filtered' : ''}`} />
 
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -51,7 +57,10 @@ export default async function AdminEnrollmentsPage({
             const rangeFrom = isAllTime ? '' : toDateInputValue(new Date(today.getTime() - r.days! * 24 * 60 * 60 * 1000));
             const rangeTo = isAllTime ? '' : toDateInputValue(today);
             const isActive = isAllTime ? !from && !to : from === rangeFrom && to === rangeTo;
-            const href = isAllTime ? '/admin/enrollments' : `/admin/enrollments?from=${rangeFrom}&to=${rangeTo}`;
+            const courseQuery = courseId ? `&course=${courseId}` : '';
+            const href = isAllTime
+              ? `/admin/enrollments${courseId ? `?course=${courseId}` : ''}`
+              : `/admin/enrollments?from=${rangeFrom}&to=${rangeTo}${courseQuery}`;
             return (
               <a
                 key={r.label}
@@ -68,7 +77,17 @@ export default async function AdminEnrollmentsPage({
           })}
         </div>
 
-        <form method="get" className="flex items-center gap-2">
+        <form method="get" className="flex items-center gap-2 flex-wrap">
+          <select
+            name="course"
+            defaultValue={courseId}
+            className="px-3 py-2 bg-white border border-[#F3DCDD] rounded-xl text-xs font-semibold text-[#1F1A1C] max-w-[200px]"
+          >
+            <option value="">All courses</option>
+            {allCourses.map((c) => (
+              <option key={c.id} value={c.id}>{c.title}</option>
+            ))}
+          </select>
           <input
             type="date"
             name="from"
@@ -85,7 +104,7 @@ export default async function AdminEnrollmentsPage({
           <button type="submit" className="px-3.5 py-2 bg-[#C12223] text-white font-bold text-xs rounded-xl cursor-pointer">
             Filter
           </button>
-          {(from || to) && (
+          {isFiltered && (
             <a href="/admin/enrollments" className="px-3.5 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl">
               Clear
             </a>
@@ -128,7 +147,7 @@ export default async function AdminEnrollmentsPage({
             {enrollments.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-[#888888] text-sm">
-                  {from || to ? 'No enrollments in this date range.' : 'No enrollments yet.'}
+                  {isFiltered ? 'No enrollments match these filters.' : 'No enrollments yet.'}
                 </td>
               </tr>
             )}
