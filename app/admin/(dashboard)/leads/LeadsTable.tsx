@@ -39,25 +39,33 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
   const [leads, setLeads] = useState(initialLeads);
   const [statusFilter, setStatusFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
+  const [examFilter, setExamFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
-  const activeCount = (statusFilter ? 1 : 0) + (sourceFilter ? 1 : 0) + (dateFrom || dateTo ? 1 : 0);
+  const activeCount = (statusFilter ? 1 : 0) + (sourceFilter ? 1 : 0) + (examFilter ? 1 : 0) + (dateFrom || dateTo ? 1 : 0);
+
+  const examOptions = useMemo(
+    () => [...new Set(leads.map((l) => l.targetExam).filter((e): e is string => Boolean(e)))].sort(),
+    [leads]
+  );
 
   const filteredLeads = useMemo(() => {
     return leads.filter((l) => {
       if (statusFilter && l.status !== statusFilter) return false;
       if (sourceFilter && l.source !== sourceFilter) return false;
+      if (examFilter && l.targetExam !== examFilter) return false;
       const day = l.createdAt.slice(0, 10);
       if (dateFrom && day < dateFrom) return false;
       if (dateTo && day > dateTo) return false;
       return true;
     });
-  }, [leads, statusFilter, sourceFilter, dateFrom, dateTo]);
+  }, [leads, statusFilter, sourceFilter, examFilter, dateFrom, dateTo]);
 
   const clearFilters = () => {
     setStatusFilter('');
     setSourceFilter('');
+    setExamFilter('');
     setDateFrom('');
     setDateTo('');
   };
@@ -98,6 +106,12 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
             value={sourceFilter}
             onChange={setSourceFilter}
             options={[{ label: 'All sources', value: '' }, ...SOURCE_OPTIONS.map((s) => ({ label: s.replace('_', ' '), value: s }))]}
+          />
+          <FilterSelect
+            label="Target Exam"
+            value={examFilter}
+            onChange={setExamFilter}
+            options={[{ label: 'All exams', value: '' }, ...examOptions.map((e) => ({ label: e, value: e }))]}
           />
           <DateRangeFields from={dateFrom} to={dateTo} onFromChange={setDateFrom} onToChange={setDateTo} />
         </FilterPopover>
