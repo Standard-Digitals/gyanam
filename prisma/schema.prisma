@@ -212,6 +212,7 @@ model FAQItem {
   category  String
   question  String
   answer    String
+  linkUrl   String?
   createdAt DateTime @default(now())
 }
 

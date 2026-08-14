@@ -143,4 +143,5 @@ export interface FAQItem {
   category: 'General' | 'Courses & Batches' | 'Mock Tests' | 'App & Access' | 'Payments';
   question: string;
   answer: string;
+  linkUrl?: string | null;
 }

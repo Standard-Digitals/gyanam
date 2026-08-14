@@ -6,9 +6,24 @@ interface Faq {
   category: string;
   question: string;
   answer: string;
+  linkUrl: string | null;
 }
 
-const EMPTY_FORM = { category: 'General', question: '', answer: '' };
+const EMPTY_FORM = { category: 'General', question: '', answer: '', linkUrl: '' };
+
+const PAGE_OPTIONS = [
+  { label: 'No link', value: '' },
+  { label: 'Home', value: '/' },
+  { label: 'Courses', value: '/courses' },
+  { label: 'Daily Quiz', value: '/daily-quiz' },
+  { label: 'Current Affairs', value: '/current-affairs' },
+  { label: 'Study Material', value: '/study-material' },
+  { label: 'Downloads', value: '/downloads' },
+  { label: 'FAQ / Helpdesk', value: '/faq' },
+  { label: 'About', value: '/about' },
+  { label: 'Contact', value: '/contact' },
+];
+const CUSTOM_URL = '__custom__';
 
 export default function FaqManager({ faqs: initialFaqs }: { faqs: Faq[] }) {
   const [faqs, setFaqs] = useState(initialFaqs);
@@ -25,7 +40,7 @@ export default function FaqManager({ faqs: initialFaqs }: { faqs: Faq[] }) {
 
   const startEdit = (faq: Faq) => {
     setEditingId(faq.id);
-    setForm({ category: faq.category, question: faq.question, answer: faq.answer });
+    setForm({ category: faq.category, question: faq.question, answer: faq.answer, linkUrl: faq.linkUrl ?? '' });
     setError(null);
   };
 
@@ -120,6 +135,26 @@ export default function FaqManager({ faqs: initialFaqs }: { faqs: Faq[] }) {
             onChange={(e) => setForm({ ...form, answer: e.target.value })}
             className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
           />
+          <div>
+            <label className="text-[11px] font-bold text-[#888888] uppercase tracking-wide">Link to page (optional)</label>
+            <select
+              value={PAGE_OPTIONS.some((o) => o.value === form.linkUrl) ? form.linkUrl : CUSTOM_URL}
+              onChange={(e) => setForm({ ...form, linkUrl: e.target.value === CUSTOM_URL ? form.linkUrl || '/' : e.target.value })}
+              className="w-full mt-1 px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+            >
+              {PAGE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              <option value={CUSTOM_URL}>Custom URL...</option>
+            </select>
+            {!PAGE_OPTIONS.some((o) => o.value === form.linkUrl) && (
+              <input
+                type="text"
+                placeholder="/courses/ssc-cgl-2026-foundation"
+                value={form.linkUrl}
+                onChange={(e) => setForm({ ...form, linkUrl: e.target.value })}
+                className="w-full mt-1.5 px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+              />
+            )}
+          </div>
           {error && <p className="text-xs font-semibold text-red-600">{error}</p>}
           <div className="flex gap-2">
             <button
@@ -146,6 +181,9 @@ export default function FaqManager({ faqs: initialFaqs }: { faqs: Faq[] }) {
               <span className="text-[10px] font-bold text-[#C12223] uppercase">{faq.category}</span>
               <h4 className="font-bold text-sm text-[#1F1A1C]">{faq.question}</h4>
               <p className="text-xs text-[#555555] mt-1">{faq.answer}</p>
+              {faq.linkUrl && (
+                <p className="text-[11px] font-semibold text-[#C12223] mt-1">Links to {faq.linkUrl}</p>
+              )}
             </div>
             <div className="flex gap-2 shrink-0">
               <button

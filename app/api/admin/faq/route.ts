@@ -6,6 +6,7 @@ const bodySchema = z.object({
   category: z.string().min(1),
   question: z.string().min(1),
   answer: z.string().min(1),
+  linkUrl: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {

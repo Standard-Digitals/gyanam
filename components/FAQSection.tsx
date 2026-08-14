@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import { FAQItem } from '../types';
-import { ChevronDown, HelpCircle, Phone, Search } from 'lucide-react';
+import { ChevronDown, HelpCircle, Phone, Search, ArrowRight } from 'lucide-react';
 
 export const FAQSection: React.FC<{ faqs: FAQItem[] }> = ({ faqs }) => {
   const [openId, setOpenId] = useState<string>('faq-1');
@@ -90,6 +91,14 @@ export const FAQSection: React.FC<{ faqs: FAQItem[] }> = ({ faqs }) => {
                       className="px-5 pb-5 text-xs sm:text-sm text-[#555555] leading-relaxed border-t border-[#F3DCDD]/60 pt-3"
                     >
                       {faq.answer}
+                      {faq.linkUrl && (
+                        <Link
+                          href={faq.linkUrl}
+                          className="inline-flex items-center gap-1.5 mt-3 text-xs font-bold text-[#C12223] hover:underline"
+                        >
+                          Learn more <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
