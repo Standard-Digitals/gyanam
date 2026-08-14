@@ -1,8 +1,34 @@
 import { prisma } from '@/lib/prisma';
 import { PageHeader, StatusPill } from '../_components/AdminUI';
 
-export default async function AdminEnrollmentsPage() {
-  const enrollments = await prisma.enrollment.findMany({ orderBy: { enrolledAt: 'desc' } });
+function toDateInputValue(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+const QUICK_RANGES: { label: string; days: number | null }[] = [
+  { label: 'Today', days: 0 },
+  { label: 'Last 7 days', days: 7 },
+  { label: 'Last 30 days', days: 30 },
+  { label: 'All time', days: null },
+];
+
+export default async function AdminEnrollmentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string; to?: string }>;
+}) {
+  const sp = await searchParams;
+  const from = sp.from?.trim() || '';
+  const to = sp.to?.trim() || '';
+
+  const where: { enrolledAt?: { gte?: Date; lte?: Date } } = {};
+  if (from || to) {
+    where.enrolledAt = {};
+    if (from) where.enrolledAt.gte = new Date(`${from}T00:00:00.000Z`);
+    if (to) where.enrolledAt.lte = new Date(`${to}T23:59:59.999Z`);
+  }
+
+  const enrollments = await prisma.enrollment.findMany({ where, orderBy: { enrolledAt: 'desc' } });
   const userIds = [...new Set(enrollments.map((e) => e.userId))];
   const courseIds = [...new Set(enrollments.map((e) => e.courseId))];
   const [users, courses] = await Promise.all([
@@ -12,9 +38,61 @@ export default async function AdminEnrollmentsPage() {
   const userMap = new Map(users.map((u) => [u.id, u]));
   const courseMap = new Map(courses.map((c) => [c.id, c]));
 
+  const today = new Date();
+
   return (
-    <div className="space-y-6">
-      <PageHeader title="Enrollments" subtitle={`${enrollments.length} total`} />
+    <div className="space-y-4">
+      <PageHeader title="Enrollments" subtitle={`${enrollments.length} total${from || to ? ' · filtered' : ''}`} />
+
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {QUICK_RANGES.map((r) => {
+            const isAllTime = r.days === null;
+            const rangeFrom = isAllTime ? '' : toDateInputValue(new Date(today.getTime() - r.days! * 24 * 60 * 60 * 1000));
+            const rangeTo = isAllTime ? '' : toDateInputValue(today);
+            const isActive = isAllTime ? !from && !to : from === rangeFrom && to === rangeTo;
+            const href = isAllTime ? '/admin/enrollments' : `/admin/enrollments?from=${rangeFrom}&to=${rangeTo}`;
+            return (
+              <a
+                key={r.label}
+                href={href}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
+                  isActive
+                    ? 'bg-white text-[#1F1A1C] border border-[#F3DCDD] shadow-sm'
+                    : 'text-[#8A7A7B] hover:text-[#1F1A1C]'
+                }`}
+              >
+                {r.label}
+              </a>
+            );
+          })}
+        </div>
+
+        <form method="get" className="flex items-center gap-2">
+          <input
+            type="date"
+            name="from"
+            defaultValue={from}
+            className="px-3 py-2 bg-white border border-[#F3DCDD] rounded-xl text-xs font-semibold text-[#1F1A1C]"
+          />
+          <span className="text-xs text-[#8A7A7B]">to</span>
+          <input
+            type="date"
+            name="to"
+            defaultValue={to}
+            className="px-3 py-2 bg-white border border-[#F3DCDD] rounded-xl text-xs font-semibold text-[#1F1A1C]"
+          />
+          <button type="submit" className="px-3.5 py-2 bg-[#C12223] text-white font-bold text-xs rounded-xl cursor-pointer">
+            Filter
+          </button>
+          {(from || to) && (
+            <a href="/admin/enrollments" className="px-3.5 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl">
+              Clear
+            </a>
+          )}
+        </form>
+      </div>
+
       <div className="bg-white rounded-2xl border border-[#F3DCDD] shadow-sm overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -49,7 +127,9 @@ export default async function AdminEnrollmentsPage() {
             })}
             {enrollments.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-[#888888] text-sm">No enrollments yet.</td>
+                <td colSpan={5} className="px-4 py-8 text-center text-[#888888] text-sm">
+                  {from || to ? 'No enrollments in this date range.' : 'No enrollments yet.'}
+                </td>
               </tr>
             )}
           </tbody>
