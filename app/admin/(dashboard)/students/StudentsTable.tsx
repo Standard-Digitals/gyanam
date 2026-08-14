@@ -1,7 +1,11 @@
 'use client';
 import { useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { Filter as FilterIcon, Download, ChevronDown } from 'lucide-react';
+import { Download } from 'lucide-react';
+import FilterPopover from '../_components/FilterPopover';
+import FilterSelect from '../_components/FilterSelect';
+import DateRangeFields from '../_components/DateRangeFields';
+import { downloadCsv } from '../_components/exportCsv';
 
 interface StudentRow {
   id: string;
@@ -54,7 +58,11 @@ export default function StudentsTable({
   pageSize,
   filter,
   examFilter,
+  courseFilter,
+  from,
+  to,
   targetExams,
+  allCourses,
 }: {
   rows: StudentRow[];
   total: number;
@@ -62,12 +70,20 @@ export default function StudentsTable({
   pageSize: number;
   filter: string;
   examFilter: string;
+  courseFilter: string;
+  from: string;
+  to: string;
   targetExams: string[];
+  allCourses: { id: string; title: string }[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [draftFilter, setDraftFilter] = useState(filter);
+  const [draftExam, setDraftExam] = useState(examFilter);
+  const [draftCourse, setDraftCourse] = useState(courseFilter);
+  const [draftFrom, setDraftFrom] = useState(from);
+  const [draftTo, setDraftTo] = useState(to);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const pageNumbers = getPageNumbers(page, totalPages);
@@ -81,21 +97,34 @@ export default function StudentsTable({
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const applyFilters = () => {
+    navigate({
+      filter: draftFilter === 'all' ? null : draftFilter,
+      exam: draftExam || null,
+      course: draftCourse || null,
+      from: draftFrom || null,
+      to: draftTo || null,
+      page: null,
+    });
+  };
+
+  const clearFilters = () => {
+    setDraftFilter('all');
+    setDraftExam('');
+    setDraftCourse('');
+    setDraftFrom('');
+    setDraftTo('');
+    navigate({ filter: null, exam: null, course: null, from: null, to: null, page: null });
+  };
+
+  const activeFilterCount = (examFilter ? 1 : 0) + (courseFilter ? 1 : 0) + (from || to ? 1 : 0);
+
   const handleExport = () => {
-    const header = ['Name', 'Email', 'Phone', 'Target Exam', 'Course', 'Status', 'Joined'];
-    const lines = rows.map((r) =>
-      [r.name, r.email ?? '', r.phone, r.targetExam ?? '', r.course ?? '', r.status, new Date(r.joinedAt).toLocaleDateString()]
-        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
-        .join(',')
+    downloadCsv(
+      `students-page-${page}.csv`,
+      ['Name', 'Email', 'Phone', 'Target Exam', 'Course', 'Status', 'Joined'],
+      rows.map((r) => [r.name, r.email ?? '', r.phone, r.targetExam ?? '', r.course ?? '', r.status, new Date(r.joinedAt).toLocaleDateString()])
     );
-    const csv = [header.join(','), ...lines].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `students-page-${page}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   return (
@@ -105,7 +134,10 @@ export default function StudentsTable({
           {FILTER_TABS.map((t) => (
             <button
               key={t.key}
-              onClick={() => navigate({ filter: t.key === 'all' ? null : t.key, page: null })}
+              onClick={() => {
+                setDraftFilter(t.key);
+                navigate({ filter: t.key === 'all' ? null : t.key, page: null });
+              }}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                 filter === t.key
                   ? 'bg-white text-[#1F1A1C] border border-[#F3DCDD] shadow-sm'
@@ -117,37 +149,27 @@ export default function StudentsTable({
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative">
-            <button
-              onClick={() => setFiltersOpen((v) => !v)}
-              className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#F3DCDD] rounded-xl text-xs font-bold text-[#1F1A1C] cursor-pointer"
-            >
-              <FilterIcon size={13} strokeWidth={2.25} />
-              Filters{examFilter ? ': ' + examFilter : ''}
-              <ChevronDown size={13} strokeWidth={2.25} className="text-[#8A7A7B]" />
-            </button>
-            {filtersOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setFiltersOpen(false)} />
-                <div className="absolute top-[calc(100%+6px)] right-0 w-56 bg-white border border-[#F3DCDD] rounded-xl shadow-lg z-20 p-3 space-y-2">
-                  <p className="text-[10px] font-bold text-[#888888] uppercase">Target Exam</p>
-                  <select
-                    value={examFilter}
-                    onChange={(e) => {
-                      navigate({ exam: e.target.value || null, page: null });
-                      setFiltersOpen(false);
-                    }}
-                    className="w-full px-3 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg text-xs font-semibold"
-                  >
-                    <option value="">All exams</option>
-                    {targetExams.map((ex) => (
-                      <option key={ex} value={ex}>{ex}</option>
-                    ))}
-                  </select>
-                </div>
-              </>
-            )}
-          </div>
+          <FilterPopover activeCount={activeFilterCount} onApply={applyFilters} onClear={clearFilters}>
+            <FilterSelect
+              label="Status"
+              value={draftFilter}
+              onChange={setDraftFilter}
+              options={FILTER_TABS.map((t) => ({ label: t.label, value: t.key }))}
+            />
+            <FilterSelect
+              label="Target Exam"
+              value={draftExam}
+              onChange={setDraftExam}
+              options={[{ label: 'All exams', value: '' }, ...targetExams.map((ex) => ({ label: ex, value: ex }))]}
+            />
+            <FilterSelect
+              label="Course"
+              value={draftCourse}
+              onChange={setDraftCourse}
+              options={[{ label: 'All courses', value: '' }, ...allCourses.map((c) => ({ label: c.title, value: c.id }))]}
+            />
+            <DateRangeFields from={draftFrom} to={draftTo} onFromChange={setDraftFrom} onToChange={setDraftTo} />
+          </FilterPopover>
           <button onClick={handleExport} className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#F3DCDD] rounded-xl text-xs font-bold text-[#1F1A1C] cursor-pointer">
             <Download size={13} strokeWidth={2.25} />
             Export
