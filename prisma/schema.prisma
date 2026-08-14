@@ -225,6 +225,7 @@ model Quiz {
   timeLimitMinutes Int
   totalMarks       Int
   difficulty       String
+  thumbnail        String?
   questions        Json
   createdAt        DateTime @default(now())
 }

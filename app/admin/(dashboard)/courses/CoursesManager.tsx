@@ -2,6 +2,7 @@
 import { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Star, Users, PlayCircle, ArrowUpDown, ChevronDown } from 'lucide-react';
+import ImageUploadField from '../_components/ImageUploadField';
 
 interface Course {
   id: string;
@@ -286,7 +287,7 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
             <input type="number" placeholder="Original Price (Rs)" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
             <input type="number" placeholder="Discount Price (Rs)" value={form.discountPrice} onChange={(e) => setForm({ ...form, discountPrice: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
           </div>
-          <input type="text" placeholder="Thumbnail URL" value={form.thumbnail} onChange={(e) => setForm({ ...form, thumbnail: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          <ImageUploadField label="Thumbnail" value={form.thumbnail} onChange={(url) => setForm({ ...form, thumbnail: url })} />
           <textarea placeholder="Features (one per line)" rows={3} value={form.featuresText} onChange={(e) => setForm({ ...form, featuresText: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
           <div>
             <textarea

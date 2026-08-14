@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import ImageUploadField from '../_components/ImageUploadField';
 
 interface Mentor {
   id: string;
@@ -128,7 +129,7 @@ export default function MentorsManager({ mentors: initialMentors }: { mentors: M
             <input type="number" placeholder="Selections Mentored" value={form.selectionsMentored} onChange={(e) => setForm({ ...form, selectionsMentored: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
             <input type="number" step="0.1" min="0" max="5" placeholder="Rating" value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
           </div>
-          <input type="text" placeholder="Image URL" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          <ImageUploadField label="Photo" value={form.image} onChange={(url) => setForm({ ...form, image: url })} />
           <textarea placeholder="Bio" rows={3} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
           {error && <p className="text-xs font-semibold text-red-600">{error}</p>}
           <div className="flex gap-2">

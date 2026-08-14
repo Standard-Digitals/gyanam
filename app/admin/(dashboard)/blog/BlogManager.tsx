@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import ImageUploadField from '../_components/ImageUploadField';
 
 interface Blog {
   id: string;
@@ -151,13 +152,7 @@ export default function BlogManager({ posts: initialPosts }: { posts: Blog[] }) 
               className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
             />
           </div>
-          <input
-            type="text"
-            placeholder="Image URL"
-            value={form.imageUrl}
-            onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-            className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
-          />
+          <ImageUploadField label="Image" value={form.imageUrl} onChange={(url) => setForm({ ...form, imageUrl: url })} />
           <textarea
             placeholder="Excerpt"
             rows={3}

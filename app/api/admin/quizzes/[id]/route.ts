@@ -17,6 +17,7 @@ const bodySchema = z.object({
   date: z.string().min(1),
   timeLimitMinutes: z.number().int().positive(),
   difficulty: z.string().min(1),
+  thumbnail: z.string().optional(),
   questions: z.array(questionSchema).min(1),
 });
 

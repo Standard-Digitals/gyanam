@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import ImageUploadField from '../_components/ImageUploadField';
 
 interface QuizQuestion {
   id: number;
@@ -17,6 +18,7 @@ interface Quiz {
   date: string;
   timeLimitMinutes: number;
   difficulty: string;
+  thumbnail: string | null;
   questions: QuizQuestion[];
 }
 
@@ -35,6 +37,7 @@ const EMPTY_FORM = {
   date: '',
   timeLimitMinutes: 5,
   difficulty: 'Moderate',
+  thumbnail: '',
   questions: [EMPTY_QUESTION(1)],
 };
 
@@ -62,6 +65,7 @@ export default function QuizzesManager({ quizzes: initialQuizzes }: { quizzes: Q
       date: quiz.date,
       timeLimitMinutes: quiz.timeLimitMinutes,
       difficulty: quiz.difficulty,
+      thumbnail: quiz.thumbnail ?? '',
       questions: quiz.questions.map((q) => ({ ...q, options: [...q.options] })),
     });
     setError(null);
@@ -114,6 +118,7 @@ export default function QuizzesManager({ quizzes: initialQuizzes }: { quizzes: Q
       date: form.date,
       timeLimitMinutes: Number(form.timeLimitMinutes),
       difficulty: form.difficulty,
+      thumbnail: form.thumbnail || undefined,
       questions: form.questions,
     };
     try {
@@ -182,6 +187,7 @@ export default function QuizzesManager({ quizzes: initialQuizzes }: { quizzes: Q
               {DIFFICULTIES.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
+          <ImageUploadField label="Thumbnail" value={form.thumbnail} onChange={(url) => setForm({ ...form, thumbnail: url })} />
 
           <div className="space-y-3 pt-3 border-t border-gray-100">
             <p className="text-[11px] font-bold text-[#888888] uppercase">Questions ({form.questions.length})</p>
@@ -247,9 +253,15 @@ export default function QuizzesManager({ quizzes: initialQuizzes }: { quizzes: Q
       <div className="space-y-2">
         {quizzes.map((quiz) => (
           <div key={quiz.id} className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm hover:shadow-md transition-shadow flex items-start justify-between gap-4">
-            <div>
-              <span className="text-[10px] font-bold text-[#C12223] uppercase">{quiz.subject} · {quiz.examCategory} · {quiz.questions.length} Qs</span>
-              <h4 className="font-bold text-sm text-[#1F1A1C]">{quiz.title}</h4>
+            <div className="flex items-start gap-3">
+              {quiz.thumbnail && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={quiz.thumbnail} alt="" className="w-11 h-11 rounded-lg object-cover border border-[#F3DCDD] shrink-0" />
+              )}
+              <div>
+                <span className="text-[10px] font-bold text-[#C12223] uppercase">{quiz.subject} · {quiz.examCategory} · {quiz.questions.length} Qs</span>
+                <h4 className="font-bold text-sm text-[#1F1A1C]">{quiz.title}</h4>
+              </div>
             </div>
             <div className="flex gap-2 shrink-0">
               <button onClick={() => startEdit(quiz)} className="px-3 py-1.5 bg-gray-100 text-gray-700 font-bold text-xs rounded-lg cursor-pointer">Edit</button>

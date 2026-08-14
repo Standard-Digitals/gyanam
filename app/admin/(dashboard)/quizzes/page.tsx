@@ -13,6 +13,7 @@ export default async function AdminQuizzesPage() {
         date: q.date,
         timeLimitMinutes: q.timeLimitMinutes,
         difficulty: q.difficulty,
+        thumbnail: q.thumbnail,
         questions: q.questions as { id: number; question: string; options: string[]; correctAnswer: number; explanation: string }[],
       }))}
     />
