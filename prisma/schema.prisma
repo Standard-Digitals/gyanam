@@ -227,8 +227,11 @@ model Quiz {
   totalMarks       Int
   difficulty       String
   thumbnail        String?
+  courseId         String?
   questions        Json
   createdAt        DateTime @default(now())
+
+  @@index([courseId])
 }
 
 model QuizAttempt {

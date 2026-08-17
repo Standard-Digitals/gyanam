@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUserProfile } from '@/lib/currentUser';
 import { getCourseCurriculum } from '@/lib/data/curriculum';
+import { getQuizzesByCourseId } from '@/lib/data/quizzes';
 import CoursePlayer from './CoursePlayer';
 
 export default async function CoursePlayerPage({
@@ -25,7 +26,10 @@ export default async function CoursePlayerPage({
   });
   if (!enrollment) redirect(`/courses/${slug}`);
 
-  const chapters = await getCourseCurriculum(course.id);
+  const [chapters, courseQuizzes] = await Promise.all([
+    getCourseCurriculum(course.id),
+    getQuizzesByCourseId(course.id),
+  ]);
   const flatTopics = chapters.flatMap((c) => c.topics);
 
   const topicIds = flatTopics.map((t) => t.id);
@@ -48,6 +52,15 @@ export default async function CoursePlayerPage({
       chapters={chapters}
       completedTopicIds={completedTopicIds}
       initialTopicId={initialTopicId}
+      quizzes={courseQuizzes.map((q) => ({
+        id: q.id,
+        title: q.title,
+        examCategory: q.examCategory,
+        totalQuestions: q.totalQuestions,
+        timeLimitMinutes: q.timeLimitMinutes,
+        difficulty: q.difficulty,
+        questions: q.questions,
+      }))}
     />
   );
 }

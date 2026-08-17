@@ -19,6 +19,7 @@ interface Quiz {
   timeLimitMinutes: number;
   difficulty: string;
   thumbnail: string | null;
+  courseId: string | null;
   questions: QuizQuestion[];
 }
 
@@ -38,12 +39,13 @@ const EMPTY_FORM = {
   timeLimitMinutes: 5,
   difficulty: 'Moderate',
   thumbnail: '',
+  courseId: '',
   questions: [EMPTY_QUESTION(1)],
 };
 
 const DIFFICULTIES = ['Easy', 'Moderate', 'Hard'];
 
-export default function QuizzesManager({ quizzes: initialQuizzes }: { quizzes: Quiz[] }) {
+export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { quizzes: Quiz[]; courses: { id: string; title: string }[] }) {
   const [quizzes, setQuizzes] = useState(initialQuizzes);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -66,6 +68,7 @@ export default function QuizzesManager({ quizzes: initialQuizzes }: { quizzes: Q
       timeLimitMinutes: quiz.timeLimitMinutes,
       difficulty: quiz.difficulty,
       thumbnail: quiz.thumbnail ?? '',
+      courseId: quiz.courseId ?? '',
       questions: quiz.questions.map((q) => ({ ...q, options: [...q.options] })),
     });
     setError(null);
@@ -119,6 +122,7 @@ export default function QuizzesManager({ quizzes: initialQuizzes }: { quizzes: Q
       timeLimitMinutes: Number(form.timeLimitMinutes),
       difficulty: form.difficulty,
       thumbnail: form.thumbnail || undefined,
+      courseId: form.courseId || null,
       questions: form.questions,
     };
     try {
@@ -188,6 +192,18 @@ export default function QuizzesManager({ quizzes: initialQuizzes }: { quizzes: Q
             </select>
           </div>
           <ImageUploadField label="Thumbnail" value={form.thumbnail} onChange={(url) => setForm({ ...form, thumbnail: url })} />
+
+          <div>
+            <label className="text-[11px] font-bold text-[#888888] uppercase tracking-wide">Link to Course (optional)</label>
+            <select
+              value={form.courseId}
+              onChange={(e) => setForm({ ...form, courseId: e.target.value })}
+              className="w-full mt-1 px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+            >
+              <option value="">Not linked (general Daily Quiz)</option>
+              {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+            </select>
+          </div>
 
           <div className="space-y-3 pt-3 border-t border-gray-100">
             <p className="text-[11px] font-bold text-[#888888] uppercase">Questions ({form.questions.length})</p>
@@ -261,6 +277,11 @@ export default function QuizzesManager({ quizzes: initialQuizzes }: { quizzes: Q
               <div>
                 <span className="text-[10px] font-bold text-[#C12223] uppercase">{quiz.subject} · {quiz.examCategory} · {quiz.questions.length} Qs</span>
                 <h4 className="font-bold text-sm text-[#1F1A1C]">{quiz.title}</h4>
+                {quiz.courseId && (
+                  <p className="text-[11px] text-[#127A52] font-semibold mt-0.5">
+                    Linked to: {courses.find((c) => c.id === quiz.courseId)?.title ?? 'Unknown course'}
+                  </p>
+                )}
               </div>
             </div>
             <div className="flex gap-2 shrink-0">

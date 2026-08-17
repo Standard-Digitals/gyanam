@@ -18,6 +18,7 @@ const bodySchema = z.object({
   timeLimitMinutes: z.number().int().positive(),
   difficulty: z.string().min(1),
   thumbnail: z.string().optional(),
+  courseId: z.string().nullable().optional(),
   questions: z.array(questionSchema).min(1),
 });
 
