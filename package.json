@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed-demo": "tsx prisma/seedDemo.ts",
     "admin:create": "tsx prisma/createAdmin.ts"
   },
   "dependencies": {
