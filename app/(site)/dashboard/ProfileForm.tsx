@@ -38,29 +38,29 @@ export default function ProfileForm({ name, phone, targetExam }: { name: string 
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-[#F3DCDD] shadow-sm space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#F3DCDD] shadow-sm space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-bold text-[#555555] uppercase tracking-wider mb-1">Full Name</label>
+          <label className="block text-xs font-bold text-[#555555] uppercase tracking-wider mb-1.5">Full Name</label>
           <input
             type="text"
             value={formName}
             onChange={(e) => setFormName(e.target.value)}
             placeholder="Enter your name"
-            className="w-full px-3.5 py-2.5 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+            className="w-full px-3.5 py-2.5 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold outline-none focus:border-[#C12223] transition"
           />
         </div>
         <div>
-          <label className="block text-xs font-bold text-[#555555] uppercase tracking-wider mb-1">Mobile Number</label>
+          <label className="block text-xs font-bold text-[#555555] uppercase tracking-wider mb-1.5">Mobile Number</label>
           <input type="text" value={`+91 ${phone}`} disabled className="w-full px-3.5 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-sm font-semibold text-gray-500" />
         </div>
       </div>
       <div>
-        <label className="block text-xs font-bold text-[#555555] uppercase tracking-wider mb-1">Target Exam</label>
+        <label className="block text-xs font-bold text-[#555555] uppercase tracking-wider mb-1.5">Target Exam</label>
         <select
           value={formTargetExam}
           onChange={(e) => setFormTargetExam(e.target.value)}
-          className="w-full px-3.5 py-2.5 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+          className="w-full px-3.5 py-2.5 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold outline-none focus:border-[#C12223] transition"
         >
           {TARGET_EXAMS.map((exam) => (
             <option key={exam} value={exam}>{exam}</option>
@@ -71,7 +71,7 @@ export default function ProfileForm({ name, phone, targetExam }: { name: string 
       <button
         onClick={handleSave}
         disabled={isSubmitting}
-        className="px-5 py-2.5 bg-[#C12223] text-white font-bold text-xs rounded-xl disabled:opacity-50 cursor-pointer"
+        className="px-5 py-2.5 bg-[#C12223] text-white font-bold text-xs rounded-xl disabled:opacity-50 cursor-pointer hover:bg-[#A81C1D] transition"
       >
         {isSubmitting ? 'Saving...' : 'Save Changes'}
       </button>

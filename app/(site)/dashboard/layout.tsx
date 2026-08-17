@@ -1,15 +1,8 @@
 import Link from 'next/link';
-import { Lock, LayoutDashboard, User, BookOpen, Trophy, Download, Package } from 'lucide-react';
+import { Lock, GraduationCap, ArrowUpRight } from 'lucide-react';
 import { getCurrentUserProfile } from '@/lib/currentUser';
-
-const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { href: '/dashboard/profile', label: 'My Profile', icon: User },
-  { href: '/dashboard/courses', label: 'My Courses', icon: BookOpen },
-  { href: '/dashboard/orders', label: 'My Orders', icon: Package },
-  { href: '/dashboard/quiz-history', label: 'Quiz History', icon: Trophy },
-  { href: '/dashboard/downloads', label: 'Download History', icon: Download },
-];
+import { Avatar } from '@/components/dashboard/Avatar';
+import { SidebarNav, BottomNav } from '@/components/dashboard/DashboardNav';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUserProfile();
@@ -27,29 +20,33 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="min-h-[70vh] bg-[#FFF5F5] flex flex-col sm:flex-row">
-      <aside className="sm:w-60 shrink-0 bg-white border-b sm:border-b-0 sm:border-r border-[#F3DCDD] p-5">
-        <div className="mb-5">
-          <p className="font-heading font-black text-sm text-[#1F1A1C]">{user.name || `+91 ${user.phone}`}</p>
-          <p className="text-xs text-[#888888]">{user.targetExam || 'Student Dashboard'}</p>
-        </div>
-        <nav className="flex sm:flex-col gap-1 overflow-x-auto sm:overflow-visible">
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-[#555555] hover:bg-[#FFF5F5] hover:text-[#C12223] transition whitespace-nowrap"
-              >
-                <Icon className="w-4 h-4 text-[#C12223] shrink-0" />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-      </aside>
-      <main className="flex-1 p-6 sm:p-8">{children}</main>
+    <div className="min-h-[70vh] bg-[#FFF5F5]">
+      <div className="mx-auto max-w-[1180px] lg:grid lg:grid-cols-[240px_1fr] lg:gap-8 lg:px-6 lg:py-8">
+        <aside className="hidden lg:flex flex-col shrink-0">
+          <div className="flex items-center gap-3 px-2 pb-6">
+            <Avatar name={user.name} phone={user.phone} size={40} />
+            <div className="min-w-0">
+              <p className="font-heading font-black text-sm text-[#1F1A1C] truncate">{user.name || `+91 ${user.phone}`}</p>
+              <p className="text-[11px] text-[#888888] truncate">{user.targetExam || 'Student Dashboard'}</p>
+            </div>
+          </div>
+          <SidebarNav />
+          <div className="mt-6 bg-white border border-[#F3DCDD] rounded-2xl p-4">
+            <GraduationCap className="w-5 h-5 text-[#C12223] mb-2" />
+            <p className="text-xs font-bold text-[#1F1A1C] leading-snug">Explore more courses</p>
+            <p className="text-[11px] text-[#888888] mt-1 mb-3">Find your next batch from our full catalog.</p>
+            <Link
+              href="/courses"
+              className="flex items-center justify-center gap-1.5 w-full px-3 py-2.5 bg-[#C12223] text-white font-bold text-xs rounded-xl"
+            >
+              Browse courses <ArrowUpRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </aside>
+
+        <main className="px-4 py-6 pb-24 sm:px-6 sm:py-8 lg:px-0 lg:pb-8 min-w-0">{children}</main>
+      </div>
+      <BottomNav />
     </div>
   );
 }
