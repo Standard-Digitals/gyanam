@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, BookOpen, Trophy, Download, Package, User, type LucideIcon } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Trophy, BarChart3, Download, Package, User, type LucideIcon } from 'lucide-react';
 
 export const NAV_ITEMS: { href: string; label: string; shortLabel: string; icon: LucideIcon }[] = [
   { href: '/dashboard', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard },
   { href: '/dashboard/courses', label: 'My Courses', shortLabel: 'Courses', icon: BookOpen },
   { href: '/dashboard/quiz-history', label: 'Quiz History', shortLabel: 'Quizzes', icon: Trophy },
+  { href: '/dashboard/performance', label: 'Performance', shortLabel: 'Stats', icon: BarChart3 },
   { href: '/dashboard/downloads', label: 'Downloads', shortLabel: 'Files', icon: Download },
   { href: '/dashboard/orders', label: 'My Orders', shortLabel: 'Orders', icon: Package },
   { href: '/dashboard/profile', label: 'Profile', shortLabel: 'Profile', icon: User },
