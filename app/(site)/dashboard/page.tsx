@@ -19,6 +19,7 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUserProfile } from '@/lib/currentUser';
 import { buildMetadata } from '@/lib/metadata';
 import { getQuizStreak } from '@/lib/data/dashboardAlerts';
+import { getCourseProgress } from '@/lib/data/courseProgress';
 
 export const metadata: Metadata = buildMetadata({
   title: 'My Dashboard',
@@ -75,6 +76,7 @@ export default async function DashboardOverviewPage() {
   const latestCourse = latestEnrollment
     ? await prisma.course.findUnique({ where: { id: latestEnrollment.courseId }, select: { title: true, slug: true } })
     : null;
+  const latestCourseProgress = latestEnrollment && latestCourse ? await getCourseProgress(user.id, latestEnrollment.courseId) : null;
 
   const allAccuracies = [...quizAccuracies, ...mockTestAccuracies].map((a) => a.accuracy);
   const avgScore = allAccuracies.length > 0 ? Math.round(allAccuracies.reduce((sum, a) => sum + a, 0) / allAccuracies.length) : null;
@@ -140,12 +142,24 @@ export default async function DashboardOverviewPage() {
           Track your courses, quizzes and downloads all in one place.
         </p>
         {latestCourse && (
-          <Link
-            href={`/courses/${latestCourse.slug}`}
-            className="inline-flex items-center gap-2 mt-5 relative bg-white text-[#C12223] font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-white/90 transition"
-          >
-            Continue {latestCourse.title} <ArrowUpRight className="w-3.5 h-3.5" />
-          </Link>
+          <>
+            {latestCourseProgress && latestCourseProgress.total > 0 && (
+              <div className="relative mt-4 max-w-xs">
+                <div className="h-1.5 bg-white/25 rounded-full overflow-hidden">
+                  <div className="h-full bg-white rounded-full" style={{ width: `${latestCourseProgress.percent}%` }} />
+                </div>
+                <p className="text-[11px] text-white/80 mt-1.5 font-semibold">
+                  {latestCourseProgress.percent}% complete · {latestCourseProgress.total - latestCourseProgress.completedCount} lessons left
+                </p>
+              </div>
+            )}
+            <Link
+              href={`/dashboard/courses/${latestCourse.slug}${latestCourseProgress?.nextTopicId ? `?topic=${latestCourseProgress.nextTopicId}` : ''}`}
+              className="inline-flex items-center gap-2 mt-5 relative bg-white text-[#C12223] font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-white/90 transition"
+            >
+              Continue {latestCourse.title} <ArrowUpRight className="w-3.5 h-3.5" />
+            </Link>
+          </>
         )}
       </div>
 

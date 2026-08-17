@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { BookOpen, ArrowUpRight } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUserProfile } from '@/lib/currentUser';
+import { getCourseProgressMap } from '@/lib/data/courseProgress';
 
 export default async function DashboardCoursesPage() {
   const user = await getCurrentUserProfile();
@@ -9,12 +10,11 @@ export default async function DashboardCoursesPage() {
 
   const enrollments = await prisma.enrollment.findMany({ where: { userId: user.id }, orderBy: { enrolledAt: 'desc' } });
   const courseIds = enrollments.map((e) => e.courseId);
-  const [courses, chapterCounts] = await Promise.all([
+  const [courses, progressMap] = await Promise.all([
     prisma.course.findMany({ where: { id: { in: courseIds } } }),
-    prisma.chapter.groupBy({ by: ['courseId'], where: { courseId: { in: courseIds } }, _count: { _all: true } }),
+    getCourseProgressMap(user.id, courseIds),
   ]);
   const courseMap = new Map(courses.map((c) => [c.id, c]));
-  const chapterCountMap = new Map(chapterCounts.map((c) => [c.courseId, c._count._all]));
 
   return (
     <div className="space-y-6">
@@ -34,11 +34,12 @@ export default async function DashboardCoursesPage() {
           {enrollments.map((enrollment) => {
             const course = courseMap.get(enrollment.courseId);
             if (!course) return null;
-            const chapterCount = chapterCountMap.get(course.id) ?? 0;
+            const progress = progressMap.get(course.id) ?? { total: 0, completedCount: 0, percent: 0, nextTopicId: null };
+            const href = `/dashboard/courses/${course.slug}${progress.nextTopicId ? `?topic=${progress.nextTopicId}` : ''}`;
             return (
               <Link
                 key={enrollment.id}
-                href={`/courses/${course.slug}`}
+                href={href}
                 className="group bg-white rounded-2xl border border-[#F3DCDD] shadow-sm overflow-hidden hover:border-[#C12223] hover:shadow-md transition"
               >
                 <div className="h-32 bg-cover bg-center relative" style={{ backgroundImage: `url(${course.thumbnail})` }}>
@@ -51,12 +52,20 @@ export default async function DashboardCoursesPage() {
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-[#888888]">
                     <span className="flex items-center gap-1">
                       <BookOpen className="w-3 h-3" />
-                      {chapterCount} {chapterCount === 1 ? 'chapter' : 'chapters'}
+                      {progress.total} {progress.total === 1 ? 'lesson' : 'lessons'}
                     </span>
                     <span>Enrolled {new Date(enrollment.enrolledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                   </div>
+                  {progress.total > 0 && (
+                    <div className="flex items-center gap-2 mt-3">
+                      <div className="flex-1 h-1.5 bg-[#F3DCDD] rounded-full overflow-hidden">
+                        <div className="h-full bg-[#C12223] rounded-full" style={{ width: `${progress.percent}%` }} />
+                      </div>
+                      <span className="text-[10px] font-bold text-[#888888] font-plexmono shrink-0">{progress.percent}%</span>
+                    </div>
+                  )}
                   <span className="inline-flex items-center gap-1.5 mt-3 text-xs font-bold text-[#C12223] group-hover:gap-2.5 transition-all">
-                    Continue learning <ArrowUpRight className="w-3.5 h-3.5" />
+                    {progress.completedCount > 0 ? 'Continue learning' : 'Start learning'} <ArrowUpRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
               </Link>

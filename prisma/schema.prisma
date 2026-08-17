@@ -384,6 +384,17 @@ model Topic {
   @@index([chapterId])
 }
 
+model TopicProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  topicId     String
+  completedAt DateTime @default(now())
+
+  @@unique([userId, topicId])
+  @@index([userId])
+  @@index([topicId])
+}
+
 model Enrollment {
   id          String   @id @default(cuid())
   userId      String
