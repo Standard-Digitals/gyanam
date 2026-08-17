@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { SearchModal } from '@/components/modals/SearchModal';
@@ -18,6 +18,8 @@ interface SiteShellProps {
 
 export function SiteShell({ children, courses, currentAffairs, resources, user }: SiteShellProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isDashboard = pathname?.startsWith('/dashboard') ?? false;
   const [searchOpen, setSearchOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
@@ -30,16 +32,18 @@ export function SiteShell({ children, courses, currentAffairs, resources, user }
 
   return (
     <>
-      <Header
-        onOpenSearch={() => setSearchOpen(true)}
-        onOpenAuth={handleOpenAuth}
-        onOpenMentorship={() => setMentorshipOpen(true)}
-        user={user}
-      />
+      {!isDashboard && (
+        <Header
+          onOpenSearch={() => setSearchOpen(true)}
+          onOpenAuth={handleOpenAuth}
+          onOpenMentorship={() => setMentorshipOpen(true)}
+          user={user}
+        />
+      )}
 
       <main>{children}</main>
 
-      <Footer />
+      {!isDashboard && <Footer />}
 
       <SearchModal
         isOpen={searchOpen}
