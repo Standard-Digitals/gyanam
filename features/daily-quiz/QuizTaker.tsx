@@ -26,10 +26,12 @@ export default function QuizTaker({
   quiz,
   onExit,
   onSubmitSuccess,
+  submitUrl,
 }: {
   quiz: QuizTakerQuiz;
   onExit: () => void;
   onSubmitSuccess?: () => void;
+  submitUrl?: string;
 }) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
@@ -68,7 +70,7 @@ export default function QuizTaker({
     setQuizSubmitted(true);
     const timeTakenSec = quiz.timeLimitMinutes * 60 - timeRemaining;
     try {
-      const res = await fetch(`/api/quiz/${quiz.id}/submit`, {
+      const res = await fetch(submitUrl ?? `/api/quiz/${quiz.id}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ answers: userAnswers, timeTakenSec }),
