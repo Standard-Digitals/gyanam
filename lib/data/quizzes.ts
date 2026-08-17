@@ -54,6 +54,16 @@ export async function getQuizById(id: string): Promise<QuizForSubmit | null> {
   return { id: quiz.id, totalQuestions: quiz.totalQuestions, questions: quiz.questions as unknown as QuizQuestion[] };
 }
 
+export async function getQuizzesBySubject(subject: string): Promise<QuizWithQuestions[]> {
+  const quizzes = await prisma.quiz.findMany({ where: { subject }, orderBy: { createdAt: 'desc' } });
+  return quizzes.map((q) => ({
+    ...q,
+    questions: q.questions as unknown as QuizQuestion[],
+    attemptsCount: 0,
+    avgScore: 0,
+  }));
+}
+
 export async function getQuizzesByCourseId(courseId: string): Promise<QuizWithQuestions[]> {
   const quizzes = await prisma.quiz.findMany({ where: { courseId }, orderBy: { createdAt: 'asc' } });
   return quizzes.map((q) => ({

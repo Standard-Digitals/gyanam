@@ -8,7 +8,7 @@ export const NAV_ITEMS: { href: string; label: string; shortLabel: string; icon:
   { href: '/dashboard', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard, showInBottomNav: true },
   { href: '/dashboard/courses', label: 'My Courses', shortLabel: 'Courses', icon: BookOpen, showInBottomNav: true },
   { href: '/dashboard/mock-tests', label: 'Mock Tests', shortLabel: 'Mocks', icon: ClipboardCheck, showInBottomNav: true },
-  { href: '/dashboard/quiz-history', label: 'Quiz History', shortLabel: 'Quizzes', icon: Trophy },
+  { href: '/dashboard/quiz-history', label: 'Quiz', shortLabel: 'Quiz', icon: Trophy },
   { href: '/dashboard/performance', label: 'Performance', shortLabel: 'Stats', icon: BarChart3, showInBottomNav: true },
   { href: '/dashboard/downloads', label: 'Downloads', shortLabel: 'Files', icon: Download },
   { href: '/dashboard/orders', label: 'My Orders', shortLabel: 'Orders', icon: Package },
