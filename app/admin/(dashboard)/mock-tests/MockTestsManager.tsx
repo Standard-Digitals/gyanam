@@ -3,7 +3,8 @@ import { useMemo, useRef, useState } from 'react';
 import { Clock, ClipboardCheck, BarChart3, AlertTriangle } from 'lucide-react';
 import { StatCard } from '../_components/AdminUI';
 import QuestionEditor from '../_components/QuestionEditor';
-import { type EditableQuestion, type RawQuestion, createEmptyQuestion, normalizeQuestion, isQuestionValid, toPayloadQuestion } from '../_components/questionTypes';
+import QuestionImportButton from '../_components/QuestionImportButton';
+import { type EditableQuestion, type RawQuestion, createEmptyQuestion, normalizeQuestion, isQuestionValid, toPayloadQuestion, mergeImportedQuestions } from '../_components/questionTypes';
 
 interface MockTest {
   id: string;
@@ -115,6 +116,11 @@ export default function MockTestsManager({
     setForm((prev) => ({ ...prev, questions: prev.questions.filter((_, i) => i !== idx) }));
   };
 
+  const handleImported = (imported: RawQuestion[], warnings: string[]) => {
+    setForm((prev) => ({ ...prev, questions: mergeImportedQuestions(prev.questions, imported) }));
+    setError(warnings.length ? `Imported ${imported.length} question(s) with ${warnings.length} warning(s): ${warnings.slice(0, 3).join(' | ')}` : null);
+  };
+
   const handleSave = async () => {
     if (!form.title.trim() || form.questions.some((q) => !isQuestionValid(q))) {
       setError('Title is required, and every question needs either valid MCQ options with a correct answer, or a fill-in-the-blank answer');
@@ -219,7 +225,10 @@ export default function MockTestsManager({
           </div>
 
           <div className="space-y-3 pt-3 border-t border-gray-100">
-            <p className="text-[11px] font-bold text-[#888888] uppercase">Questions ({form.questions.length})</p>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <p className="text-[11px] font-bold text-[#888888] uppercase">Questions ({form.questions.length})</p>
+              <QuestionImportButton onImported={handleImported} />
+            </div>
             {form.questions.map((q, qIdx) => (
               <QuestionEditor
                 key={qIdx}

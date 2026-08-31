@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import ImageUploadField from '../_components/ImageUploadField';
 import QuestionEditor from '../_components/QuestionEditor';
-import { type EditableQuestion, type RawQuestion, createEmptyQuestion, normalizeQuestion, isQuestionValid, toPayloadQuestion } from '../_components/questionTypes';
+import QuestionImportButton from '../_components/QuestionImportButton';
+import { type EditableQuestion, type RawQuestion, createEmptyQuestion, normalizeQuestion, isQuestionValid, toPayloadQuestion, mergeImportedQuestions } from '../_components/questionTypes';
 
 interface Quiz {
   id: string;
@@ -82,6 +83,11 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
 
   const removeQuestion = (idx: number) => {
     setForm((prev) => ({ ...prev, questions: prev.questions.filter((_, i) => i !== idx) }));
+  };
+
+  const handleImported = (imported: RawQuestion[], warnings: string[]) => {
+    setForm((prev) => ({ ...prev, questions: mergeImportedQuestions(prev.questions, imported) }));
+    setError(warnings.length ? `Imported ${imported.length} question(s) with ${warnings.length} warning(s): ${warnings.slice(0, 3).join(' | ')}` : null);
   };
 
   const handleSave = async () => {
@@ -183,7 +189,10 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
           </div>
 
           <div className="space-y-3 pt-3 border-t border-gray-100">
-            <p className="text-[11px] font-bold text-[#888888] uppercase">Questions ({form.questions.length})</p>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <p className="text-[11px] font-bold text-[#888888] uppercase">Questions ({form.questions.length})</p>
+              <QuestionImportButton onImported={handleImported} />
+            </div>
             {form.questions.map((q, qIdx) => (
               <QuestionEditor
                 key={qIdx}

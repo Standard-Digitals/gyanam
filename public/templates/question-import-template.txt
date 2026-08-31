@@ -1,0 +1,37 @@
+GYANM Academy - Quiz / Mock Test Question Import Template
+============================================================
+INSTRUCTIONS (delete this instructions block before uploading, or leave it - it will be ignored):
+
+1. Type each question starting with "Q1.", "Q2.", "Q3." and so on, on its own line.
+   Do NOT use Word's automatic numbered list feature - just type "Q1." as plain text.
+2. For a Multiple Choice question, list 2 to 6 options below it as A) B) C) D) ...
+3. For a Fill in the Blank question, add the tag [FILL] right after the question
+   number (e.g. "Q2. [FILL] ...") and skip the options entirely.
+4. Always add an "Answer:" line.
+   - For Multiple Choice, just the option letter, e.g. "Answer: B"
+   - For Fill in the Blank, the accepted answer text, e.g. "Answer: Au"
+5. Always add an "Explanation:" line.
+6. Leave one blank line between questions.
+7. Save this file as .docx (Word) or .txt and upload it using "Import from
+   Word/Text" in the admin panel. Review the imported questions before saving.
+============================================================
+
+Q1. What is the capital of India?
+A) Mumbai
+B) Delhi
+C) Chennai
+D) Kolkata
+Answer: B
+Explanation: Delhi has been the capital of India since 1911.
+
+Q2. [FILL] The chemical symbol for gold is ______.
+Answer: Au
+Explanation: "Au" comes from the Latin word "aurum".
+
+Q3. Simplify: 25% of 200.
+A) 25
+B) 50
+C) 75
+D) 100
+Answer: B
+Explanation: 25% of 200 = 0.25 x 200 = 50.

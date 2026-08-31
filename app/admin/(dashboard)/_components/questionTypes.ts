@@ -53,10 +53,19 @@ export function normalizeQuestion(q: RawQuestion): EditableQuestion {
 }
 
 export function isQuestionValid(q: EditableQuestion): boolean {
-  if (!q.question.trim()) return false;
+  if (!q.question.trim() || !q.explanation.trim()) return false;
   if (q.type === 'fill_blank') return q.correctAnswerText.trim().length > 0;
   const filledCount = q.options.filter((o) => o.trim().length > 0).length;
   return filledCount >= MIN_OPTIONS && !!q.options[q.correctAnswer]?.trim();
+}
+
+export function mergeImportedQuestions(existing: EditableQuestion[], imported: RawQuestion[]): EditableQuestion[] {
+  const kept = existing.filter(
+    (q) => q.question.trim() || q.options.some((o) => o.trim()) || q.correctAnswerText.trim()
+  );
+  const startId = (kept[kept.length - 1]?.id ?? 0) + 1;
+  const normalized = imported.map((q, i) => normalizeQuestion({ ...q, id: startId + i }));
+  return [...kept, ...normalized];
 }
 
 export function toPayloadQuestion(q: EditableQuestion) {
