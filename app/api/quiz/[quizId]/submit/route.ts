@@ -5,7 +5,7 @@ import { getCurrentUser } from '@/lib/currentUser';
 import { getQuizById } from '@/lib/data/quizzes';
 
 const bodySchema = z.object({
-  answers: z.record(z.string(), z.number()),
+  answers: z.record(z.string(), z.union([z.number(), z.string()])),
   timeTakenSec: z.number().int().nonnegative(),
 });
 
@@ -33,8 +33,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ qui
 
   for (const q of quiz.questions) {
     const selected = answers[String(q.id)];
-    if (selected === undefined) {
+    const answered = typeof selected === 'string' ? selected.trim().length > 0 : selected !== undefined;
+    if (!answered) {
       unattemptedCount++;
+    } else if (q.type === 'fill_blank') {
+      const isCorrect = typeof selected === 'string' && selected.trim().toLowerCase() === (q.correctAnswerText ?? '').trim().toLowerCase();
+      if (isCorrect) correctCount++;
+      else incorrectCount++;
     } else if (selected === q.correctAnswer) {
       correctCount++;
     } else {

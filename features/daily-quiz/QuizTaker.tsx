@@ -7,10 +7,18 @@ import {
 
 interface Question {
   id: number;
+  type?: 'mcq' | 'fill_blank';
   question: string;
   options: string[];
   correctAnswer: number;
+  correctAnswerText?: string;
   explanation: string;
+}
+
+type Answer = number | string;
+
+function hasAnswer(val: Answer | undefined): boolean {
+  return typeof val === 'string' ? val.trim().length > 0 : val !== undefined;
 }
 
 export interface QuizTakerQuiz {
@@ -34,7 +42,7 @@ export default function QuizTaker({
   submitUrl?: string;
 }) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
-  const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
+  const [userAnswers, setUserAnswers] = useState<Record<number, Answer>>({});
   const [markedForReview, setMarkedForReview] = useState<Record<number, boolean>>({});
   const [quizSubmitted, setQuizSubmitted] = useState<boolean>(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(quiz.timeLimitMinutes * 60);
@@ -60,6 +68,11 @@ export default function QuizTaker({
   const handleSelectOption = (questionId: number, optionIdx: number) => {
     if (quizSubmitted) return;
     setUserAnswers((prev) => ({ ...prev, [questionId]: optionIdx }));
+  };
+
+  const handleFillBlankChange = (questionId: number, value: string) => {
+    if (quizSubmitted) return;
+    setUserAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
   const handleToggleReview = (questionId: number) => {
@@ -94,9 +107,17 @@ export default function QuizTaker({
 
     quiz.questions.forEach((q) => {
       const selected = userAnswers[q.id];
-      if (selected === undefined) unattempted++;
-      else if (selected === q.correctAnswer) correct++;
-      else incorrect++;
+      if (!hasAnswer(selected)) {
+        unattempted++;
+      } else if (q.type === 'fill_blank') {
+        const isCorrect = typeof selected === 'string' && selected.trim().toLowerCase() === (q.correctAnswerText ?? '').trim().toLowerCase();
+        if (isCorrect) correct++;
+        else incorrect++;
+      } else if (selected === q.correctAnswer) {
+        correct++;
+      } else {
+        incorrect++;
+      }
     });
 
     const marks = correct * 1 - incorrect * 0.25;
@@ -169,34 +190,47 @@ export default function QuizTaker({
                 {quiz.questions[currentQuestionIndex].question}
               </h3>
 
-              <div className="space-y-3 pt-2">
-                {quiz.questions[currentQuestionIndex].options.map((option, idx) => {
-                  const isSelected = userAnswers[quiz.questions[currentQuestionIndex].id] === idx;
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => handleSelectOption(quiz.questions[currentQuestionIndex].id, idx)}
-                      className={`w-full text-left p-4 rounded-2xl border text-xs sm:text-sm font-semibold transition flex items-center justify-between cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#FFF5F5] border-[#C12223] text-[#8C1316] font-bold shadow-sm'
-                          : 'bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-800'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs ${
-                            isSelected ? 'bg-[#C12223] text-white' : 'bg-white text-gray-500 border border-gray-300'
-                          }`}
-                        >
-                          {String.fromCharCode(65 + idx)}
-                        </span>
-                        <span>{option}</span>
-                      </div>
-                      {isSelected && <CheckCircle2 className="w-5 h-5 text-[#C12223]" />}
-                    </button>
-                  );
-                })}
-              </div>
+              {quiz.questions[currentQuestionIndex].type === 'fill_blank' ? (
+                <div className="pt-2">
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Type your answer here"
+                    value={(userAnswers[quiz.questions[currentQuestionIndex].id] as string) ?? ''}
+                    onChange={(e) => handleFillBlankChange(quiz.questions[currentQuestionIndex].id, e.target.value)}
+                    className="w-full p-4 rounded-2xl border-2 border-[#F3DCDD] focus:border-[#C12223] outline-none text-sm sm:text-base font-semibold text-[#1F1A1C]"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-3 pt-2">
+                  {quiz.questions[currentQuestionIndex].options.map((option, idx) => {
+                    const isSelected = userAnswers[quiz.questions[currentQuestionIndex].id] === idx;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => handleSelectOption(quiz.questions[currentQuestionIndex].id, idx)}
+                        className={`w-full text-left p-4 rounded-2xl border text-xs sm:text-sm font-semibold transition flex items-center justify-between cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#FFF5F5] border-[#C12223] text-[#8C1316] font-bold shadow-sm'
+                            : 'bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-800'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs ${
+                              isSelected ? 'bg-[#C12223] text-white' : 'bg-white text-gray-500 border border-gray-300'
+                            }`}
+                          >
+                            {String.fromCharCode(65 + idx)}
+                          </span>
+                          <span>{option}</span>
+                        </div>
+                        {isSelected && <CheckCircle2 className="w-5 h-5 text-[#C12223]" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-between pt-6 border-t border-gray-100">
@@ -236,7 +270,7 @@ export default function QuizTaker({
 
             <div className="grid grid-cols-5 gap-2.5">
               {quiz.questions.map((q, idx) => {
-                const isAnswered = userAnswers[q.id] !== undefined;
+                const isAnswered = hasAnswer(userAnswers[q.id]);
                 const isMarked = markedForReview[q.id];
                 const isCurrent = currentQuestionIndex === idx;
 
@@ -260,7 +294,7 @@ export default function QuizTaker({
             <div className="space-y-2 text-[11px] font-semibold text-gray-600 border-t border-gray-100 pt-4">
               <div className="flex items-center gap-2">
                 <span className="w-3.5 h-3.5 rounded-md bg-emerald-600" />
-                <span>Answered ({Object.keys(userAnswers).length})</span>
+                <span>Answered ({Object.values(userAnswers).filter(hasAnswer).length})</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-3.5 h-3.5 rounded-md bg-amber-100 border border-amber-300" />
@@ -268,7 +302,7 @@ export default function QuizTaker({
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-3.5 h-3.5 rounded-md bg-gray-100 border border-gray-200" />
-                <span>Unanswered ({quiz.totalQuestions - Object.keys(userAnswers).length})</span>
+                <span>Unanswered ({quiz.totalQuestions - Object.values(userAnswers).filter(hasAnswer).length})</span>
               </div>
             </div>
 
@@ -347,8 +381,12 @@ export default function QuizTaker({
             <div className="space-y-6">
               {quiz.questions.map((q, qIdx) => {
                 const userSelected = userAnswers[q.id];
-                const isCorrect = userSelected === q.correctAnswer;
-                const isUnattempted = userSelected === undefined;
+                const isUnattempted = !hasAnswer(userSelected);
+                const isCorrect = isUnattempted
+                  ? false
+                  : q.type === 'fill_blank'
+                    ? typeof userSelected === 'string' && userSelected.trim().toLowerCase() === (q.correctAnswerText ?? '').trim().toLowerCase()
+                    : userSelected === q.correctAnswer;
 
                 return (
                   <div
@@ -370,6 +408,18 @@ export default function QuizTaker({
                       </span>
                     </div>
 
+                    {q.type === 'fill_blank' ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div className={`p-3 rounded-xl border flex items-center justify-between ${isUnattempted ? 'bg-gray-50 text-gray-500 border-gray-200' : isCorrect ? 'bg-emerald-100 text-emerald-900 border-emerald-300 font-bold' : 'bg-red-100 text-red-900 border-red-300 font-bold line-through'}`}>
+                          <span>Your answer: {isUnattempted ? '—' : String(userSelected)}</span>
+                          {!isUnattempted && (isCorrect ? <Check className="w-4 h-4 text-emerald-700 shrink-0" /> : <X className="w-4 h-4 text-red-700 shrink-0" />)}
+                        </div>
+                        <div className="p-3 rounded-xl border bg-emerald-100 text-emerald-900 border-emerald-300 font-bold flex items-center justify-between">
+                          <span>Correct answer: {q.correctAnswerText}</span>
+                          <Check className="w-4 h-4 text-emerald-700 shrink-0" />
+                        </div>
+                      </div>
+                    ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                       {q.options.map((opt, optIdx) => {
                         const isThisCorrect = optIdx === q.correctAnswer;
@@ -388,6 +438,7 @@ export default function QuizTaker({
                         );
                       })}
                     </div>
+                    )}
 
                     <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-1.5 text-xs text-gray-700">
                       <strong className="text-[#8C1316] font-extrabold flex items-center gap-1.5">

@@ -3,9 +3,11 @@ import { prisma } from '@/lib/prisma';
 
 export interface MockTestQuestion {
   id: number;
+  type?: 'mcq' | 'fill_blank';
   question: string;
   options: string[];
   correctAnswer: number;
+  correctAnswerText?: string;
   explanation: string;
   flagged?: boolean;
 }

@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-
-const questionSchema = z.object({
-  id: z.number(),
-  question: z.string().min(1),
-  options: z.array(z.string()).min(2),
-  correctAnswer: z.number().int().nonnegative(),
-  explanation: z.string().min(1),
-  flagged: z.boolean().optional().default(false),
-});
+import { questionSchema } from '@/lib/validation/question';
 
 const bodySchema = z.object({
   title: z.string().min(1),

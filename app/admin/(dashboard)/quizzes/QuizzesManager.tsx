@@ -1,14 +1,8 @@
 'use client';
 import { useState } from 'react';
 import ImageUploadField from '../_components/ImageUploadField';
-
-interface QuizQuestion {
-  id: number;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation: string;
-}
+import QuestionEditor from '../_components/QuestionEditor';
+import { type EditableQuestion, type RawQuestion, createEmptyQuestion, normalizeQuestion, isQuestionValid, toPayloadQuestion } from '../_components/questionTypes';
 
 interface Quiz {
   id: string;
@@ -20,16 +14,8 @@ interface Quiz {
   difficulty: string;
   thumbnail: string | null;
   courseId: string | null;
-  questions: QuizQuestion[];
+  questions: RawQuestion[];
 }
-
-const EMPTY_QUESTION = (id: number): QuizQuestion => ({
-  id,
-  question: '',
-  options: ['', '', '', ''],
-  correctAnswer: 0,
-  explanation: '',
-});
 
 const EMPTY_FORM = {
   title: '',
@@ -40,7 +26,7 @@ const EMPTY_FORM = {
   difficulty: 'Moderate',
   thumbnail: '',
   courseId: '',
-  questions: [EMPTY_QUESTION(1)],
+  questions: [createEmptyQuestion(1)],
 };
 
 const DIFFICULTIES = ['Easy', 'Moderate', 'Hard'];
@@ -69,7 +55,7 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
       difficulty: quiz.difficulty,
       thumbnail: quiz.thumbnail ?? '',
       courseId: quiz.courseId ?? '',
-      questions: quiz.questions.map((q) => ({ ...q, options: [...q.options] })),
+      questions: quiz.questions.map((q) => normalizeQuestion(q)),
     });
     setError(null);
   };
@@ -80,26 +66,17 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
     setError(null);
   };
 
-  const updateQuestion = (idx: number, patch: Partial<QuizQuestion>) => {
+  const updateQuestion = (idx: number, patch: Partial<EditableQuestion>) => {
     setForm((prev) => ({
       ...prev,
       questions: prev.questions.map((q, i) => (i === idx ? { ...q, ...patch } : q)),
     }));
   };
 
-  const updateOption = (qIdx: number, optIdx: number, value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      questions: prev.questions.map((q, i) =>
-        i === qIdx ? { ...q, options: q.options.map((o, oi) => (oi === optIdx ? value : o)) } : q
-      ),
-    }));
-  };
-
   const addQuestion = () => {
     setForm((prev) => ({
       ...prev,
-      questions: [...prev.questions, EMPTY_QUESTION((prev.questions[prev.questions.length - 1]?.id ?? 0) + 1)],
+      questions: [...prev.questions, createEmptyQuestion((prev.questions[prev.questions.length - 1]?.id ?? 0) + 1)],
     }));
   };
 
@@ -108,8 +85,8 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || form.questions.some((q) => !q.question.trim() || q.options.some((o) => !o.trim()))) {
-      setError('Title and all question fields (including options) are required');
+    if (!form.title.trim() || form.questions.some((q) => !isQuestionValid(q))) {
+      setError('Title is required, and every question needs either valid MCQ options with a correct answer, or a fill-in-the-blank answer');
       return;
     }
     setIsSubmitting(true);
@@ -123,7 +100,7 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
       difficulty: form.difficulty,
       thumbnail: form.thumbnail || undefined,
       courseId: form.courseId || null,
-      questions: form.questions,
+      questions: form.questions.map(toPayloadQuestion),
     };
     try {
       if (editingId === 'new') {
@@ -208,48 +185,14 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
           <div className="space-y-3 pt-3 border-t border-gray-100">
             <p className="text-[11px] font-bold text-[#888888] uppercase">Questions ({form.questions.length})</p>
             {form.questions.map((q, qIdx) => (
-              <div key={qIdx} className="p-4 bg-[#FFF5F5] rounded-2xl border border-[#F3DCDD] space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-[#C12223]">Question {qIdx + 1}</span>
-                  {form.questions.length > 1 && (
-                    <button onClick={() => removeQuestion(qIdx)} className="text-xs font-bold text-red-600 cursor-pointer">Remove</button>
-                  )}
-                </div>
-                <textarea
-                  placeholder="Question text"
-                  rows={2}
-                  value={q.question}
-                  onChange={(e) => updateQuestion(qIdx, { question: e.target.value })}
-                  className="w-full px-3 py-2 bg-white border border-[#F3DCDD] rounded-xl text-sm font-semibold"
-                />
-                <div className="grid grid-cols-2 gap-2">
-                  {q.options.map((opt, optIdx) => (
-                    <div key={optIdx} className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name={`correct-${qIdx}`}
-                        checked={q.correctAnswer === optIdx}
-                        onChange={() => updateQuestion(qIdx, { correctAnswer: optIdx })}
-                        title="Mark as correct answer"
-                      />
-                      <input
-                        type="text"
-                        placeholder={`Option ${optIdx + 1}`}
-                        value={opt}
-                        onChange={(e) => updateOption(qIdx, optIdx, e.target.value)}
-                        className="w-full px-3 py-1.5 bg-white border border-[#F3DCDD] rounded-lg text-xs font-semibold"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <textarea
-                  placeholder="Explanation"
-                  rows={2}
-                  value={q.explanation}
-                  onChange={(e) => updateQuestion(qIdx, { explanation: e.target.value })}
-                  className="w-full px-3 py-2 bg-white border border-[#F3DCDD] rounded-xl text-xs font-semibold"
-                />
-              </div>
+              <QuestionEditor
+                key={qIdx}
+                index={qIdx}
+                question={q}
+                onChange={(patch) => updateQuestion(qIdx, patch)}
+                onRemove={() => removeQuestion(qIdx)}
+                canRemove={form.questions.length > 1}
+              />
             ))}
             <button onClick={addQuestion} className="px-4 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl cursor-pointer">
               + Add Question
