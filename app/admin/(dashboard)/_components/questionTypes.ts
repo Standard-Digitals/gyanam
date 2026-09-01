@@ -1,3 +1,7 @@
+import { LEVEL_OPTIONS, ENTRY_TYPE_OPTIONS, YEAR_OPTIONS } from '@/lib/questionMeta';
+
+export { LEVEL_OPTIONS, ENTRY_TYPE_OPTIONS, YEAR_OPTIONS };
+
 export type QuestionType = 'mcq' | 'fill_blank';
 
 export interface RawQuestion {
@@ -9,6 +13,9 @@ export interface RawQuestion {
   correctAnswerText?: string;
   explanation: string;
   flagged?: boolean;
+  level?: string;
+  entryType?: string;
+  year?: string;
 }
 
 export interface EditableQuestion {
@@ -20,6 +27,9 @@ export interface EditableQuestion {
   correctAnswerText: string;
   explanation: string;
   flagged?: boolean;
+  level: string;
+  entryType: string;
+  year: string;
 }
 
 export const MIN_OPTIONS = 2;
@@ -35,6 +45,9 @@ export function createEmptyQuestion(id: number): EditableQuestion {
     correctAnswerText: '',
     explanation: '',
     flagged: false,
+    level: 'Moderate',
+    entryType: 'New',
+    year: 'NA',
   };
 }
 
@@ -49,6 +62,9 @@ export function normalizeQuestion(q: RawQuestion): EditableQuestion {
     correctAnswerText: q.correctAnswerText ?? '',
     explanation: q.explanation ?? '',
     flagged: q.flagged ?? false,
+    level: q.level && LEVEL_OPTIONS.includes(q.level) ? q.level : 'Moderate',
+    entryType: q.entryType && ENTRY_TYPE_OPTIONS.includes(q.entryType) ? q.entryType : 'New',
+    year: q.year && YEAR_OPTIONS.includes(q.year) ? q.year : 'NA',
   };
 }
 
@@ -69,6 +85,12 @@ export function mergeImportedQuestions(existing: EditableQuestion[], imported: R
 }
 
 export function toPayloadQuestion(q: EditableQuestion) {
+  const meta = {
+    level: q.level,
+    entryType: q.entryType,
+    year: q.year,
+    ...(q.flagged !== undefined ? { flagged: q.flagged } : {}),
+  };
   if (q.type === 'fill_blank') {
     return {
       id: q.id,
@@ -78,7 +100,7 @@ export function toPayloadQuestion(q: EditableQuestion) {
       correctAnswer: 0,
       correctAnswerText: q.correctAnswerText.trim(),
       explanation: q.explanation,
-      ...(q.flagged !== undefined ? { flagged: q.flagged } : {}),
+      ...meta,
     };
   }
   return {
@@ -88,6 +110,6 @@ export function toPayloadQuestion(q: EditableQuestion) {
     options: q.options,
     correctAnswer: q.correctAnswer,
     explanation: q.explanation,
-    ...(q.flagged !== undefined ? { flagged: q.flagged } : {}),
+    ...meta,
   };
 }

@@ -238,6 +238,7 @@ export default function MockTestsManager({
                 onRemove={() => removeQuestion(qIdx)}
                 canRemove={form.questions.length > 1}
                 showFlagged
+                showMeta
               />
             ))}
             <button onClick={addQuestion} className="px-4 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl cursor-pointer">

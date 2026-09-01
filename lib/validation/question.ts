@@ -10,6 +10,9 @@ export const questionSchema = z
     correctAnswerText: z.string().optional(),
     explanation: z.string().min(1),
     flagged: z.boolean().optional(),
+    level: z.string().optional(),
+    entryType: z.string().optional(),
+    year: z.string().optional(),
   })
   .refine(
     (q) => {

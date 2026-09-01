@@ -1,5 +1,5 @@
 'use client';
-import { type EditableQuestion, MIN_OPTIONS, MAX_OPTIONS } from './questionTypes';
+import { type EditableQuestion, MIN_OPTIONS, MAX_OPTIONS, LEVEL_OPTIONS, ENTRY_TYPE_OPTIONS, YEAR_OPTIONS } from './questionTypes';
 
 export default function QuestionEditor({
   index,
@@ -8,6 +8,7 @@ export default function QuestionEditor({
   onRemove,
   canRemove,
   showFlagged,
+  showMeta,
 }: {
   index: number;
   question: EditableQuestion;
@@ -15,6 +16,7 @@ export default function QuestionEditor({
   onRemove: () => void;
   canRemove: boolean;
   showFlagged?: boolean;
+  showMeta?: boolean;
 }) {
   const updateOption = (optIdx: number, value: string) => {
     onChange({ options: question.options.map((o, i) => (i === optIdx ? value : o)) });
@@ -67,6 +69,49 @@ export default function QuestionEditor({
         onChange={(e) => onChange({ question: e.target.value })}
         className="w-full px-3 py-2 bg-white border border-[#F3DCDD] rounded-xl text-sm font-semibold"
       />
+
+      {showMeta && (
+        <div className="grid grid-cols-3 gap-2">
+          <div>
+            <label className="text-[9px] font-bold text-[#888888] uppercase tracking-wide">Question Level</label>
+            <select
+              value={question.level}
+              onChange={(e) => onChange({ level: e.target.value })}
+              className="w-full mt-0.5 px-2.5 py-1.5 bg-white border border-[#F3DCDD] rounded-lg text-[11px] font-semibold cursor-pointer"
+            >
+              {LEVEL_OPTIONS.map((l) => (
+                <option key={l} value={l}>{l}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-[9px] font-bold text-[#888888] uppercase tracking-wide">Question Type</label>
+            <select
+              value={question.entryType}
+              onChange={(e) => onChange({ entryType: e.target.value })}
+              className="w-full mt-0.5 px-2.5 py-1.5 bg-white border border-[#F3DCDD] rounded-lg text-[11px] font-semibold cursor-pointer"
+            >
+              {ENTRY_TYPE_OPTIONS.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-[9px] font-bold text-[#888888] uppercase tracking-wide" title="Select NA if year not known">
+              Question Year
+            </label>
+            <select
+              value={question.year}
+              onChange={(e) => onChange({ year: e.target.value })}
+              className="w-full mt-0.5 px-2.5 py-1.5 bg-white border border-[#F3DCDD] rounded-lg text-[11px] font-semibold cursor-pointer"
+            >
+              {YEAR_OPTIONS.map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
 
       {question.type === 'mcq' ? (
         <div className="space-y-2">

@@ -1,3 +1,5 @@
+import { LEVEL_OPTIONS, ENTRY_TYPE_OPTIONS, YEAR_OPTIONS } from '@/lib/questionMeta';
+
 export interface ParsedQuestion {
   id: number;
   type: 'mcq' | 'fill_blank';
@@ -6,6 +8,9 @@ export interface ParsedQuestion {
   correctAnswer: number;
   correctAnswerText: string;
   explanation: string;
+  level?: string;
+  entryType?: string;
+  year?: string;
 }
 
 export interface ParseResult {
@@ -17,6 +22,9 @@ const QUESTION_START = /^Q\s*\d+\s*[.)]\s*(.*)$/i;
 const OPTION_LINE = /^([A-Za-z0-9])[.)]\s*(.+)$/;
 const ANSWER_LINE = /^answer\s*:\s*(.+)$/i;
 const EXPLANATION_LINE = /^explanation\s*:\s*(.+)$/i;
+const LEVEL_LINE = /^level\s*:\s*(.+)$/i;
+const TYPE_LINE = /^type\s*:\s*(.+)$/i;
+const YEAR_LINE = /^year\s*:\s*(.+)$/i;
 const FILL_TAG = /^\[\s*fill(?:\s*in\s*the\s*blank)?\s*\]\s*/i;
 
 interface DraftQuestion {
@@ -25,6 +33,9 @@ interface DraftQuestion {
   options: string[];
   answerRaw: string | null;
   explanation: string;
+  level?: string;
+  entryType?: string;
+  year?: string;
 }
 
 export function parseQuestionsFromText(rawText: string): ParseResult {
@@ -67,6 +78,13 @@ export function parseQuestionsFromText(rawText: string): ParseResult {
       warnings.push(`Question ${qNum}: no "Explanation:" line found — please add one before saving.`);
     }
 
+    const matchOption = (raw: string | undefined, allowed: string[], label: string): string | undefined => {
+      if (!raw) return undefined;
+      const match = allowed.find((a) => a.toLowerCase() === raw.trim().toLowerCase());
+      if (!match) warnings.push(`Question ${qNum}: "${label}: ${raw}" didn't match a known value — defaulted, please review.`);
+      return match;
+    };
+
     questions.push({
       id: qNum,
       type: current.type,
@@ -75,6 +93,9 @@ export function parseQuestionsFromText(rawText: string): ParseResult {
       correctAnswer,
       correctAnswerText,
       explanation: current.explanation.trim(),
+      level: matchOption(current.level, LEVEL_OPTIONS, 'Level'),
+      entryType: matchOption(current.entryType, ENTRY_TYPE_OPTIONS, 'Type'),
+      year: matchOption(current.year, YEAR_OPTIONS, 'Year'),
     });
     current = null;
   };
@@ -105,6 +126,21 @@ export function parseQuestionsFromText(rawText: string): ParseResult {
     const explanationMatch = line.match(EXPLANATION_LINE);
     if (explanationMatch) {
       current.explanation = explanationMatch[1];
+      continue;
+    }
+    const levelMatch = line.match(LEVEL_LINE);
+    if (levelMatch) {
+      current.level = levelMatch[1];
+      continue;
+    }
+    const typeMatch = line.match(TYPE_LINE);
+    if (typeMatch) {
+      current.entryType = typeMatch[1];
+      continue;
+    }
+    const yearMatch = line.match(YEAR_LINE);
+    if (yearMatch) {
+      current.year = yearMatch[1];
       continue;
     }
     const optionMatch = current.type === 'mcq' ? line.match(OPTION_LINE) : null;

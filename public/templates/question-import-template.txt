@@ -11,8 +11,14 @@ INSTRUCTIONS (delete this instructions block before uploading, or leave it - it 
    - For Multiple Choice, just the option letter, e.g. "Answer: B"
    - For Fill in the Blank, the accepted answer text, e.g. "Answer: Au"
 5. Always add an "Explanation:" line.
-6. Leave one blank line between questions.
-7. Save this file as .docx (Word) or .txt and upload it using "Import from
+6. Optionally add "Level:", "Type:", and "Year:" lines (Mock Tests only use these):
+   - Level: Difficult / Moderate / Easy / Basic / Other
+   - Type: PYQ / New / Test Series / Notes / Assignment / Other
+   - Year: 2011-2026, or NA if the year isn't known
+   If you skip these, they default to Moderate / New / NA and can be changed
+   later in the editor.
+7. Leave one blank line between questions.
+8. Save this file as .docx (Word) or .txt and upload it using "Import from
    Word/Text" in the admin panel. Review the imported questions before saving.
 ============================================================
 
@@ -23,10 +29,16 @@ C) Chennai
 D) Kolkata
 Answer: B
 Explanation: Delhi has been the capital of India since 1911.
+Level: Easy
+Type: PYQ
+Year: 2022
 
 Q2. [FILL] The chemical symbol for gold is ______.
 Answer: Au
 Explanation: "Au" comes from the Latin word "aurum".
+Level: Moderate
+Type: New
+Year: NA
 
 Q3. Simplify: 25% of 200.
 A) 25
@@ -35,3 +47,6 @@ C) 75
 D) 100
 Answer: B
 Explanation: 25% of 200 = 0.25 x 200 = 50.
+Level: Basic
+Type: Test Series
+Year: 2024
