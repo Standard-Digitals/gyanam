@@ -9,6 +9,7 @@ export default function QuestionEditor({
   canRemove,
   showFlagged,
   showMeta,
+  sections,
 }: {
   index: number;
   question: EditableQuestion;
@@ -17,6 +18,7 @@ export default function QuestionEditor({
   canRemove: boolean;
   showFlagged?: boolean;
   showMeta?: boolean;
+  sections?: string[];
 }) {
   const updateOption = (optIdx: number, value: string) => {
     onChange({ options: question.options.map((o, i) => (i === optIdx ? value : o)) });
@@ -71,7 +73,21 @@ export default function QuestionEditor({
       />
 
       {showMeta && (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {sections && sections.length > 0 && (
+            <div>
+              <label className="text-[9px] font-bold text-[#888888] uppercase tracking-wide">Section</label>
+              <select
+                value={question.section}
+                onChange={(e) => onChange({ section: e.target.value })}
+                className="w-full mt-0.5 px-2.5 py-1.5 bg-white border border-[#F3DCDD] rounded-lg text-[11px] font-semibold cursor-pointer"
+              >
+                {sections.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="text-[9px] font-bold text-[#888888] uppercase tracking-wide">Question Level</label>
             <select

@@ -4,7 +4,16 @@ import { Clock, ClipboardCheck, BarChart3, AlertTriangle } from 'lucide-react';
 import { StatCard } from '../_components/AdminUI';
 import QuestionEditor from '../_components/QuestionEditor';
 import QuestionImportButton from '../_components/QuestionImportButton';
-import { type EditableQuestion, type RawQuestion, createEmptyQuestion, normalizeQuestion, isQuestionValid, toPayloadQuestion, mergeImportedQuestions } from '../_components/questionTypes';
+import {
+  type EditableQuestion,
+  type RawQuestion,
+  createEmptyQuestion,
+  normalizeQuestion,
+  isQuestionValid,
+  toPayloadQuestion,
+  mergeImportedQuestions,
+  renameQuestionsSection,
+} from '../_components/questionTypes';
 
 interface MockTest {
   id: string;
@@ -12,6 +21,7 @@ interface MockTest {
   examCategory: string;
   timeLimitMinutes: number;
   status: string;
+  sections: string[];
   questions: RawQuestion[];
   attempts: number;
   avgScore: number;
@@ -29,6 +39,7 @@ const EMPTY_FORM = {
   examCategory: 'SSC',
   timeLimitMinutes: 60,
   status: 'ACTIVE',
+  sections: [] as string[],
   questions: [createEmptyQuestion(1)],
 };
 
@@ -68,6 +79,17 @@ export default function MockTestsManager({
     return mockTests.filter((t) => t.examCategory === activeCategory);
   }, [mockTests, activeCategory]);
 
+  const questionsBySection = useMemo(() => {
+    const map = new Map<string, { question: EditableQuestion; index: number }[]>();
+    form.questions.forEach((q, index) => {
+      const key = q.section && form.sections.includes(q.section) ? q.section : '';
+      const list = map.get(key) ?? [];
+      list.push({ question: q, index });
+      map.set(key, list);
+    });
+    return map;
+  }, [form.questions, form.sections]);
+
   const scrollToForm = () => {
     setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
   };
@@ -86,6 +108,7 @@ export default function MockTestsManager({
       examCategory: t.examCategory,
       timeLimitMinutes: t.timeLimitMinutes,
       status: t.status,
+      sections: t.sections ?? [],
       questions: t.questions.map((q) => normalizeQuestion(q)),
     });
     setError(null);
@@ -112,8 +135,39 @@ export default function MockTestsManager({
     }));
   };
 
+  const addQuestionToSection = (sectionName: string) => {
+    setForm((prev) => {
+      const nextId = (prev.questions[prev.questions.length - 1]?.id ?? 0) + 1;
+      return { ...prev, questions: [...prev.questions, { ...createEmptyQuestion(nextId), section: sectionName }] };
+    });
+  };
+
   const removeQuestion = (idx: number) => {
     setForm((prev) => ({ ...prev, questions: prev.questions.filter((_, i) => i !== idx) }));
+  };
+
+  const addSection = () => {
+    setForm((prev) => ({ ...prev, sections: [...prev.sections, `Section ${prev.sections.length + 1}`] }));
+  };
+
+  const renameSection = (idx: number, newName: string) => {
+    setForm((prev) => {
+      const oldName = prev.sections[idx];
+      return {
+        ...prev,
+        sections: prev.sections.map((s, i) => (i === idx ? newName : s)),
+        questions: renameQuestionsSection(prev.questions, oldName, newName),
+      };
+    });
+  };
+
+  const removeSection = (idx: number) => {
+    const name = form.sections[idx];
+    if (form.questions.some((q) => q.section === name)) {
+      alert(`Move or delete the questions in "${name}" before removing this section.`);
+      return;
+    }
+    setForm((prev) => ({ ...prev, sections: prev.sections.filter((_, i) => i !== idx) }));
   };
 
   const handleImported = (imported: RawQuestion[], warnings: string[]) => {
@@ -126,6 +180,10 @@ export default function MockTestsManager({
       setError('Title is required, and every question needs either valid MCQ options with a correct answer, or a fill-in-the-blank answer');
       return;
     }
+    if (form.sections.length > 0 && form.questions.some((q) => !form.sections.includes(q.section))) {
+      setError('Every question needs a section assigned — check the "Unassigned" group below.');
+      return;
+    }
     setIsSubmitting(true);
     setError(null);
     const payload = {
@@ -133,6 +191,7 @@ export default function MockTestsManager({
       examCategory: form.examCategory,
       timeLimitMinutes: Number(form.timeLimitMinutes),
       status: form.status,
+      sections: form.sections,
       questions: form.questions.map(toPayloadQuestion),
     };
     try {
@@ -226,24 +285,112 @@ export default function MockTestsManager({
 
           <div className="space-y-3 pt-3 border-t border-gray-100">
             <div className="flex items-center justify-between flex-wrap gap-2">
+              <p className="text-[11px] font-bold text-[#888888] uppercase">Sections</p>
+              <button onClick={addSection} className="px-3 py-1.5 bg-white border border-[#F3DCDD] text-[#C12223] font-bold text-[11px] rounded-lg cursor-pointer">
+                + Add Section
+              </button>
+            </div>
+            {form.sections.length === 0 ? (
+              <p className="text-xs text-[#888888]">
+                No sections yet — all questions go in one list. Add a section (e.g. "Quantitative Aptitude") to organize questions by section.
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {form.sections.map((sectionName, sIdx) => (
+                  <div key={sIdx} className="flex items-center gap-1.5 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg pl-2.5 pr-1.5 py-1">
+                    <input
+                      type="text"
+                      value={sectionName}
+                      onChange={(e) => renameSection(sIdx, e.target.value)}
+                      className="bg-transparent text-xs font-bold text-[#1F1A1C] outline-none w-32"
+                    />
+                    <button onClick={() => removeSection(sIdx)} title="Remove section" className="text-red-500 hover:text-red-700 text-sm font-black cursor-pointer w-5">
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3 pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <p className="text-[11px] font-bold text-[#888888] uppercase">Questions ({form.questions.length})</p>
               <QuestionImportButton onImported={handleImported} />
             </div>
-            {form.questions.map((q, qIdx) => (
-              <QuestionEditor
-                key={qIdx}
-                index={qIdx}
-                question={q}
-                onChange={(patch) => updateQuestion(qIdx, patch)}
-                onRemove={() => removeQuestion(qIdx)}
-                canRemove={form.questions.length > 1}
-                showFlagged
-                showMeta
-              />
-            ))}
-            <button onClick={addQuestion} className="px-4 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl cursor-pointer">
-              + Add Question
-            </button>
+
+            {form.sections.length === 0 ? (
+              <>
+                {form.questions.map((q, qIdx) => (
+                  <QuestionEditor
+                    key={qIdx}
+                    index={qIdx}
+                    question={q}
+                    onChange={(patch) => updateQuestion(qIdx, patch)}
+                    onRemove={() => removeQuestion(qIdx)}
+                    canRemove={form.questions.length > 1}
+                    showFlagged
+                    showMeta
+                  />
+                ))}
+                <button onClick={addQuestion} className="px-4 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl cursor-pointer">
+                  + Add Question
+                </button>
+              </>
+            ) : (
+              <>
+                {form.sections.map((sectionName, sIdx) => {
+                  const items = questionsBySection.get(sectionName) ?? [];
+                  return (
+                    <div key={sIdx} className="space-y-3 p-3 bg-white rounded-2xl border border-[#F3DCDD]">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-heading font-black text-sm text-[#1F1A1C]">{sectionName}</span>
+                        <span className="text-[11px] text-[#888888] font-semibold">
+                          {items.length} question{items.length === 1 ? '' : 's'}
+                        </span>
+                      </div>
+                      {items.map(({ question, index }) => (
+                        <QuestionEditor
+                          key={index}
+                          index={index}
+                          question={question}
+                          onChange={(patch) => updateQuestion(index, patch)}
+                          onRemove={() => removeQuestion(index)}
+                          canRemove={form.questions.length > 1}
+                          showFlagged
+                          showMeta
+                          sections={form.sections}
+                        />
+                      ))}
+                      <button
+                        onClick={() => addQuestionToSection(sectionName)}
+                        className="px-4 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl cursor-pointer"
+                      >
+                        + Add Question to {sectionName}
+                      </button>
+                    </div>
+                  );
+                })}
+                {(questionsBySection.get('') ?? []).length > 0 && (
+                  <div className="space-y-3 p-3 bg-amber-50 rounded-2xl border border-amber-200">
+                    <p className="text-xs font-bold text-amber-800">Unassigned — pick a section for these questions.</p>
+                    {(questionsBySection.get('') ?? []).map(({ question, index }) => (
+                      <QuestionEditor
+                        key={index}
+                        index={index}
+                        question={question}
+                        onChange={(patch) => updateQuestion(index, patch)}
+                        onRemove={() => removeQuestion(index)}
+                        canRemove={form.questions.length > 1}
+                        showFlagged
+                        showMeta
+                        sections={form.sections}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           {error && <p className="text-xs font-semibold text-red-600">{error}</p>}

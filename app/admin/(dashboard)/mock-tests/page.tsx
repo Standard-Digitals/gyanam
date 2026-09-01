@@ -39,6 +39,7 @@ export default async function AdminMockTestsPage() {
         examCategory: t.examCategory,
         timeLimitMinutes: t.timeLimitMinutes,
         status: t.status,
+        sections: t.sections,
         questions: t.questions as MockTestQuestion[],
         attempts: statsByTest.get(t.id)?.attempts ?? 0,
         avgScore: statsByTest.get(t.id)?.avgScore ?? 0,

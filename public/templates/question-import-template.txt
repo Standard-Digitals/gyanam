@@ -17,8 +17,13 @@ INSTRUCTIONS (delete this instructions block before uploading, or leave it - it 
    - Year: 2011-2026, or NA if the year isn't known
    If you skip these, they default to Moderate / New / NA and can be changed
    later in the editor.
-7. Leave one blank line between questions.
-8. Save this file as .docx (Word) or .txt and upload it using "Import from
+7. If the Mock Test has Sections (e.g. Quantitative Aptitude, Reasoning),
+   add a "Section:" line with the EXACT section name you already created in
+   the admin panel - e.g. "Section: Quantitative Aptitude". If it doesn't
+   match an existing section, the question lands as "Unassigned" and you
+   can pick the right section for it after importing.
+8. Leave one blank line between questions.
+9. Save this file as .docx (Word) or .txt and upload it using "Import from
    Word/Text" in the admin panel. Review the imported questions before saving.
 ============================================================
 
@@ -32,6 +37,7 @@ Explanation: Delhi has been the capital of India since 1911.
 Level: Easy
 Type: PYQ
 Year: 2022
+Section: General Awareness
 
 Q2. [FILL] The chemical symbol for gold is ______.
 Answer: Au
@@ -39,6 +45,7 @@ Explanation: "Au" comes from the Latin word "aurum".
 Level: Moderate
 Type: New
 Year: NA
+Section: General Awareness
 
 Q3. Simplify: 25% of 200.
 A) 25
@@ -50,3 +57,4 @@ Explanation: 25% of 200 = 0.25 x 200 = 50.
 Level: Basic
 Type: Test Series
 Year: 2024
+Section: Quantitative Aptitude

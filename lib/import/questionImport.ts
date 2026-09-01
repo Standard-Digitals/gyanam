@@ -11,6 +11,7 @@ export interface ParsedQuestion {
   level?: string;
   entryType?: string;
   year?: string;
+  section?: string;
 }
 
 export interface ParseResult {
@@ -25,6 +26,7 @@ const EXPLANATION_LINE = /^explanation\s*:\s*(.+)$/i;
 const LEVEL_LINE = /^level\s*:\s*(.+)$/i;
 const TYPE_LINE = /^type\s*:\s*(.+)$/i;
 const YEAR_LINE = /^year\s*:\s*(.+)$/i;
+const SECTION_LINE = /^section\s*:\s*(.+)$/i;
 const FILL_TAG = /^\[\s*fill(?:\s*in\s*the\s*blank)?\s*\]\s*/i;
 
 interface DraftQuestion {
@@ -36,6 +38,7 @@ interface DraftQuestion {
   level?: string;
   entryType?: string;
   year?: string;
+  section?: string;
 }
 
 export function parseQuestionsFromText(rawText: string): ParseResult {
@@ -96,6 +99,7 @@ export function parseQuestionsFromText(rawText: string): ParseResult {
       level: matchOption(current.level, LEVEL_OPTIONS, 'Level'),
       entryType: matchOption(current.entryType, ENTRY_TYPE_OPTIONS, 'Type'),
       year: matchOption(current.year, YEAR_OPTIONS, 'Year'),
+      section: current.section?.trim(),
     });
     current = null;
   };
@@ -141,6 +145,11 @@ export function parseQuestionsFromText(rawText: string): ParseResult {
     const yearMatch = line.match(YEAR_LINE);
     if (yearMatch) {
       current.year = yearMatch[1];
+      continue;
+    }
+    const sectionMatch = line.match(SECTION_LINE);
+    if (sectionMatch) {
+      current.section = sectionMatch[1];
       continue;
     }
     const optionMatch = current.type === 'mcq' ? line.match(OPTION_LINE) : null;

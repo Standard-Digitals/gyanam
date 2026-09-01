@@ -13,6 +13,7 @@ export const questionSchema = z
     level: z.string().optional(),
     entryType: z.string().optional(),
     year: z.string().optional(),
+    section: z.string().optional(),
   })
   .refine(
     (q) => {

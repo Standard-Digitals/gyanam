@@ -258,6 +258,7 @@ model MockTest {
   totalQuestions   Int
   timeLimitMinutes Int
   status           String   @default("ACTIVE")
+  sections         String[] @default([])
   questions        Json
   createdAt        DateTime @default(now())
 

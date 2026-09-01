@@ -13,6 +13,7 @@ interface Question {
   correctAnswer: number;
   correctAnswerText?: string;
   explanation: string;
+  section?: string;
 }
 
 type Answer = number | string;
@@ -28,6 +29,7 @@ export interface QuizTakerQuiz {
   totalQuestions: number;
   timeLimitMinutes: number;
   questions: Question[];
+  sections?: string[];
 }
 
 export default function QuizTaker({
@@ -133,6 +135,19 @@ export default function QuizTaker({
     };
   }, [quiz, userAnswers]);
 
+  const sectionGroups = useMemo(() => {
+    const hasSections = quiz.questions.some((q) => q.section);
+    if (!hasSections) return null;
+    const order = quiz.sections?.length ? quiz.sections : [...new Set(quiz.questions.map((q) => q.section || 'Other'))];
+    return order.map((name) => ({
+      name,
+      indices: quiz.questions.reduce<number[]>((acc, q, idx) => {
+        if ((q.section || 'Other') === name) acc.push(idx);
+        return acc;
+      }, []),
+    })).filter((g) => g.indices.length > 0);
+  }, [quiz]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -171,6 +186,11 @@ export default function QuizTaker({
             <div className="flex items-center justify-between border-b border-gray-100 pb-4">
               <span className="text-xs font-black text-gray-400 uppercase tracking-wider">
                 Question {currentQuestionIndex + 1} of {quiz.totalQuestions}
+                {quiz.questions[currentQuestionIndex].section && (
+                  <span className="ml-2 px-2 py-0.5 bg-[#FDEAE9] text-[#C12223] rounded-full normal-case">
+                    {quiz.questions[currentQuestionIndex].section}
+                  </span>
+                )}
               </span>
               <button
                 onClick={() => handleToggleReview(quiz.questions[currentQuestionIndex].id)}
@@ -268,8 +288,9 @@ export default function QuizTaker({
               Question Palette
             </h4>
 
-            <div className="grid grid-cols-5 gap-2.5">
-              {quiz.questions.map((q, idx) => {
+            {(() => {
+              const paletteButton = (idx: number) => {
+                const q = quiz.questions[idx];
                 const isAnswered = hasAnswer(userAnswers[q.id]);
                 const isMarked = markedForReview[q.id];
                 const isCurrent = currentQuestionIndex === idx;
@@ -288,8 +309,22 @@ export default function QuizTaker({
                     {idx + 1}
                   </button>
                 );
-              })}
-            </div>
+              };
+
+              if (sectionGroups) {
+                return (
+                  <div className="space-y-4">
+                    {sectionGroups.map((group) => (
+                      <div key={group.name}>
+                        <p className="text-[10px] font-bold text-gray-500 uppercase mb-2">{group.name}</p>
+                        <div className="grid grid-cols-5 gap-2.5">{group.indices.map((idx) => paletteButton(idx))}</div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+              return <div className="grid grid-cols-5 gap-2.5">{quiz.questions.map((_, idx) => paletteButton(idx))}</div>;
+            })()}
 
             <div className="space-y-2 text-[11px] font-semibold text-gray-600 border-t border-gray-100 pt-4">
               <div className="flex items-center gap-2">
@@ -398,6 +433,11 @@ export default function QuizTaker({
                     <div className="flex items-start justify-between gap-4">
                       <h4 className="font-heading font-extrabold text-sm sm:text-base text-[#1F1A1C]">
                         Q{qIdx + 1}. {q.question}
+                        {q.section && (
+                          <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-500 text-[9px] font-bold uppercase rounded-full align-middle">
+                            {q.section}
+                          </span>
+                        )}
                       </h4>
                       <span
                         className={`px-2.5 py-1 text-[10px] font-black uppercase rounded-md shrink-0 ${

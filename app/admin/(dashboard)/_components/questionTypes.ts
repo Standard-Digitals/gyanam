@@ -16,6 +16,7 @@ export interface RawQuestion {
   level?: string;
   entryType?: string;
   year?: string;
+  section?: string;
 }
 
 export interface EditableQuestion {
@@ -30,6 +31,7 @@ export interface EditableQuestion {
   level: string;
   entryType: string;
   year: string;
+  section: string;
 }
 
 export const MIN_OPTIONS = 2;
@@ -48,6 +50,7 @@ export function createEmptyQuestion(id: number): EditableQuestion {
     level: 'Moderate',
     entryType: 'New',
     year: 'NA',
+    section: '',
   };
 }
 
@@ -65,6 +68,7 @@ export function normalizeQuestion(q: RawQuestion): EditableQuestion {
     level: q.level && LEVEL_OPTIONS.includes(q.level) ? q.level : 'Moderate',
     entryType: q.entryType && ENTRY_TYPE_OPTIONS.includes(q.entryType) ? q.entryType : 'New',
     year: q.year && YEAR_OPTIONS.includes(q.year) ? q.year : 'NA',
+    section: q.section ?? '',
   };
 }
 
@@ -73,6 +77,10 @@ export function isQuestionValid(q: EditableQuestion): boolean {
   if (q.type === 'fill_blank') return q.correctAnswerText.trim().length > 0;
   const filledCount = q.options.filter((o) => o.trim().length > 0).length;
   return filledCount >= MIN_OPTIONS && !!q.options[q.correctAnswer]?.trim();
+}
+
+export function renameQuestionsSection(questions: EditableQuestion[], oldName: string, newName: string): EditableQuestion[] {
+  return questions.map((q) => (q.section === oldName ? { ...q, section: newName } : q));
 }
 
 export function mergeImportedQuestions(existing: EditableQuestion[], imported: RawQuestion[]): EditableQuestion[] {
@@ -89,6 +97,7 @@ export function toPayloadQuestion(q: EditableQuestion) {
     level: q.level,
     entryType: q.entryType,
     year: q.year,
+    section: q.section,
     ...(q.flagged !== undefined ? { flagged: q.flagged } : {}),
   };
   if (q.type === 'fill_blank') {

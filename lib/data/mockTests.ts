@@ -10,6 +10,7 @@ export interface MockTestQuestion {
   correctAnswerText?: string;
   explanation: string;
   flagged?: boolean;
+  section?: string;
 }
 
 export interface MockTestWithQuestions {
@@ -19,6 +20,7 @@ export interface MockTestWithQuestions {
   totalQuestions: number;
   timeLimitMinutes: number;
   status: string;
+  sections: string[];
   questions: MockTestQuestion[];
 }
 
@@ -38,3 +40,5 @@ export async function getMockTestById(id: string): Promise<MockTestForSubmit | n
   if (!test || test.status !== 'ACTIVE') return null;
   return { id: test.id, totalQuestions: test.totalQuestions, questions: test.questions as unknown as MockTestQuestion[] };
 }
+
+

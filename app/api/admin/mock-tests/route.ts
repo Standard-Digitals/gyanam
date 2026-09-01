@@ -8,6 +8,7 @@ const bodySchema = z.object({
   examCategory: z.string().min(1),
   timeLimitMinutes: z.number().int().positive(),
   status: z.enum(['ACTIVE', 'DRAFT', 'CLOSED']).default('ACTIVE'),
+  sections: z.array(z.string()).default([]),
   questions: z.array(questionSchema).min(1),
 });
 
