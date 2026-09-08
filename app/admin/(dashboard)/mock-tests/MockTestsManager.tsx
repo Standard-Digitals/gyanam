@@ -1,9 +1,12 @@
 'use client';
 import { useMemo, useRef, useState } from 'react';
-import { Clock, ClipboardCheck, BarChart3, AlertTriangle } from 'lucide-react';
+import { Clock, ClipboardCheck, BarChart3, AlertTriangle, GripVertical } from 'lucide-react';
 import { StatCard } from '../_components/AdminUI';
+import FormField from '../_components/FormField';
 import QuestionEditor from '../_components/QuestionEditor';
 import QuestionImportButton from '../_components/QuestionImportButton';
+import { EXAM_CATEGORIES as CATEGORIES } from '../_components/examCategories';
+import { moveInArray } from '../_components/reorder';
 import {
   type EditableQuestion,
   type RawQuestion,
@@ -40,10 +43,9 @@ const EMPTY_FORM = {
   timeLimitMinutes: 60,
   status: 'ACTIVE',
   sections: [] as string[],
-  questions: [createEmptyQuestion(1)],
+  questions: [] as EditableQuestion[],
 };
 
-const CATEGORIES = ['SSC', 'Banking', 'Railway', 'UPSC', 'Assam Govt', 'State PSC', 'Defence'];
 const CATEGORY_TABS = ['All tests', ...CATEGORIES];
 const STATUS_OPTIONS = ['ACTIVE', 'DRAFT', 'CLOSED'];
 
@@ -72,6 +74,8 @@ export default function MockTestsManager({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('All tests');
+  const [dragSectionIdx, setDragSectionIdx] = useState<number | null>(null);
+  const [dragQuestionIdx, setDragQuestionIdx] = useState<number | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
   const displayedTests = useMemo(() => {
@@ -170,14 +174,34 @@ export default function MockTestsManager({
     setForm((prev) => ({ ...prev, sections: prev.sections.filter((_, i) => i !== idx) }));
   };
 
+  const handleSectionDrop = (targetIdx: number) => {
+    if (dragSectionIdx === null) return;
+    setForm((prev) => ({ ...prev, sections: moveInArray(prev.sections, dragSectionIdx, targetIdx) }));
+    setDragSectionIdx(null);
+  };
+
+  const handleQuestionDrop = (targetRealIdx: number) => {
+    if (dragQuestionIdx === null) return;
+    setForm((prev) => ({ ...prev, questions: moveInArray(prev.questions, dragQuestionIdx, targetRealIdx) }));
+    setDragQuestionIdx(null);
+  };
+
+  const questionDragProps = (realIdx: number) => ({
+    draggable: true as const,
+    onDragStart: () => setDragQuestionIdx(realIdx),
+    onDragOver: (e: React.DragEvent) => e.preventDefault(),
+    onDrop: () => handleQuestionDrop(realIdx),
+    onDragEnd: () => setDragQuestionIdx(null),
+  });
+
   const handleImported = (imported: RawQuestion[], warnings: string[]) => {
     setForm((prev) => ({ ...prev, questions: mergeImportedQuestions(prev.questions, imported) }));
     setError(warnings.length ? `Imported ${imported.length} question(s) with ${warnings.length} warning(s): ${warnings.slice(0, 3).join(' | ')}` : null);
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || form.questions.some((q) => !isQuestionValid(q))) {
-      setError('Title is required, and every question needs either valid MCQ options with a correct answer, or a fill-in-the-blank answer');
+    if (!form.title.trim() || form.questions.length === 0 || form.questions.some((q) => !isQuestionValid(q))) {
+      setError('Title is required, and you need at least one question — each with valid MCQ options and a correct answer, or a fill-in-the-blank answer');
       return;
     }
     if (form.sections.length > 0 && form.questions.some((q) => !form.sections.includes(q.section))) {
@@ -271,16 +295,24 @@ export default function MockTestsManager({
       {editingId !== null && (
         <div ref={formRef} className="bg-white p-5 rounded-2xl border border-[#F3DCDD] shadow-sm space-y-4 max-h-[75vh] overflow-y-auto">
           <div className="grid grid-cols-2 gap-3">
-            <input type="text" placeholder="Mock Test Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <select value={form.examCategory} onChange={(e) => setForm({ ...form, examCategory: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold">
-              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
+            <FormField label="Mock Test Title">
+              <input type="text" placeholder="e.g. SSC CGL Tier 1 — Full Mock #15" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Exam Category">
+              <select value={form.examCategory} onChange={(e) => setForm({ ...form, examCategory: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold">
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </FormField>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <input type="number" placeholder="Time Limit (min)" value={form.timeLimitMinutes} onChange={(e) => setForm({ ...form, timeLimitMinutes: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold">
-              {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <FormField label="Time Limit (minutes)">
+              <input type="number" placeholder="60" value={form.timeLimitMinutes} onChange={(e) => setForm({ ...form, timeLimitMinutes: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Status">
+              <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold">
+                {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </FormField>
           </div>
 
           <div className="space-y-3 pt-3 border-t border-gray-100">
@@ -292,12 +324,21 @@ export default function MockTestsManager({
             </div>
             {form.sections.length === 0 ? (
               <p className="text-xs text-[#888888]">
-                No sections yet — all questions go in one list. Add a section (e.g. "Quantitative Aptitude") to organize questions by section.
+                No sections yet — all questions go in one list. Add a section (e.g. "Quantitative Aptitude") to organize questions by section. Drag the grip handle to reorder sections and questions.
               </p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {form.sections.map((sectionName, sIdx) => (
-                  <div key={sIdx} className="flex items-center gap-1.5 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg pl-2.5 pr-1.5 py-1">
+                  <div
+                    key={sIdx}
+                    draggable
+                    onDragStart={() => setDragSectionIdx(sIdx)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => handleSectionDrop(sIdx)}
+                    onDragEnd={() => setDragSectionIdx(null)}
+                    className={`flex items-center gap-1 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg pl-1.5 pr-1.5 py-1 cursor-grab ${dragSectionIdx === sIdx ? 'opacity-40' : ''}`}
+                  >
+                    <GripVertical className="w-3.5 h-3.5 text-[#C7B4B3] shrink-0" />
                     <input
                       type="text"
                       value={sectionName}
@@ -331,6 +372,8 @@ export default function MockTestsManager({
                     canRemove={form.questions.length > 1}
                     showFlagged
                     showMeta
+                    dragHandleProps={questionDragProps(qIdx)}
+                    isDragging={dragQuestionIdx === qIdx}
                   />
                 ))}
                 <button onClick={addQuestion} className="px-4 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl cursor-pointer">
@@ -360,6 +403,8 @@ export default function MockTestsManager({
                           showFlagged
                           showMeta
                           sections={form.sections}
+                          dragHandleProps={questionDragProps(index)}
+                          isDragging={dragQuestionIdx === index}
                         />
                       ))}
                       <button
@@ -385,6 +430,8 @@ export default function MockTestsManager({
                         showFlagged
                         showMeta
                         sections={form.sections}
+                        dragHandleProps={questionDragProps(index)}
+                        isDragging={dragQuestionIdx === index}
                       />
                     ))}
                   </div>

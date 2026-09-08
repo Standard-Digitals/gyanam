@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import FormField from '../_components/FormField';
 
 interface Faq {
   id: string;
@@ -114,33 +115,38 @@ export default function FaqManager({ faqs: initialFaqs }: { faqs: Faq[] }) {
 
       {editingId !== null && (
         <div className="bg-white p-5 rounded-2xl border border-[#F3DCDD] shadow-sm space-y-3">
-          <input
-            type="text"
-            placeholder="Category (e.g. General, Payments)"
-            value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-            className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
-          />
-          <input
-            type="text"
-            placeholder="Question"
-            value={form.question}
-            onChange={(e) => setForm({ ...form, question: e.target.value })}
-            className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
-          />
-          <textarea
-            placeholder="Answer"
-            rows={3}
-            value={form.answer}
-            onChange={(e) => setForm({ ...form, answer: e.target.value })}
-            className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
-          />
-          <div>
-            <label className="text-[11px] font-bold text-[#888888] uppercase tracking-wide">Link to page (optional)</label>
+          <FormField label="Category">
+            <input
+              type="text"
+              placeholder="e.g. General, Payments"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+            />
+          </FormField>
+          <FormField label="Question">
+            <input
+              type="text"
+              placeholder="e.g. How do I get a refund?"
+              value={form.question}
+              onChange={(e) => setForm({ ...form, question: e.target.value })}
+              className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+            />
+          </FormField>
+          <FormField label="Answer">
+            <textarea
+              placeholder="The full answer shown when this FAQ is expanded"
+              rows={3}
+              value={form.answer}
+              onChange={(e) => setForm({ ...form, answer: e.target.value })}
+              className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+            />
+          </FormField>
+          <FormField label="Link to page (optional)">
             <select
               value={PAGE_OPTIONS.some((o) => o.value === form.linkUrl) ? form.linkUrl : CUSTOM_URL}
               onChange={(e) => setForm({ ...form, linkUrl: e.target.value === CUSTOM_URL ? form.linkUrl || '/' : e.target.value })}
-              className="w-full mt-1 px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+              className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
             >
               {PAGE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
               <option value={CUSTOM_URL}>Custom URL...</option>
@@ -154,7 +160,7 @@ export default function FaqManager({ faqs: initialFaqs }: { faqs: Faq[] }) {
                 className="w-full mt-1.5 px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
               />
             )}
-          </div>
+          </FormField>
           {error && <p className="text-xs font-semibold text-red-600">{error}</p>}
           <div className="flex gap-2">
             <button

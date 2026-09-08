@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import ImageUploadField from '../_components/ImageUploadField';
+import FormField from '../_components/FormField';
 
 interface Mentor {
   id: string;
@@ -116,21 +117,39 @@ export default function MentorsManager({ mentors: initialMentors }: { mentors: M
       {editingId !== null && (
         <div className="bg-white p-5 rounded-2xl border border-[#F3DCDD] shadow-sm space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <input type="text" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="text" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            <FormField label="Name">
+              <input type="text" placeholder="e.g. Rakesh Sharma" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Title">
+              <input type="text" placeholder="e.g. Senior Faculty, Quant" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <input type="text" placeholder="Qualification" value={form.qualification} onChange={(e) => setForm({ ...form, qualification: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="text" placeholder="Ex-Role (optional)" value={form.exRole} onChange={(e) => setForm({ ...form, exRole: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            <FormField label="Qualification">
+              <input type="text" placeholder="e.g. M.Sc. Mathematics, IIT Delhi" value={form.qualification} onChange={(e) => setForm({ ...form, qualification: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Ex-Role (optional)">
+              <input type="text" placeholder="e.g. Ex-Central Excise Inspector" value={form.exRole} onChange={(e) => setForm({ ...form, exRole: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
           </div>
-          <input type="text" placeholder="Subject" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          <FormField label="Subject">
+            <input type="text" placeholder="e.g. Quantitative Aptitude" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          </FormField>
           <div className="grid grid-cols-3 gap-3">
-            <input type="number" placeholder="Experience (yrs)" value={form.experienceYears} onChange={(e) => setForm({ ...form, experienceYears: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="number" placeholder="Selections Mentored" value={form.selectionsMentored} onChange={(e) => setForm({ ...form, selectionsMentored: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="number" step="0.1" min="0" max="5" placeholder="Rating" value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            <FormField label="Experience (yrs)">
+              <input type="number" placeholder="0" value={form.experienceYears} onChange={(e) => setForm({ ...form, experienceYears: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Selections Mentored">
+              <input type="number" placeholder="0" value={form.selectionsMentored} onChange={(e) => setForm({ ...form, selectionsMentored: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Rating (0-5)">
+              <input type="number" step="0.1" min="0" max="5" placeholder="4.8" value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
           </div>
           <ImageUploadField label="Photo" value={form.image} onChange={(url) => setForm({ ...form, image: url })} />
-          <textarea placeholder="Bio" rows={3} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          <FormField label="Bio">
+            <textarea placeholder="A short bio highlighting achievements and teaching style" rows={3} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          </FormField>
           {error && <p className="text-xs font-semibold text-red-600">{error}</p>}
           <div className="flex gap-2">
             <button onClick={handleSave} disabled={isSubmitting} className="px-4 py-2 bg-[#C12223] text-white font-bold text-xs rounded-xl disabled:opacity-50 cursor-pointer">

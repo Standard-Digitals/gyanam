@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { ChevronDown, ChevronRight, Youtube, Upload, Trash2, Plus } from 'lucide-react';
+import FormField from '../../../_components/FormField';
 
 interface Topic {
   id: string;
@@ -154,21 +155,25 @@ export default function CurriculumManager({ courseId, courseTitle, chapters: ini
       </div>
 
       {/* Add Chapter */}
-      <div className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm flex gap-2">
-        <input
-          type="text"
-          placeholder="New Chapter Title (e.g. Module 1: Quantitative Aptitude)"
-          value={newChapterTitle}
-          onChange={(e) => setNewChapterTitle(e.target.value)}
-          className="flex-1 px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
-        />
-        <button
-          onClick={handleAddChapter}
-          disabled={addingChapter}
-          className="px-4 py-2 bg-[#C12223] text-white font-bold text-xs rounded-xl disabled:opacity-50 cursor-pointer flex items-center gap-1"
-        >
-          <Plus className="w-3.5 h-3.5" /> Add Chapter
-        </button>
+      <div className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm">
+        <FormField label="New Chapter Title">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="e.g. Module 1: Quantitative Aptitude"
+              value={newChapterTitle}
+              onChange={(e) => setNewChapterTitle(e.target.value)}
+              className="flex-1 px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+            />
+            <button
+              onClick={handleAddChapter}
+              disabled={addingChapter}
+              className="px-4 py-2 bg-[#C12223] text-white font-bold text-xs rounded-xl disabled:opacity-50 cursor-pointer flex items-center gap-1 shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" /> Add Chapter
+            </button>
+          </div>
+        </FormField>
       </div>
 
       {/* Chapters List */}
@@ -212,22 +217,28 @@ export default function CurriculumManager({ courseId, courseTitle, chapters: ini
 
                   {topicFormFor?.chapterId === chapter.id ? (
                     <div className="p-4 bg-white rounded-xl border border-[#C12223]/30 space-y-2.5">
-                      <input
-                        type="text"
-                        placeholder="Lecture Title"
-                        value={topicForm.title}
-                        onChange={(e) => setTopicForm({ ...topicForm, title: e.target.value })}
-                        className="w-full px-3 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg text-sm font-semibold"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Duration (e.g. 24:10) - optional"
-                        value={topicForm.duration}
-                        onChange={(e) => setTopicForm({ ...topicForm, duration: e.target.value })}
-                        className="w-full px-3 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg text-sm font-semibold"
-                      />
+                      <FormField label="Lecture Title">
+                        <input
+                          type="text"
+                          placeholder="e.g. Introduction to Percentages"
+                          value={topicForm.title}
+                          onChange={(e) => setTopicForm({ ...topicForm, title: e.target.value })}
+                          className="w-full px-3 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg text-sm font-semibold"
+                        />
+                      </FormField>
+                      <FormField label="Duration (optional)">
+                        <input
+                          type="text"
+                          placeholder="e.g. 24:10"
+                          value={topicForm.duration}
+                          onChange={(e) => setTopicForm({ ...topicForm, duration: e.target.value })}
+                          className="w-full px-3 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg text-sm font-semibold"
+                        />
+                      </FormField>
 
-                      <div className="flex gap-2 text-xs font-bold">
+                      <div>
+                        <label className="text-[11px] font-bold text-[#888888] uppercase tracking-wide">Video Source</label>
+                      <div className="flex gap-2 text-xs font-bold mt-1">
                         <button
                           type="button"
                           onClick={() => setTopicForm({ ...topicForm, videoType: 'youtube', videoUrl: '' })}
@@ -245,28 +256,33 @@ export default function CurriculumManager({ courseId, courseTitle, chapters: ini
                       </div>
 
                       {topicForm.videoType === 'youtube' ? (
-                        <input
-                          type="text"
-                          placeholder="https://www.youtube.com/watch?v=..."
-                          value={topicForm.videoUrl}
-                          onChange={(e) => setTopicForm({ ...topicForm, videoUrl: e.target.value })}
-                          className="w-full px-3 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg text-sm font-semibold"
-                        />
-                      ) : (
-                        <div className="space-y-1.5">
+                        <FormField label="YouTube URL">
                           <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="video/mp4,video/webm,video/quicktime"
-                            onChange={(e) => e.target.files?.[0] && handleFileSelected(e.target.files[0])}
-                            className="w-full text-xs"
+                            type="text"
+                            placeholder="https://www.youtube.com/watch?v=..."
+                            value={topicForm.videoUrl}
+                            onChange={(e) => setTopicForm({ ...topicForm, videoUrl: e.target.value })}
+                            className="w-full px-3 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-lg text-sm font-semibold"
                           />
-                          {uploading && <p className="text-xs text-blue-600 font-bold">Uploading video...</p>}
-                          {topicForm.videoUrl && !uploading && (
-                            <p className="text-xs text-emerald-600 font-bold">✓ Uploaded: {topicForm.videoUrl}</p>
-                          )}
-                        </div>
+                        </FormField>
+                      ) : (
+                        <FormField label="Video File">
+                          <div className="space-y-1.5">
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="video/mp4,video/webm,video/quicktime"
+                              onChange={(e) => e.target.files?.[0] && handleFileSelected(e.target.files[0])}
+                              className="w-full text-xs"
+                            />
+                            {uploading && <p className="text-xs text-blue-600 font-bold">Uploading video...</p>}
+                            {topicForm.videoUrl && !uploading && (
+                              <p className="text-xs text-emerald-600 font-bold">✓ Uploaded: {topicForm.videoUrl}</p>
+                            )}
+                          </div>
+                        </FormField>
                       )}
+                      </div>
 
                       {error && <p className="text-xs font-bold text-red-600">{error}</p>}
 

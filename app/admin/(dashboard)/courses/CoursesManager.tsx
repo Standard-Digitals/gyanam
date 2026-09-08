@@ -3,6 +3,15 @@ import { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Star, Users, PlayCircle, ArrowUpDown, ChevronDown } from 'lucide-react';
 import ImageUploadField from '../_components/ImageUploadField';
+import FormField from '../_components/FormField';
+import { EXAM_CATEGORIES as CATEGORIES } from '../_components/examCategories';
+
+interface Mentor {
+  id: string;
+  name: string;
+  title: string;
+  image: string;
+}
 
 interface Course {
   id: string;
@@ -51,7 +60,6 @@ const EMPTY_FORM = {
   startDate: '',
 };
 
-const CATEGORIES = ['SSC', 'Banking', 'Railway', 'UPSC', 'Assam Govt', 'State PSC', 'Defence'];
 const CATEGORY_TABS = ['All', ...CATEGORIES];
 
 const SORT_OPTIONS = [
@@ -85,10 +93,11 @@ function syllabusToText(syllabus: { module: string; topics: string[] }[]): strin
   return syllabus.map((s) => `${s.module} | ${s.topics.join(', ')}`).join('\n');
 }
 
-export default function CoursesManager({ courses: initialCourses }: { courses: Course[] }) {
+export default function CoursesManager({ courses: initialCourses, mentors }: { courses: Course[]; mentors: Mentor[] }) {
   const [courses, setCourses] = useState(initialCourses);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [selectedMentorId, setSelectedMentorId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('All');
@@ -126,6 +135,7 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
   const startCreate = () => {
     setEditingId('new');
     setForm(EMPTY_FORM);
+    setSelectedMentorId('');
     setError(null);
     scrollToForm();
   };
@@ -155,6 +165,7 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
       syllabusText: syllabusToText(c.syllabusOverview),
       startDate: c.startDate,
     });
+    setSelectedMentorId(mentors.find((m) => m.name === c.instructor.name)?.id ?? '');
     setError(null);
     scrollToForm();
   };
@@ -162,7 +173,16 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
   const cancelEdit = () => {
     setEditingId(null);
     setForm(EMPTY_FORM);
+    setSelectedMentorId('');
     setError(null);
+  };
+
+  const applyMentor = (mentorId: string) => {
+    setSelectedMentorId(mentorId);
+    const mentor = mentors.find((m) => m.id === mentorId);
+    if (mentor) {
+      setForm((prev) => ({ ...prev, instructorName: mentor.name, instructorDesignation: mentor.title, instructorAvatar: mentor.image }));
+    }
   };
 
   const handleSave = async () => {
@@ -252,53 +272,107 @@ export default function CoursesManager({ courses: initialCourses }: { courses: C
       {editingId !== null && (
         <div ref={formRef} className="bg-white p-5 rounded-2xl border border-[#F3DCDD] shadow-sm space-y-3 max-h-[70vh] overflow-y-auto">
           <div className="grid grid-cols-2 gap-3">
-            <input type="text" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="text" placeholder="Slug (auto if blank)" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            <FormField label="Title">
+              <input type="text" placeholder="e.g. SSC CGL 2026 Foundation Batch" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Slug">
+              <input type="text" placeholder="Auto-generated from title if blank" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold">
-              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <input type="text" placeholder="Target Exam" value={form.targetExam} onChange={(e) => setForm({ ...form, targetExam: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="text" placeholder="Badge (optional)" value={form.badge} onChange={(e) => setForm({ ...form, badge: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            <FormField label="Category">
+              <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold">
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </FormField>
+            <FormField label="Target Exam">
+              <input type="text" placeholder="e.g. SSC CGL, CHSL, CPO" value={form.targetExam} onChange={(e) => setForm({ ...form, targetExam: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Badge (optional)">
+              <input type="text" placeholder="e.g. 🔥 Bestseller" value={form.badge} onChange={(e) => setForm({ ...form, badge: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
           </div>
 
           <div className="pt-2 border-t border-gray-100">
             <p className="text-[11px] font-bold text-[#888888] uppercase mb-2">Instructor</p>
-            <div className="grid grid-cols-3 gap-3">
-              <input type="text" placeholder="Name" value={form.instructorName} onChange={(e) => setForm({ ...form, instructorName: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-              <input type="text" placeholder="Designation" value={form.instructorDesignation} onChange={(e) => setForm({ ...form, instructorDesignation: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-              <input type="text" placeholder="Avatar URL" value={form.instructorAvatar} onChange={(e) => setForm({ ...form, instructorAvatar: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            <FormField label="Select from Mentors">
+              <select
+                value={selectedMentorId}
+                onChange={(e) => applyMentor(e.target.value)}
+                className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+              >
+                <option value="">— Enter manually below —</option>
+                {mentors.map((m) => (
+                  <option key={m.id} value={m.id}>{m.name} — {m.title}</option>
+                ))}
+              </select>
+              <p className="text-[10px] text-[#888888] mt-1">
+                Picking a mentor fills in the name, designation and photo — add or edit mentors from the Mentors page.
+              </p>
+            </FormField>
+            <div className="flex gap-3 mt-3">
+              {form.instructorAvatar && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={form.instructorAvatar} alt="" className="w-[74px] h-[74px] rounded-xl object-cover border border-[#F3DCDD] shrink-0" />
+              )}
+              <div className="grid grid-cols-2 gap-3 flex-1">
+                <FormField label="Name">
+                  <input type="text" placeholder="e.g. Rakesh Sharma" value={form.instructorName} onChange={(e) => setForm({ ...form, instructorName: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+                </FormField>
+                <FormField label="Designation">
+                  <input type="text" placeholder="e.g. Ex-Central Excise Inspector" value={form.instructorDesignation} onChange={(e) => setForm({ ...form, instructorDesignation: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+                </FormField>
+              </div>
             </div>
           </div>
 
           <div className="grid grid-cols-4 gap-3 pt-2 border-t border-gray-100">
-            <input type="number" step="0.1" min="0" max="5" placeholder="Rating" value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="number" placeholder="Reviews" value={form.reviewsCount} onChange={(e) => setForm({ ...form, reviewsCount: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="number" placeholder="Students" value={form.studentsEnrolled} onChange={(e) => setForm({ ...form, studentsEnrolled: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="number" placeholder="Lessons" value={form.lessonsCount} onChange={(e) => setForm({ ...form, lessonsCount: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            <FormField label="Rating (0-5)">
+              <input type="number" step="0.1" min="0" max="5" placeholder="4.8" value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Reviews Count">
+              <input type="number" placeholder="0" value={form.reviewsCount} onChange={(e) => setForm({ ...form, reviewsCount: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Students Enrolled">
+              <input type="number" placeholder="0" value={form.studentsEnrolled} onChange={(e) => setForm({ ...form, studentsEnrolled: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Lessons Count">
+              <input type="number" placeholder="0" value={form.lessonsCount} onChange={(e) => setForm({ ...form, lessonsCount: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <input type="text" placeholder="Duration (e.g. 8 Months)" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="text" placeholder="Language" value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="text" placeholder="Start Date (e.g. Batch Starts 28th July)" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            <FormField label="Duration">
+              <input type="text" placeholder="e.g. 8 Months (350+ Live Classes)" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Language">
+              <input type="text" placeholder="e.g. Bilingual (Hindi + Eng)" value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Batch Start Date">
+              <input type="text" placeholder="e.g. Batch Starts 28th July" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <input type="number" placeholder="Original Price (Rs)" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="number" placeholder="Discount Price (Rs)" value={form.discountPrice} onChange={(e) => setForm({ ...form, discountPrice: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            <FormField label="Original Price (₹)">
+              <input type="number" placeholder="0" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Discount Price (₹)">
+              <input type="number" placeholder="0" value={form.discountPrice} onChange={(e) => setForm({ ...form, discountPrice: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
           </div>
           <ImageUploadField label="Thumbnail" value={form.thumbnail} onChange={(url) => setForm({ ...form, thumbnail: url })} />
-          <textarea placeholder="Features (one per line)" rows={3} value={form.featuresText} onChange={(e) => setForm({ ...form, featuresText: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-          <div>
+          <FormField label="Features (one per line)">
+            <textarea placeholder={'e.g.\nLive doubt-clearing sessions\n10,000+ practice questions'} rows={3} value={form.featuresText} onChange={(e) => setForm({ ...form, featuresText: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          </FormField>
+          <FormField label="Syllabus Overview">
             <textarea
-              placeholder="Syllabus (one module per line: Module Name | topic1, topic2, topic3)"
+              placeholder="Module 1: Quant | Algebra, Geometry, Trigonometry"
               rows={4}
               value={form.syllabusText}
               onChange={(e) => setForm({ ...form, syllabusText: e.target.value })}
               className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
             />
-            <p className="text-[10px] text-[#888888] mt-1">Format: Module 1: Quant | Algebra, Geometry, Trigonometry</p>
-          </div>
+            <p className="text-[10px] text-[#888888] mt-1">One module per line: Module Name | topic1, topic2, topic3</p>
+          </FormField>
           <label className="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-[#555555]">
             <input type="checkbox" checked={form.popular} onChange={(e) => setForm({ ...form, popular: e.target.checked })} /> Mark as Popular
           </label>

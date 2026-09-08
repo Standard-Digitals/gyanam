@@ -21,6 +21,7 @@ export interface QuizWithQuestions {
   timeLimitMinutes: number;
   totalMarks: number;
   difficulty: string;
+  sections: string[];
   questions: QuizQuestion[];
   attemptsCount: number;
   avgScore: number;

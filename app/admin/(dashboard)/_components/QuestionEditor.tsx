@@ -1,5 +1,14 @@
 'use client';
+import { GripVertical } from 'lucide-react';
 import { type EditableQuestion, MIN_OPTIONS, MAX_OPTIONS, LEVEL_OPTIONS, ENTRY_TYPE_OPTIONS, YEAR_OPTIONS } from './questionTypes';
+
+export interface DragHandleProps {
+  draggable: true;
+  onDragStart: (e: React.DragEvent) => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent) => void;
+  onDragEnd: () => void;
+}
 
 export default function QuestionEditor({
   index,
@@ -10,6 +19,8 @@ export default function QuestionEditor({
   showFlagged,
   showMeta,
   sections,
+  dragHandleProps,
+  isDragging,
 }: {
   index: number;
   question: EditableQuestion;
@@ -19,6 +30,8 @@ export default function QuestionEditor({
   showFlagged?: boolean;
   showMeta?: boolean;
   sections?: string[];
+  dragHandleProps?: DragHandleProps;
+  isDragging?: boolean;
 }) {
   const updateOption = (optIdx: number, value: string) => {
     onChange({ options: question.options.map((o, i) => (i === optIdx ? value : o)) });
@@ -38,9 +51,15 @@ export default function QuestionEditor({
   };
 
   return (
-    <div className="p-4 bg-[#FFF5F5] rounded-2xl border border-[#F3DCDD] space-y-2">
+    <div
+      {...dragHandleProps}
+      className={`p-4 bg-[#FFF5F5] rounded-2xl border border-[#F3DCDD] space-y-2 ${isDragging ? 'opacity-40' : ''}`}
+    >
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <span className="text-xs font-black text-[#C12223]">Question {index + 1}</span>
+        <span className="flex items-center gap-1.5 text-xs font-black text-[#C12223]">
+          {dragHandleProps && <GripVertical className="w-3.5 h-3.5 text-[#C7B4B3] cursor-grab" />}
+          Question {index + 1}
+        </span>
         <div className="flex items-center gap-3">
           <select
             value={question.type}

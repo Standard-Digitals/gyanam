@@ -18,6 +18,7 @@ export default async function AdminQuizzesPage() {
         difficulty: q.difficulty,
         thumbnail: q.thumbnail,
         courseId: q.courseId,
+        sections: q.sections,
         questions: q.questions as { id: number; question: string; options: string[]; correctAnswer: number; explanation: string }[],
       }))}
       courses={courses}

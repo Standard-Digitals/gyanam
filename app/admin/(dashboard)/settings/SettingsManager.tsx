@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { MoreVertical, UserPlus, Copy, Check, X } from 'lucide-react';
 import { ADMIN_ROLE_LABELS } from '../_components/AdminUI';
+import FormField from '../_components/FormField';
 
 interface SiteSettings {
   academyName: string;
@@ -322,27 +323,33 @@ export default function SettingsManager({
 
         {inviting && (
           <div className="p-3 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl space-y-2">
-            <input
-              type="text"
-              placeholder="Full name"
-              value={inviteForm.name}
-              onChange={(e) => setInviteForm({ ...inviteForm, name: e.target.value })}
-              className="w-full px-3 py-2 bg-white border border-[#F3DCDD] rounded-lg text-xs font-semibold"
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={inviteForm.email}
-              onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
-              className="w-full px-3 py-2 bg-white border border-[#F3DCDD] rounded-lg text-xs font-semibold"
-            />
-            <select
-              value={inviteForm.role}
-              onChange={(e) => setInviteForm({ ...inviteForm, role: e.target.value })}
-              className="w-full px-3 py-2 bg-white border border-[#F3DCDD] rounded-lg text-xs font-semibold"
-            >
-              {ROLE_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-            </select>
+            <FormField label="Full name">
+              <input
+                type="text"
+                placeholder="e.g. Anjali Verma"
+                value={inviteForm.name}
+                onChange={(e) => setInviteForm({ ...inviteForm, name: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-[#F3DCDD] rounded-lg text-xs font-semibold"
+              />
+            </FormField>
+            <FormField label="Email">
+              <input
+                type="email"
+                placeholder="name@gyanam.in"
+                value={inviteForm.email}
+                onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-[#F3DCDD] rounded-lg text-xs font-semibold"
+              />
+            </FormField>
+            <FormField label="Role">
+              <select
+                value={inviteForm.role}
+                onChange={(e) => setInviteForm({ ...inviteForm, role: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-[#F3DCDD] rounded-lg text-xs font-semibold"
+              >
+                {ROLE_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
+            </FormField>
             {inviteError && <p className="text-[11px] font-semibold text-red-600">{inviteError}</p>}
             <div className="flex gap-2">
               <button onClick={submitInvite} disabled={inviteSubmitting} className="px-3 py-1.5 bg-[#C12223] text-white font-bold text-xs rounded-lg disabled:opacity-50 cursor-pointer">

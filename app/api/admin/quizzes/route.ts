@@ -12,6 +12,7 @@ const bodySchema = z.object({
   difficulty: z.string().min(1),
   thumbnail: z.string().optional(),
   courseId: z.string().nullable().optional(),
+  sections: z.array(z.string()).default([]),
   questions: z.array(questionSchema).min(1),
 });
 

@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import FormField from '../_components/FormField';
 
 interface Resource {
   id: string;
@@ -152,25 +153,47 @@ export default function ResourcesManager({ resources: initialResources }: { reso
 
       {editingId !== null && (
         <div className="bg-white p-5 rounded-2xl border border-[#F3DCDD] shadow-sm space-y-3">
-          <input type="text" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          <FormField label="Title">
+            <input type="text" placeholder="e.g. SSC CGL Previous Year Papers (2019-2025)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          </FormField>
           <div className="grid grid-cols-2 gap-3">
-            <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold">
-              {RESOURCE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <input type="text" placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            <FormField label="Type">
+              <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold">
+                {RESOURCE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </FormField>
+            <FormField label="Category">
+              <input type="text" placeholder="e.g. SSC, Banking" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <input type="text" placeholder="File Size (e.g. 4.5 MB)" value={form.fileSize} onChange={(e) => setForm({ ...form, fileSize: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="number" step="0.1" min="0" max="5" placeholder="Rating" value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="text" placeholder="Badge (optional)" value={form.badge} onChange={(e) => setForm({ ...form, badge: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            <FormField label="File Size">
+              <input type="text" placeholder="e.g. 4.5 MB" value={form.fileSize} onChange={(e) => setForm({ ...form, fileSize: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Rating (0-5)">
+              <input type="number" step="0.1" min="0" max="5" placeholder="4.8" value={form.rating} onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Badge (optional)">
+              <input type="text" placeholder="e.g. 🔥 Trending" value={form.badge} onChange={(e) => setForm({ ...form, badge: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <input type="number" placeholder="Price (optional)" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="number" placeholder="Original Price (optional)" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            <input type="text" placeholder="Author (optional)" value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            <FormField label="Price (optional)">
+              <input type="number" placeholder="Leave blank if free" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Original Price (optional)">
+              <input type="number" placeholder="Shown struck-through" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
+            <FormField label="Author (optional)">
+              <input type="text" placeholder="e.g. Gyanam Editorial Team" value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+            </FormField>
           </div>
-          <input type="text" placeholder="Target Exams (comma separated)" value={form.targetExamsText} onChange={(e) => setForm({ ...form, targetExamsText: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-          <textarea placeholder="Description" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          <FormField label="Target Exams (comma separated)">
+            <input type="text" placeholder="e.g. SSC CGL, SSC CHSL, IBPS PO" value={form.targetExamsText} onChange={(e) => setForm({ ...form, targetExamsText: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          </FormField>
+          <FormField label="Description">
+            <textarea placeholder="A short description shown on the resource card" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          </FormField>
           <div className="flex items-center gap-6 text-xs font-bold text-[#555555]">
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input type="checkbox" checked={form.isHot} onChange={(e) => setForm({ ...form, isHot: e.target.checked })} /> Hot / Featured

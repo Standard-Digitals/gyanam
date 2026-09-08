@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import ImageUploadField from '../_components/ImageUploadField';
+import FormField from '../_components/FormField';
 
 interface Blog {
   id: string;
@@ -111,55 +112,67 @@ export default function BlogManager({ posts: initialPosts }: { posts: Blog[] }) 
 
       {editingId !== null && (
         <div className="bg-white p-5 rounded-2xl border border-[#F3DCDD] shadow-sm space-y-3">
-          <input
-            type="text"
-            placeholder="Title"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <select
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+          <FormField label="Title">
             <input
               type="text"
-              placeholder="Author"
-              value={form.author}
-              onChange={(e) => setForm({ ...form, author: e.target.value })}
+              placeholder="e.g. SSC CGL 2026 Notification Out — Key Dates"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
               className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
             />
+          </FormField>
+          <div className="grid grid-cols-2 gap-3">
+            <FormField label="Category">
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </FormField>
+            <FormField label="Author">
+              <input
+                type="text"
+                placeholder="e.g. Team Gyanam"
+                value={form.author}
+                onChange={(e) => setForm({ ...form, author: e.target.value })}
+                className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+              />
+            </FormField>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <input
-              type="text"
-              placeholder="Date (e.g. Aug 10, 2026)"
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
-              className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
-            />
-            <input
-              type="text"
-              placeholder="Read Time (e.g. 5 min read)"
-              value={form.readTime}
-              onChange={(e) => setForm({ ...form, readTime: e.target.value })}
-              className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
-            />
+            <FormField label="Date">
+              <input
+                type="text"
+                placeholder="e.g. Aug 10, 2026"
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+              />
+            </FormField>
+            <FormField label="Read Time">
+              <input
+                type="text"
+                placeholder="e.g. 5 min read"
+                value={form.readTime}
+                onChange={(e) => setForm({ ...form, readTime: e.target.value })}
+                className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+              />
+            </FormField>
           </div>
           <ImageUploadField label="Image" value={form.imageUrl} onChange={(url) => setForm({ ...form, imageUrl: url })} />
-          <textarea
-            placeholder="Excerpt"
-            rows={3}
-            value={form.excerpt}
-            onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-            className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
-          />
+          <FormField label="Excerpt">
+            <textarea
+              placeholder="A short 1-2 line summary shown on the blog listing card"
+              rows={3}
+              value={form.excerpt}
+              onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+              className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+            />
+          </FormField>
           {error && <p className="text-xs font-semibold text-red-600">{error}</p>}
           <div className="flex gap-2">
             <button onClick={handleSave} disabled={isSubmitting} className="px-4 py-2 bg-[#C12223] text-white font-bold text-xs rounded-xl disabled:opacity-50 cursor-pointer">

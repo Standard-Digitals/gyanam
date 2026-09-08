@@ -228,6 +228,7 @@ model Quiz {
   difficulty       String
   thumbnail        String?
   courseId         String?
+  sections         String[] @default([])
   questions        Json
   createdAt        DateTime @default(now())
 
