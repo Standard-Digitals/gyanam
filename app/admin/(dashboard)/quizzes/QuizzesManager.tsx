@@ -46,6 +46,13 @@ const EMPTY_FORM = {
 };
 
 const DIFFICULTIES = ['Easy', 'Moderate', 'Hard'];
+const CATEGORY_TABS = ['All', ...CATEGORIES];
+const DIFFICULTY_TABS = ['All', ...DIFFICULTIES];
+const LINK_OPTIONS = [
+  { value: 'all', label: 'All quizzes' },
+  { value: 'linked', label: 'Linked to a course' },
+  { value: 'unlinked', label: 'General (not linked)' },
+] as const;
 
 export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { quizzes: Quiz[]; courses: { id: string; title: string }[] }) {
   const [quizzes, setQuizzes] = useState(initialQuizzes);
@@ -55,6 +62,24 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
   const [error, setError] = useState<string | null>(null);
   const [dragSectionIdx, setDragSectionIdx] = useState<number | null>(null);
   const [dragQuestionIdx, setDragQuestionIdx] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeDifficulty, setActiveDifficulty] = useState('All');
+  const [linkedFilter, setLinkedFilter] = useState<(typeof LINK_OPTIONS)[number]['value']>('all');
+
+  const displayedQuizzes = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return quizzes.filter((quiz) => {
+      if (q && !quiz.title.toLowerCase().includes(q) && !quiz.subject.toLowerCase().includes(q)) return false;
+      if (activeCategory !== 'All' && !quiz.examCategory.includes(activeCategory)) return false;
+      if (activeDifficulty !== 'All' && quiz.difficulty !== activeDifficulty) return false;
+      if (linkedFilter === 'linked' && !quiz.courseId) return false;
+      if (linkedFilter === 'unlinked' && quiz.courseId) return false;
+      return true;
+    });
+  }, [quizzes, searchQuery, activeCategory, activeDifficulty, linkedFilter]);
+
+  const isFiltered = Boolean(searchQuery.trim()) || activeCategory !== 'All' || activeDifficulty !== 'All' || linkedFilter !== 'all';
 
   const questionsBySection = useMemo(() => {
     const map = new Map<string, { question: EditableQuestion; index: number }[]>();
@@ -244,6 +269,49 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
           </button>
         )}
       </div>
+
+      {editingId === null && (
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              placeholder="Search by title or subject..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 px-3.5 py-2 bg-white border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+            />
+            <select
+              value={activeDifficulty}
+              onChange={(e) => setActiveDifficulty(e.target.value)}
+              className="px-3.5 py-2 bg-white border border-[#F3DCDD] rounded-xl text-sm font-semibold sm:w-44"
+            >
+              {DIFFICULTY_TABS.map((d) => <option key={d} value={d}>{d === 'All' ? 'All difficulties' : d}</option>)}
+            </select>
+            <select
+              value={linkedFilter}
+              onChange={(e) => setLinkedFilter(e.target.value as (typeof LINK_OPTIONS)[number]['value'])}
+              className="px-3.5 py-2 bg-white border border-[#F3DCDD] rounded-xl text-sm font-semibold sm:w-52"
+            >
+              {LINK_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {CATEGORY_TABS.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                  activeCategory === cat
+                    ? 'bg-white text-[#1F1A1C] border border-[#F3DCDD] shadow-sm'
+                    : 'text-[#8A7A7B] hover:text-[#1F1A1C]'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {editingId !== null && (
         <div className="bg-white p-5 rounded-2xl border border-[#F3DCDD] shadow-sm space-y-4 max-h-[75vh] overflow-y-auto">
@@ -435,7 +503,7 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
       )}
 
       <div className="space-y-2">
-        {quizzes.map((quiz) => (
+        {displayedQuizzes.map((quiz) => (
           <div key={quiz.id} className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm hover:shadow-md transition-shadow flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               {quiz.thumbnail && (
@@ -458,7 +526,11 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
             </div>
           </div>
         ))}
-        {quizzes.length === 0 && <p className="text-center text-sm text-[#888888] py-8">No quizzes yet.</p>}
+        {displayedQuizzes.length === 0 && (
+          <p className="text-center text-sm text-[#888888] py-8">
+            {isFiltered ? 'No quizzes match these filters.' : 'No quizzes yet.'}
+          </p>
+        )}
       </div>
     </div>
   );
