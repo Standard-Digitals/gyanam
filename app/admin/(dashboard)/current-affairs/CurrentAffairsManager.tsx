@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import FormField from '../_components/FormField';
+import CurrentAffairsImportButton from '../_components/CurrentAffairsImportButton';
+import type { ParsedCurrentAffairs } from '@/lib/import/currentAffairsImport';
 
 interface CAItem {
   id: string;
@@ -47,11 +49,18 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
   const [form, setForm] = useState(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [importWarnings, setImportWarnings] = useState<string[]>([]);
+
+  const handleImported = (fields: Partial<ParsedCurrentAffairs>, warnings: string[]) => {
+    setForm((prev) => ({ ...prev, ...fields }));
+    setImportWarnings(warnings);
+  };
 
   const startCreate = () => {
     setEditingId('new');
     setForm(EMPTY_FORM);
     setError(null);
+    setImportWarnings([]);
   };
 
   const startEdit = (item: CAItem) => {
@@ -72,12 +81,14 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
       author: item.author ?? '',
     });
     setError(null);
+    setImportWarnings([]);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setForm(EMPTY_FORM);
     setError(null);
+    setImportWarnings([]);
   };
 
   const handleSave = async () => {
@@ -156,6 +167,19 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
 
       {editingId !== null && (
         <div className="bg-white p-5 rounded-2xl border border-[#F3DCDD] shadow-sm space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-gray-100">
+            <p className="text-[11px] font-bold text-[#888888] uppercase">
+              Fill the fields below one by one, or paste a whole article to auto-fill them
+            </p>
+            <CurrentAffairsImportButton onImported={handleImported} />
+          </div>
+          {importWarnings.length > 0 && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1">
+              {importWarnings.map((w, i) => (
+                <p key={i} className="text-[11px] font-semibold text-amber-800">{w}</p>
+              ))}
+            </div>
+          )}
           <FormField label="Title">
             <input type="text" placeholder="e.g. RBI Announces New Repo Rate" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
           </FormField>

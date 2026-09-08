@@ -15,7 +15,7 @@ export interface QuizWithQuestions {
   id: string;
   title: string;
   subject: string;
-  examCategory: string;
+  examCategory: string[];
   date: string;
   totalQuestions: number;
   timeLimitMinutes: number;

@@ -2,7 +2,7 @@ export interface Course {
   id: string;
   slug?: string;
   title: string;
-  category: 'SSC' | 'Banking' | 'Railway' | 'UPSC' | 'Assam Govt' | 'State PSC' | 'Defence';
+  category: ('SSC' | 'Banking' | 'Railway' | 'UPSC' | 'Assam Govt' | 'State PSC' | 'Defence')[];
   targetExam: string;
   badge?: string;
   rating: number;

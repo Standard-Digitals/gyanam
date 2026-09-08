@@ -18,7 +18,7 @@ interface Quiz {
   id: string;
   title: string;
   subject: string;
-  examCategory: string;
+  examCategory: string[];
   date: string;
   totalQuestions: number;
   timeLimitMinutes: number;
@@ -74,7 +74,7 @@ export default function DailyQuizPage({ quizzes: quizzesList }: { quizzes: Quiz[
   const filteredQuizzes = useMemo(() => {
     return quizzesList.filter((q) => {
       const matchSubject = selectedSubject === 'all' || q.subject.toLowerCase() === selectedSubject.toLowerCase();
-      const matchExam = selectedExam === 'all' || q.examCategory.toLowerCase().includes(selectedExam.toLowerCase());
+      const matchExam = selectedExam === 'all' || q.examCategory.some((cat) => cat.toLowerCase().includes(selectedExam.toLowerCase()));
       return matchSubject && matchExam;
     });
   }, [selectedSubject, selectedExam]);
@@ -298,7 +298,7 @@ export default function DailyQuizPage({ quizzes: quizzesList }: { quizzes: Quiz[
                         {quiz.title}
                       </h3>
                       <p className="text-xs text-gray-500 font-medium mt-1">
-                        Target Exam: <strong>{quiz.examCategory}</strong>
+                        Target Exam: <strong>{quiz.examCategory.join(' / ')}</strong>
                       </p>
                     </div>
 

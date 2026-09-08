@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Newspaper, Clock, Play } from 'lucide-react';
-import QuizTaker, { type QuizTakerQuiz } from '@/features/daily-quiz/QuizTaker';
+import QuizTaker, { type QuizTakerQuiz, formatExamCategory } from '@/features/daily-quiz/QuizTaker';
 
 export default function QuizHub({ quizzes }: { quizzes: QuizTakerQuiz[] }) {
   const router = useRouter();
@@ -37,7 +37,7 @@ export default function QuizHub({ quizzes }: { quizzes: QuizTakerQuiz[] }) {
                   <Newspaper className="w-4 h-4" />
                 </span>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-[#C12223] uppercase">{quiz.examCategory}</span>
+                  <span className="text-[10px] font-bold text-[#C12223] uppercase">{formatExamCategory(quiz.examCategory)}</span>
                   <h3 className="font-heading font-black text-sm text-[#1F1A1C] leading-snug">{quiz.title}</h3>
                 </div>
               </div>

@@ -96,8 +96,10 @@ export default async function AdminDashboardPage() {
 
   const categoryTotals = new Map<string, number>();
   for (const [courseId, count] of enrollCountByCourseId) {
-    const category = categoryByCourseId.get(courseId) ?? 'Other';
-    categoryTotals.set(category, (categoryTotals.get(category) ?? 0) + count);
+    const categories = categoryByCourseId.get(courseId);
+    for (const category of categories && categories.length > 0 ? categories : ['Other']) {
+      categoryTotals.set(category, (categoryTotals.get(category) ?? 0) + count);
+    }
   }
   const totalCategorized = [...categoryTotals.values()].reduce((sum, v) => sum + v, 0);
   const categoryData = [...categoryTotals.entries()]
@@ -116,7 +118,7 @@ export default async function AdminDashboardPage() {
       return {
         id: course.id,
         title: course.title,
-        meta: `${course.category} · ${instructor?.name ?? 'Faculty'}`,
+        meta: `${course.category.join(' / ')} · ${instructor?.name ?? 'Faculty'}`,
         value: count.toLocaleString(),
         pct: Math.round((count / maxRankedCount) * 100),
       };

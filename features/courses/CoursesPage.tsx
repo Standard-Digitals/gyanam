@@ -65,7 +65,7 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
   const filteredCourses = useMemo(() => {
     return courses.filter(course => {
       // Category filter
-      const matchesCat = selectedCategory === 'all' || course.category === selectedCategory;
+      const matchesCat = selectedCategory === 'all' || course.category.includes(selectedCategory as Course['category'][number]);
 
       // Language filter
       let matchesLang = true;
@@ -84,7 +84,7 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
       const matchesSearch = !q || 
         course.title.toLowerCase().includes(q) ||
         course.targetExam.toLowerCase().includes(q) ||
-        course.category.toLowerCase().includes(q) ||
+        course.category.some((cat) => cat.toLowerCase().includes(q)) ||
         course.instructor.name.toLowerCase().includes(q);
 
       return matchesCat && matchesLang && matchesPrice && matchesSearch;
@@ -445,7 +445,7 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
                       {/* Top Badges */}
                       <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
                         <span className="px-3 py-1 bg-[#C12223] text-white font-extrabold text-[10px] uppercase rounded-full shadow-md">
-                          {course.category}
+                          {course.category.join(' / ')}
                         </span>
                         {course.badge && (
                           <span className="px-3 py-1 bg-[#8C1316] text-white font-extrabold text-[10px] rounded-full shadow-md">
@@ -593,7 +593,7 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
                         <span className="px-2.5 py-0.5 bg-[#C12223] text-white font-bold text-[9px] rounded uppercase">
-                          {course.category}
+                          {course.category.join(' / ')}
                         </span>
                         <span className="text-xs font-bold text-[#C12223]">
                           Target: {course.targetExam}
@@ -725,7 +725,7 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="px-2.5 py-0.5 bg-[#C12223] text-white font-bold text-[10px] rounded uppercase">
-                      {activeCourseDetail.category}
+                      {activeCourseDetail.category.join(' / ')}
                     </span>
                     <span className="text-xs font-bold text-[#C12223] bg-red-50 px-2 py-0.5 rounded border border-red-100">
                       {activeCourseDetail.targetExam}
@@ -899,7 +899,7 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
                         <th key={c.id} className="p-3 bg-white font-black text-[#1F1A1C] border border-[#F3DCDD] min-w-[220px]">
                           <div className="space-y-1">
                             <span className="px-2 py-0.5 bg-[#C12223] text-white text-[9px] font-bold rounded">
-                              {c.category}
+                              {c.category.join(' / ')}
                             </span>
                             <div className="font-bold text-sm text-[#1F1A1C] line-clamp-2">{c.title}</div>
                           </div>

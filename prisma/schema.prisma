@@ -68,7 +68,7 @@ model Course {
   id                String   @id @default(cuid())
   slug              String   @unique
   title             String
-  category          String
+  category          String[]
   targetExam        String
   badge             String?
   rating            Float
@@ -87,8 +87,6 @@ model Course {
   startDate         String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-
-  @@index([category])
 }
 
 model Mentor {
@@ -220,7 +218,7 @@ model Quiz {
   id               String   @id @default(cuid())
   title            String
   subject          String
-  examCategory     String
+  examCategory     String[]
   date             String
   totalQuestions   Int
   timeLimitMinutes Int

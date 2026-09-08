@@ -1,0 +1,53 @@
+GYANM Academy - Current Affairs Import Template
+============================================================
+INSTRUCTIONS (delete this instructions block before pasting/uploading, or leave it - it will be ignored):
+
+1. Use "Label: value" lines for these single-line fields (any order, all optional
+   except Title): Title, Category, Date, Read Time, Source, Author, Thumbnail.
+   - Category must exactly match one of: National, Economy, State Exams,
+     Defense, Science & Tech, International, Assam & NE, Schemes.
+     If it doesn't match, it's skipped and you pick it manually after import.
+2. Use these section headers on their own line, followed by the content below
+   them, until the next label or section header: Summary, Bullets,
+   Important For Exams, Background Context, Full Content, Key Takeaways.
+3. For Bullets, Important For Exams, and Key Takeaways, put one point per
+   line - a leading "-" or "*" is optional and gets stripped automatically.
+4. For Full Content, put one paragraph per line - each line becomes one
+   paragraph on the article page.
+5. Paste this whole block into the "Paste & Auto-Fill" window in the admin
+   panel (or save as .docx/.txt and upload it there). Review the filled
+   form before saving - some fields may need a quick touch-up.
+============================================================
+
+Title: RBI Announces New Repo Rate
+Category: Economy
+Date: Aug 10, 2026
+Read Time: 3 min read
+Source: PIB
+Author: Team Gyanam
+Thumbnail: https://images.unsplash.com/photo-example.jpg
+
+Summary:
+RBI cut the repo rate by 0.25% to 6.25% in its latest monetary policy review, aimed at boosting credit growth ahead of the festive season.
+
+Bullets:
+- Repo rate cut by 0.25% to 6.25%
+- Effective from the next quarter
+- Fourth consecutive rate cut this year
+
+Important For Exams:
+- SSC CGL — Static GK
+- Banking — Financial Awareness
+
+Background Context:
+The Monetary Policy Committee (MPC) meets every two months to review the repo rate based on inflation and growth indicators.
+
+Full Content:
+The Reserve Bank of India's Monetary Policy Committee voted 5-1 in favor of the rate cut.
+The move is expected to lower EMIs on home and auto loans across banks.
+Analysts expect one more rate cut before the end of the fiscal year.
+
+Key Takeaways:
+- New repo rate: 6.25%
+- Fourth cut in the current cycle
+- Next MPC meeting expected in October

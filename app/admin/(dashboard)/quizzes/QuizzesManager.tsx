@@ -22,7 +22,7 @@ interface Quiz {
   id: string;
   title: string;
   subject: string;
-  examCategory: string;
+  examCategory: string[];
   date: string;
   timeLimitMinutes: number;
   difficulty: string;
@@ -35,7 +35,7 @@ interface Quiz {
 const EMPTY_FORM = {
   title: '',
   subject: '',
-  examCategory: 'SSC',
+  examCategory: ['SSC'] as string[],
   date: '',
   timeLimitMinutes: 5,
   difficulty: 'Moderate',
@@ -171,8 +171,8 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || form.questions.length === 0 || form.questions.some((q) => !isQuestionValid(q))) {
-      setError('Title is required, and you need at least one question — each with valid MCQ options and a correct answer, or a fill-in-the-blank answer');
+    if (!form.title.trim() || form.examCategory.length === 0 || form.questions.length === 0 || form.questions.some((q) => !isQuestionValid(q))) {
+      setError('Title, at least one exam category, and at least one question (with valid MCQ options and a correct answer, or a fill-in-the-blank answer) are required');
       return;
     }
     if (form.sections.length > 0 && form.questions.some((q) => !form.sections.includes(q.section))) {
@@ -255,12 +255,31 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
               <input type="text" placeholder="e.g. Current Affairs" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
             </FormField>
           </div>
-          <div className="grid grid-cols-4 gap-3">
-            <FormField label="Exam Category">
-              <select value={form.examCategory} onChange={(e) => setForm({ ...form, examCategory: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold">
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </FormField>
+          <FormField label="Exam Category (select all that apply)">
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.map((c) => {
+                const active = form.examCategory.includes(c);
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() =>
+                      setForm({
+                        ...form,
+                        examCategory: active ? form.examCategory.filter((x) => x !== c) : [...form.examCategory, c],
+                      })
+                    }
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer ${
+                      active ? 'bg-[#C12223] text-white border-[#C12223]' : 'bg-[#FFF5F5] text-[#555555] border-[#F3DCDD] hover:border-[#C12223] hover:text-[#C12223]'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
+          </FormField>
+          <div className="grid grid-cols-3 gap-3">
             <FormField label="Date">
               <input type="text" placeholder="e.g. Aug 10, 2026" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
             </FormField>
@@ -424,7 +443,7 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
                 <img src={quiz.thumbnail} alt="" className="w-11 h-11 rounded-lg object-cover border border-[#F3DCDD] shrink-0" />
               )}
               <div>
-                <span className="text-[10px] font-bold text-[#C12223] uppercase">{quiz.subject} · {quiz.examCategory} · {quiz.questions.length} Qs</span>
+                <span className="text-[10px] font-bold text-[#C12223] uppercase">{quiz.subject} · {quiz.examCategory.join(' / ')} · {quiz.questions.length} Qs</span>
                 <h4 className="font-bold text-sm text-[#1F1A1C]">{quiz.title}</h4>
                 {quiz.courseId && (
                   <p className="text-[11px] text-[#127A52] font-semibold mt-0.5">

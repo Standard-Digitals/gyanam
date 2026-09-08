@@ -17,7 +17,7 @@ interface Course {
   id: string;
   slug: string;
   title: string;
-  category: string;
+  category: string[];
   targetExam: string;
   badge: string | null;
   rating: number;
@@ -39,7 +39,7 @@ interface Course {
 const EMPTY_FORM = {
   slug: '',
   title: '',
-  category: 'SSC',
+  category: ['SSC'] as string[],
   targetExam: '',
   badge: '',
   rating: 4.8,
@@ -106,7 +106,7 @@ export default function CoursesManager({ courses: initialCourses, mentors }: { c
   const formRef = useRef<HTMLDivElement>(null);
 
   const displayedCourses = useMemo(() => {
-    const filtered = activeCategory === 'All' ? courses : courses.filter((c) => c.category === activeCategory);
+    const filtered = activeCategory === 'All' ? courses : courses.filter((c) => c.category.includes(activeCategory));
     const sorted = [...filtered];
     switch (sortBy) {
       case 'rating':
@@ -186,8 +186,8 @@ export default function CoursesManager({ courses: initialCourses, mentors }: { c
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || !form.thumbnail.trim()) {
-      setError('Title and thumbnail are required');
+    if (!form.title.trim() || !form.thumbnail.trim() || form.category.length === 0) {
+      setError('Title, thumbnail and at least one category are required');
       return;
     }
     setIsSubmitting(true);
@@ -279,12 +279,31 @@ export default function CoursesManager({ courses: initialCourses, mentors }: { c
               <input type="text" placeholder="Auto-generated from title if blank" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
             </FormField>
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <FormField label="Category">
-              <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold">
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </FormField>
+          <FormField label="Category (select all that apply)">
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.map((c) => {
+                const active = form.category.includes(c);
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() =>
+                      setForm({
+                        ...form,
+                        category: active ? form.category.filter((x) => x !== c) : [...form.category, c],
+                      })
+                    }
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer ${
+                      active ? 'bg-[#C12223] text-white border-[#C12223]' : 'bg-[#FFF5F5] text-[#555555] border-[#F3DCDD] hover:border-[#C12223] hover:text-[#C12223]'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
+          </FormField>
+          <div className="grid grid-cols-2 gap-3">
             <FormField label="Target Exam">
               <input type="text" placeholder="e.g. SSC CGL, CHSL, CPO" value={form.targetExam} onChange={(e) => setForm({ ...form, targetExam: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
             </FormField>
@@ -451,7 +470,7 @@ export default function CoursesManager({ courses: initialCourses, mentors }: { c
                 </div>
               )}
               <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-white/90 text-[#C12223] backdrop-blur-sm">
-                {c.category}
+                {c.category.join(' / ')}
               </span>
               {c.popular && (
                 <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-[#C12223] text-white">

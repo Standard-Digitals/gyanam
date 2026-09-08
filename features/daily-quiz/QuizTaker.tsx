@@ -22,10 +22,15 @@ function hasAnswer(val: Answer | undefined): boolean {
   return typeof val === 'string' ? val.trim().length > 0 : val !== undefined;
 }
 
+// Mock Tests still store a single exam category (string); Quizzes support multiple (string[]).
+export function formatExamCategory(examCategory: string | string[]): string {
+  return Array.isArray(examCategory) ? examCategory.join(' / ') : examCategory;
+}
+
 export interface QuizTakerQuiz {
   id: string;
   title: string;
-  examCategory: string;
+  examCategory: string | string[];
   totalQuestions: number;
   timeLimitMinutes: number;
   questions: Question[];
@@ -159,7 +164,7 @@ export default function QuizTaker({
       <div className="bg-white p-4 sm:p-6 rounded-3xl border border-red-100 shadow-xl flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
           <span className="px-2.5 py-0.5 bg-red-50 text-[#C12223] text-[10px] font-black uppercase rounded border border-red-200">
-            {quiz.examCategory}
+            {formatExamCategory(quiz.examCategory)}
           </span>
           <h2 className="font-heading font-black text-lg sm:text-xl text-[#1F1A1C] mt-1">{quiz.title}</h2>
         </div>

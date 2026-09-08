@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 const bodySchema = z.object({
   slug: z.string().min(1),
   title: z.string().min(1),
-  category: z.string().min(1),
+  category: z.array(z.string()).min(1),
   targetExam: z.string().min(1),
   badge: z.string().optional(),
   rating: z.number().min(0).max(5),

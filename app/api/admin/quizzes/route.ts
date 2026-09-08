@@ -6,7 +6,7 @@ import { questionSchema } from '@/lib/validation/question';
 const bodySchema = z.object({
   title: z.string().min(1),
   subject: z.string().min(1),
-  examCategory: z.string().min(1),
+  examCategory: z.array(z.string()).min(1),
   date: z.string().min(1),
   timeLimitMinutes: z.number().int().positive(),
   difficulty: z.string().min(1),

@@ -44,7 +44,7 @@ export default async function DashboardCoursesPage() {
               >
                 <div className="h-32 bg-cover bg-center relative" style={{ backgroundImage: `url(${course.thumbnail})` }}>
                   <span className="absolute top-3 left-3 bg-white/95 text-[#C12223] font-plexmono font-bold text-[10px] uppercase px-2.5 py-1 rounded-full">
-                    {course.category}
+                    {course.category.join(' / ')}
                   </span>
                 </div>
                 <div className="p-4">

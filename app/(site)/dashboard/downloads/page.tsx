@@ -21,7 +21,7 @@ export default async function DashboardDownloadsPage() {
 
   const courseIds = enrollments.map((e) => e.courseId);
   const courses = courseIds.length ? await prisma.course.findMany({ where: { id: { in: courseIds } }, select: { category: true } }) : [];
-  const courseCategories = [...new Set(courses.map((c) => c.category))];
+  const courseCategories = [...new Set(courses.flatMap((c) => c.category))];
 
   const courseMaterials = courseCategories.length
     ? await prisma.freeResource.findMany({

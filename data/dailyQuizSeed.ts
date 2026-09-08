@@ -10,7 +10,7 @@ export interface QuizSeed {
   id: string;
   title: string;
   subject: string;
-  examCategory: string;
+  examCategory: string[];
   date: string;
   totalQuestions: number;
   timeLimitMinutes: number;
@@ -24,7 +24,7 @@ export const QUIZZES_SEED: QuizSeed[] = [
     id: 'qz-ca-01',
     title: 'Daily Current Affairs Quiz - August 1, 2026',
     subject: 'Current Affairs',
-    examCategory: 'All Govt Exams',
+    examCategory: ['All Govt Exams'],
     date: 'August 01, 2026',
     totalQuestions: 5,
     timeLimitMinutes: 5,
@@ -86,7 +86,7 @@ export const QUIZZES_SEED: QuizSeed[] = [
     id: 'qz-quant-02',
     title: 'Speed Math & DI Booster - 10-Minute Drill',
     subject: 'Quantitative Aptitude',
-    examCategory: 'SSC CGL & Bank PO',
+    examCategory: ['SSC CGL & Bank PO'],
     date: 'August 01, 2026',
     totalQuestions: 5,
     timeLimitMinutes: 5,
@@ -139,7 +139,7 @@ export const QUIZZES_SEED: QuizSeed[] = [
     id: 'qz-reas-03',
     title: 'SSC CGL TCS Pattern Syllogism & Coding Challenge',
     subject: 'Reasoning Ability',
-    examCategory: 'SSC CGL / CHSL',
+    examCategory: ['SSC CGL / CHSL'],
     date: 'August 01, 2026',
     totalQuestions: 5,
     timeLimitMinutes: 5,
@@ -198,7 +198,7 @@ export const QUIZZES_SEED: QuizSeed[] = [
     id: 'qz-bank-04',
     title: 'IBPS Bank PO Financial & Banking Awareness Quiz',
     subject: 'Banking Awareness',
-    examCategory: 'Banking (IBPS / SBI)',
+    examCategory: ['Banking (IBPS / SBI)'],
     date: 'July 31, 2026',
     totalQuestions: 5,
     timeLimitMinutes: 5,

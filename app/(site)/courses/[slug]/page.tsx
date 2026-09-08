@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: `Join ${course.title} — ${course.duration}, ${course.lessonsCount} lessons in ${course.language}. Taught by ${course.instructor.name} (${course.instructor.designation}). Enroll now at ₹${course.discountPrice}.`,
     path: `/courses/${course.slug}`,
     image: course.thumbnail,
-    keywords: [course.title, course.targetExam, course.category, course.instructor.name],
+    keywords: [course.title, course.targetExam, ...course.category, course.instructor.name],
   });
 }
 

@@ -52,7 +52,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({ course, onClose, onEnr
             <div className="absolute bottom-6 left-6 right-6 text-white space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="px-3 py-1 bg-[#C12223] text-white font-bold text-xs rounded-full uppercase tracking-wider">
-                  {course.category}
+                  {course.category.join(' / ')}
                 </span>
                 {course.badge && (
                   <span className="px-3 py-1 bg-[#8C1316] text-white font-bold text-xs rounded-full">

@@ -251,7 +251,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                 All Courses
               </button>
               <span>/</span>
-              <span className="text-amber-300">{course.category}</span>
+              <span className="text-amber-300">{course.category.join(' / ')}</span>
               <span>/</span>
               <span className="text-white truncate max-w-[200px] sm:max-w-xs">{course.title}</span>
             </div>
@@ -271,7 +271,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
               {/* Badges */}
               <div className="flex flex-wrap items-center gap-2.5">
                 <span className="px-3 py-1 bg-[#C12223] text-white font-black text-[11px] uppercase rounded-full tracking-wider shadow">
-                  {course.category} Exam
+                  {course.category.join(' / ')} Exam
                 </span>
                 {course.badge && (
                   <span className="px-3 py-1 bg-amber-400 text-[#1F1A1C] font-black text-[11px] rounded-full shadow flex items-center gap-1">
@@ -928,7 +928,7 @@ export const CourseDetailPage: React.FC<CourseDetailPageProps> = ({
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                   />
                   <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-[#C12223] text-white font-bold text-[9px] rounded uppercase shadow">
-                    {relCourse.category}
+                    {relCourse.category.join(' / ')}
                   </span>
                 </div>
 

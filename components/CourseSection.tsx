@@ -22,7 +22,7 @@ export const CourseSection: React.FC<CourseSectionProps> = ({
 }) => {
   const filteredCourses = selectedCategory === 'all'
     ? courses
-    : courses.filter(c => c.category === selectedCategory);
+    : courses.filter(c => c.category.includes(selectedCategory as Course['category'][number]));
 
   return (
     <section id="courses" className="py-20 bg-white border-t border-[#F3DCDD]">
@@ -82,7 +82,7 @@ export const CourseSection: React.FC<CourseSectionProps> = ({
                   {/* Top Badges */}
                   <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
                     <span className="px-3 py-1 bg-[#C12223] text-white font-extrabold text-[10px] uppercase rounded-full shadow-md">
-                      {course.category}
+                      {course.category.join(' / ')}
                     </span>
                     {course.badge && (
                       <span className="px-3 py-1 bg-[#B91C1C] text-white font-extrabold text-[10px] rounded-full shadow-md">

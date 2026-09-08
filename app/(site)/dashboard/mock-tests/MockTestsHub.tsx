@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { ClipboardCheck, Clock, Play } from 'lucide-react';
-import QuizTaker, { type QuizTakerQuiz } from '@/features/daily-quiz/QuizTaker';
+import QuizTaker, { type QuizTakerQuiz, formatExamCategory } from '@/features/daily-quiz/QuizTaker';
 
 interface MockTest extends QuizTakerQuiz {
   status: string;
@@ -47,7 +47,7 @@ export default function MockTestsHub({ mockTests, attempts }: { mockTests: MockT
                     <ClipboardCheck className="w-4 h-4" />
                   </span>
                   <div className="min-w-0">
-                    <span className="text-[10px] font-bold text-[#C12223] uppercase">{test.examCategory}</span>
+                    <span className="text-[10px] font-bold text-[#C12223] uppercase">{formatExamCategory(test.examCategory)}</span>
                     <h3 className="font-heading font-black text-sm text-[#1F1A1C] leading-snug">{test.title}</h3>
                   </div>
                 </div>

@@ -19,7 +19,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
   if (!isOpen) return null;
 
   const filteredCourses = courses.filter(
-    c => c.title.toLowerCase().includes(query.toLowerCase()) || c.category.toLowerCase().includes(query.toLowerCase()) || c.targetExam.toLowerCase().includes(query.toLowerCase())
+    c => c.title.toLowerCase().includes(query.toLowerCase()) || c.category.some((cat) => cat.toLowerCase().includes(query.toLowerCase())) || c.targetExam.toLowerCase().includes(query.toLowerCase())
   );
 
   const filteredCA = currentAffairs.filter(
@@ -112,7 +112,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
                       <div>
                         <h4 className="font-semibold text-[#1F1A1C] text-sm group-hover:text-[#C12223] transition">{course.title}</h4>
                         <div className="flex items-center gap-2 text-xs text-[#555555] mt-0.5">
-                          <span className="bg-[#C12223]/10 text-[#C12223] px-2 py-0.5 rounded font-semibold">{course.category}</span>
+                          <span className="bg-[#C12223]/10 text-[#C12223] px-2 py-0.5 rounded font-semibold">{course.category.join(' / ')}</span>
                           <span>{course.duration}</span>
                           <span className="text-[#27AE60] font-bold">₹{course.discountPrice}</span>
                         </div>
