@@ -160,21 +160,31 @@ export default function MentorsManager({ mentors: initialMentors }: { mentors: M
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {mentors.map((m) => (
-          <div key={m.id} className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm hover:shadow-md transition-shadow flex items-start justify-between gap-4">
-            <div>
-              <span className="text-[10px] font-bold text-[#C12223] uppercase">{m.subject} · {m.experienceYears} yrs</span>
-              <h4 className="font-bold text-sm text-[#1F1A1C]">{m.name} — {m.title}</h4>
-              <p className="text-xs text-[#555555] mt-1">{m.bio}</p>
+          <div key={m.id} className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">
+            <div className="flex items-start gap-3">
+              {m.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={m.image} alt={m.name} className="w-14 h-14 rounded-xl object-cover border border-[#F3DCDD] shrink-0" />
+              ) : (
+                <div className="w-14 h-14 rounded-xl bg-[#FDEAE9] text-[#C12223] flex items-center justify-center shrink-0 font-heading font-black text-lg">
+                  {m.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] font-bold text-[#C12223] uppercase">{m.subject} · {m.experienceYears} yrs</span>
+                <h4 className="font-bold text-sm text-[#1F1A1C] leading-snug">{m.name} — {m.title}</h4>
+              </div>
             </div>
-            <div className="flex gap-2 shrink-0">
-              <button onClick={() => startEdit(m)} className="px-3 py-1.5 bg-gray-100 text-gray-700 font-bold text-xs rounded-lg cursor-pointer">Edit</button>
-              <button onClick={() => handleDelete(m.id)} className="px-3 py-1.5 bg-red-50 text-red-600 font-bold text-xs rounded-lg cursor-pointer">Delete</button>
+            <p className="text-xs text-[#555555] line-clamp-3">{m.bio}</p>
+            <div className="flex gap-2 mt-auto pt-1">
+              <button onClick={() => startEdit(m)} className="flex-1 px-3 py-1.5 bg-gray-100 text-gray-700 font-bold text-xs rounded-lg cursor-pointer">Edit</button>
+              <button onClick={() => handleDelete(m.id)} className="flex-1 px-3 py-1.5 bg-red-50 text-red-600 font-bold text-xs rounded-lg cursor-pointer">Delete</button>
             </div>
           </div>
         ))}
-        {mentors.length === 0 && <p className="text-center text-sm text-[#888888] py-8">No mentors yet.</p>}
+        {mentors.length === 0 && <p className="col-span-full text-center text-sm text-[#888888] py-8">No mentors yet.</p>}
       </div>
     </div>
   );
