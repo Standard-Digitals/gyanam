@@ -3,10 +3,16 @@ GYANM Academy - Current Affairs Import Template
 INSTRUCTIONS (delete this instructions block before pasting/uploading, or leave it - it will be ignored):
 
 1. Use "Label: value" lines for these single-line fields (any order, all optional
-   except Title): Title, Category, Date, Read Time, Source, Author, Thumbnail.
-   - Category must exactly match one of: National, Economy, State Exams,
-     Defense, Science & Tech, International, Assam & NE, Schemes.
+   except Title): Title, Category, Date, Read Time, Source, Author, Thumbnail,
+   Syllabus Tag.
+   - Category must exactly match one of: Important Days, Person in News,
+     Appointments, Place/State in News, International News/Organisations,
+     Summits, Polity/E-Governance, Geography and Environment, Economy,
+     History / Art & Culture, Science and Tech, Defence and Space, Ranking,
+     Index and Reports, Policy, Programmes and Schemes, Awards and Honours,
+     Health and Disease, Books & Authors, Sports & Miscellaneous.
      If it doesn't match, it's skipped and you pick it manually after import.
+   - Syllabus Tag is optional, e.g. "GS Paper 3, Prelims Focus".
 2. Use these section headers on their own line, followed by the content below
    them, until the next label or section header: Summary, Bullets,
    Important For Exams, Background Context, Full Content, Key Takeaways.
@@ -14,7 +20,12 @@ INSTRUCTIONS (delete this instructions block before pasting/uploading, or leave 
    line - a leading "-" or "*" is optional and gets stripped automatically.
 4. For Full Content, put one paragraph per line - each line becomes one
    paragraph on the article page.
-5. Paste this whole block into the "Paste & Auto-Fill" window in the admin
+5. To attach a practice MCQ shown at the end of the article, add these
+   "Label: value" lines: MCQ Question, MCQ Option A, MCQ Option B,
+   MCQ Option C, MCQ Option D, MCQ Answer (the letter A/B/C/D of the
+   correct option), MCQ Explanation. At least 2 options are required;
+   leave the whole MCQ block out if this article doesn't need one.
+6. Paste this whole block into the "Paste & Auto-Fill" window in the admin
    panel (or save as .docx/.txt and upload it there). Review the filled
    form before saving - some fields may need a quick touch-up.
 ============================================================
@@ -26,6 +37,7 @@ Read Time: 3 min read
 Source: PIB
 Author: Team Gyanam
 Thumbnail: https://images.unsplash.com/photo-example.jpg
+Syllabus Tag: GS Paper 3, Prelims Focus
 
 Summary:
 RBI cut the repo rate by 0.25% to 6.25% in its latest monetary policy review, aimed at boosting credit growth ahead of the festive season.
@@ -51,3 +63,11 @@ Key Takeaways:
 - New repo rate: 6.25%
 - Fourth cut in the current cycle
 - Next MPC meeting expected in October
+
+MCQ Question: What is India's new repo rate after the latest MPC review?
+MCQ Option A: 6.00%
+MCQ Option B: 6.25%
+MCQ Option C: 6.50%
+MCQ Option D: 6.75%
+MCQ Answer: B
+MCQ Explanation: RBI cut the repo rate by 0.25% to 6.25% in its latest policy review.

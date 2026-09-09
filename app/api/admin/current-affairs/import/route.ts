@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mammoth from 'mammoth';
 import { parseCurrentAffairsText } from '@/lib/import/currentAffairsImport';
-
-const CATEGORIES = ['National', 'Economy', 'State Exams', 'Defense', 'Science & Tech', 'International', 'Assam & NE', 'Schemes'];
+import { CURRENT_AFFAIRS_CATEGORIES as CATEGORIES } from '@/lib/currentAffairsCategories';
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData().catch(() => null);

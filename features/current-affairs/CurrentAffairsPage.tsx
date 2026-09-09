@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import type { CurrentAffairItem, DailyQuizQuestion, FreeResource } from '../../types';
+import { CURRENT_AFFAIRS_CATEGORIES } from '../../lib/currentAffairsCategories';
 import {
   Calendar, Clock, BookOpen, Download, Share2, Bookmark, CheckCircle,
   ArrowLeft, ArrowRight, Search, Filter, Sparkles, FileText, HelpCircle,
@@ -78,10 +79,7 @@ export const CurrentAffairsPage: React.FC<CurrentAffairsPageProps> = ({ items, q
 
   // Filter items logic
   const filteredArticles = items.filter((item) => {
-    const matchesCategory = 
-      selectedCategory === 'All' ? true :
-      selectedCategory === 'Assam' ? (item.category === 'Assam & NE' || item.category === 'State Exams' || item.impForExams.some(e => e.includes('Assam'))) :
-      item.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'All' ? true : item.category === selectedCategory;
 
     const matchesSearch = 
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -307,7 +305,7 @@ export const CurrentAffairsPage: React.FC<CurrentAffairsPageProps> = ({ items, q
                 {activeTab === 'news' && (
                   <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-2 border-t border-gray-100">
                     <span className="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider shrink-0 mr-1">Category:</span>
-                    {['All', 'Economy', 'Science & Tech', 'Assam & NE', 'International', 'Schemes'].map((cat) => (
+                    {['All', ...CURRENT_AFFAIRS_CATEGORIES].map((cat) => (
                       <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}

@@ -3,6 +3,14 @@ import { useState } from 'react';
 import FormField from '../_components/FormField';
 import CurrentAffairsImportButton from '../_components/CurrentAffairsImportButton';
 import type { ParsedCurrentAffairs } from '@/lib/import/currentAffairsImport';
+import { CURRENT_AFFAIRS_CATEGORIES as CATEGORIES } from '@/lib/currentAffairsCategories';
+
+interface McqQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+}
 
 interface CAItem {
   id: string;
@@ -17,13 +25,15 @@ interface CAItem {
   fullContent: string[];
   keyTakeaways: string[];
   backgroundContext: string | null;
+  mcqQuestion: McqQuestion | null;
+  syllabusTag: string | null;
   sourceName: string | null;
   author: string | null;
 }
 
 const EMPTY_FORM = {
   title: '',
-  category: 'National',
+  category: CATEGORIES[0],
   date: '',
   readTime: '3 min read',
   summary: '',
@@ -33,11 +43,15 @@ const EMPTY_FORM = {
   fullContentText: '',
   keyTakeawaysText: '',
   backgroundContext: '',
+  syllabusTag: '',
+  mcqEnabled: false,
+  mcqQuestionText: '',
+  mcqOptions: ['', '', '', ''],
+  mcqCorrectAnswer: 0,
+  mcqExplanation: '',
   sourceName: '',
   author: '',
 };
-
-const CATEGORIES = ['National', 'Economy', 'State Exams', 'Defense', 'Science & Tech', 'International', 'Assam & NE', 'Schemes'];
 
 function toLines(text: string): string[] {
   return text.split('\n').map((s) => s.trim()).filter(Boolean);
@@ -52,7 +66,20 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
   const [importWarnings, setImportWarnings] = useState<string[]>([]);
 
   const handleImported = (fields: Partial<ParsedCurrentAffairs>, warnings: string[]) => {
-    setForm((prev) => ({ ...prev, ...fields }));
+    const { mcqQuestion, ...rest } = fields;
+    setForm((prev) => ({
+      ...prev,
+      ...rest,
+      ...(mcqQuestion
+        ? {
+            mcqEnabled: true,
+            mcqQuestionText: mcqQuestion.question,
+            mcqOptions: [...mcqQuestion.options, '', '', '', ''].slice(0, 4),
+            mcqCorrectAnswer: mcqQuestion.correctAnswer,
+            mcqExplanation: mcqQuestion.explanation,
+          }
+        : {}),
+    }));
     setImportWarnings(warnings);
   };
 
@@ -77,6 +104,12 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
       fullContentText: item.fullContent.join('\n'),
       keyTakeawaysText: item.keyTakeaways.join('\n'),
       backgroundContext: item.backgroundContext ?? '',
+      syllabusTag: item.syllabusTag ?? '',
+      mcqEnabled: !!item.mcqQuestion,
+      mcqQuestionText: item.mcqQuestion?.question ?? '',
+      mcqOptions: item.mcqQuestion?.options?.length ? [...item.mcqQuestion.options, '', '', '', ''].slice(0, 4) : ['', '', '', ''],
+      mcqCorrectAnswer: item.mcqQuestion?.correctAnswer ?? 0,
+      mcqExplanation: item.mcqQuestion?.explanation ?? '',
       sourceName: item.sourceName ?? '',
       author: item.author ?? '',
     });
@@ -96,6 +129,17 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
       setError('Title and summary are required');
       return;
     }
+    const mcqOptionsFilled = form.mcqOptions.map((o) => o.trim()).filter(Boolean);
+    if (form.mcqEnabled) {
+      if (!form.mcqQuestionText.trim() || !form.mcqExplanation.trim() || mcqOptionsFilled.length < 2) {
+        setError('The MCQ needs a question, at least 2 options, and an explanation — or uncheck "Include a practice MCQ"');
+        return;
+      }
+      if (!form.mcqOptions[form.mcqCorrectAnswer]?.trim()) {
+        setError('Pick a correct answer that has text in it');
+        return;
+      }
+    }
     setIsSubmitting(true);
     setError(null);
     const payload = {
@@ -110,6 +154,19 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
       fullContent: toLines(form.fullContentText),
       keyTakeaways: toLines(form.keyTakeawaysText),
       backgroundContext: form.backgroundContext || undefined,
+      syllabusTag: form.syllabusTag || undefined,
+      mcqQuestion: form.mcqEnabled
+        ? (() => {
+            const correctText = form.mcqOptions[form.mcqCorrectAnswer].trim();
+            const options = form.mcqOptions.map((o) => o.trim()).filter(Boolean);
+            return {
+              question: form.mcqQuestionText,
+              options,
+              correctAnswer: Math.max(0, options.indexOf(correctText)),
+              explanation: form.mcqExplanation,
+            };
+          })()
+        : null,
       sourceName: form.sourceName || undefined,
       author: form.author || undefined,
     };
@@ -196,6 +253,9 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
               <input type="text" placeholder="e.g. 3 min read" value={form.readTime} onChange={(e) => setForm({ ...form, readTime: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
             </FormField>
           </div>
+          <FormField label="Syllabus Tag (optional)">
+            <input type="text" placeholder="e.g. GS Paper 3, Prelims Focus" value={form.syllabusTag} onChange={(e) => setForm({ ...form, syllabusTag: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          </FormField>
           <FormField label="Summary">
             <textarea placeholder="A short 1-2 line summary shown on the listing card" rows={2} value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
           </FormField>
@@ -214,6 +274,60 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
           <FormField label="Background Context (optional)">
             <input type="text" placeholder="Extra context shown before the main article" value={form.backgroundContext} onChange={(e) => setForm({ ...form, backgroundContext: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
           </FormField>
+
+          <div className="space-y-3 pt-3 border-t border-gray-100">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={form.mcqEnabled} onChange={(e) => setForm({ ...form, mcqEnabled: e.target.checked })} />
+              <span className="text-[11px] font-bold text-[#888888] uppercase">Include a practice MCQ (shown at the end of the article)</span>
+            </label>
+            {form.mcqEnabled && (
+              <div className="space-y-3 p-3 bg-[#FFF5F5] rounded-xl border border-[#F3DCDD]">
+                <FormField label="Question">
+                  <textarea
+                    rows={2}
+                    placeholder="e.g. What is India's new repo rate after the latest MPC review?"
+                    value={form.mcqQuestionText}
+                    onChange={(e) => setForm({ ...form, mcqQuestionText: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-white border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+                  />
+                </FormField>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {form.mcqOptions.map((opt, i) => (
+                    <FormField key={i} label={`Option ${String.fromCharCode(65 + i)}${form.mcqCorrectAnswer === i ? ' — Correct' : ''}`}>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="mcqCorrect"
+                          checked={form.mcqCorrectAnswer === i}
+                          onChange={() => setForm({ ...form, mcqCorrectAnswer: i })}
+                          title="Mark as correct answer"
+                        />
+                        <input
+                          type="text"
+                          value={opt}
+                          onChange={(e) => {
+                            const options = [...form.mcqOptions];
+                            options[i] = e.target.value;
+                            setForm({ ...form, mcqOptions: options });
+                          }}
+                          className="w-full px-3.5 py-2 bg-white border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+                        />
+                      </div>
+                    </FormField>
+                  ))}
+                </div>
+                <FormField label="Explanation">
+                  <textarea
+                    rows={2}
+                    placeholder="Why this is the correct answer"
+                    value={form.mcqExplanation}
+                    onChange={(e) => setForm({ ...form, mcqExplanation: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-white border border-[#F3DCDD] rounded-xl text-sm font-semibold"
+                  />
+                </FormField>
+              </div>
+            )}
+          </div>
           <div className="grid grid-cols-3 gap-3">
             <FormField label="Thumbnail URL">
               <input type="text" placeholder="https://..." value={form.thumbnail} onChange={(e) => setForm({ ...form, thumbnail: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
@@ -240,6 +354,11 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
           <div key={item.id} className="bg-white p-4 rounded-2xl border border-[#F3DCDD] shadow-sm hover:shadow-md transition-shadow flex items-start justify-between gap-4">
             <div>
               <span className="text-[10px] font-bold text-[#C12223] uppercase">{item.category} · {item.date}</span>
+              {item.mcqQuestion ? (
+                <span className="ml-2 text-[9px] font-bold text-[#127A52] bg-[#E7F5EE] px-1.5 py-0.5 rounded uppercase">MCQ added</span>
+              ) : (
+                <span className="ml-2 text-[9px] font-bold text-[#B4590A] bg-[#FBF0DF] px-1.5 py-0.5 rounded uppercase">No MCQ</span>
+              )}
               <h4 className="font-bold text-sm text-[#1F1A1C]">{item.title}</h4>
               <p className="text-xs text-[#555555] mt-1">{item.summary}</p>
             </div>

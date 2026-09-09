@@ -67,7 +67,7 @@ export interface CurrentAffairItem {
   id: string;
   slug?: string;
   title: string;
-  category: 'National' | 'Economy' | 'State Exams' | 'Defense' | 'Science & Tech' | 'International' | 'Assam & NE' | 'Schemes';
+  category: string;
   date: string;
   readTime: string;
   summary: string;

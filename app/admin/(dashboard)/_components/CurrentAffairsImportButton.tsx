@@ -2,8 +2,7 @@
 import { useRef, useState } from 'react';
 import { ClipboardPaste, UploadCloud, Download, X } from 'lucide-react';
 import { parseCurrentAffairsText, type ParsedCurrentAffairs } from '@/lib/import/currentAffairsImport';
-
-const CATEGORIES = ['National', 'Economy', 'State Exams', 'Defense', 'Science & Tech', 'International', 'Assam & NE', 'Schemes'];
+import { CURRENT_AFFAIRS_CATEGORIES as CATEGORIES } from '@/lib/currentAffairsCategories';
 
 export default function CurrentAffairsImportButton({
   onImported,
