@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getCurrentAffairByIdOrSlug, getAllCurrentAffairIds, getAllCurrentAffairs } from '@/lib/data/currentAffairs';
+import { getCurrentAffairByIdOrSlug, getAllCurrentAffairs } from '@/lib/data/currentAffairs';
 import { buildMetadata } from '@/lib/metadata';
 import CurrentAffairsDetailClient from './CurrentAffairsDetailClient';
 
 type Props = { params: Promise<{ id: string }> };
 
-export async function generateStaticParams() {
-  const ids = await getAllCurrentAffairIds();
-  return ids.map((id) => ({ id }));
-}
+// Current Affairs articles are edited constantly from the admin panel (new MCQs,
+// content tweaks, etc.) — render on every request instead of pre-building static
+// HTML at deploy time, so edits show up immediately without a full rebuild.
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;

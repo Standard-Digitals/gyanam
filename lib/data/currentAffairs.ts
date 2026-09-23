@@ -36,8 +36,3 @@ export async function getCurrentAffairByIdOrSlug(idOrSlug: string): Promise<Curr
   });
   return item ? mapItem(item) : null;
 }
-
-export async function getAllCurrentAffairIds(): Promise<string[]> {
-  const items = await prisma.currentAffairItem.findMany({ select: { id: true } });
-  return items.map((i) => i.id);
-}

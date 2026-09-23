@@ -8,9 +8,10 @@ INSTRUCTIONS (delete this instructions block before pasting/uploading, or leave 
    - Category must exactly match one of: Important Days, Person in News,
      Appointments, Place/State in News, International News/Organisations,
      Summits, Polity/E-Governance, Geography and Environment, Economy,
-     History / Art & Culture, Science and Tech, Defence and Space, Ranking,
-     Index and Reports, Policy, Programmes and Schemes, Awards and Honours,
-     Health and Disease, Books & Authors, Sports & Miscellaneous.
+     Agriculture, History / Art & Culture, Science and Tech, Defence and
+     Space, Ranking, Index and Reports, Policy, Programmes and Schemes,
+     Awards and Honours, Health and Disease, Books & Authors, Sports &
+     Miscellaneous.
      If it doesn't match, it's skipped and you pick it manually after import.
    - Syllabus Tag is optional, e.g. "GS Paper 3, Prelims Focus".
 2. Use these section headers on their own line, followed by the content below

@@ -8,6 +8,7 @@ export const CURRENT_AFFAIRS_CATEGORIES = [
   'Polity/E-Governance',
   'Geography and Environment',
   'Economy',
+  'Agriculture',
   'History / Art & Culture',
   'Science and Tech, Defence and Space',
   'Ranking, Index and Reports',
