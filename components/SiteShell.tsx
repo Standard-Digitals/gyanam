@@ -14,9 +14,10 @@ interface SiteShellProps {
   currentAffairs: CurrentAffairItem[];
   resources: FreeResource[];
   user: { name: string | null; phone: string } | null;
+  banners: { id: string; badge: string; message: string; link: string | null }[];
 }
 
-export function SiteShell({ children, courses, currentAffairs, resources, user }: SiteShellProps) {
+export function SiteShell({ children, courses, currentAffairs, resources, user, banners }: SiteShellProps) {
   const router = useRouter();
   const pathname = usePathname();
   const isDashboard = pathname?.startsWith('/dashboard') ?? false;
@@ -38,6 +39,7 @@ export function SiteShell({ children, courses, currentAffairs, resources, user }
           onOpenAuth={handleOpenAuth}
           onOpenMentorship={() => setMentorshipOpen(true)}
           user={user}
+          banners={banners}
         />
       )}
 

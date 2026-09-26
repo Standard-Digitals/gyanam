@@ -15,6 +15,7 @@ import {
   HelpCircle,
   ClipboardList,
   Settings,
+  Megaphone,
 } from 'lucide-react';
 
 export const QUICK_ACTIONS = [
@@ -56,6 +57,7 @@ export const NAV_GROUPS = [
       { href: '/admin/resources', label: 'Resources', icon: FolderDown },
       { href: '/admin/blog', label: 'Blog', icon: FileText },
       { href: '/admin/faq', label: 'FAQ', icon: HelpCircle },
+      { href: '/admin/announcements', label: 'Announcement Banner', icon: Megaphone },
     ],
   },
   {

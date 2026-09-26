@@ -16,6 +16,7 @@ interface HeaderProps {
   onOpenAuth: (mode?: 'login' | 'signup') => void;
   onOpenMentorship: () => void;
   user: { name: string | null; phone: string } | null;
+  banners: { id: string; badge: string; message: string; link: string | null }[];
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -23,6 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAuth,
   onOpenMentorship,
   user,
+  banners,
 }) => {
   const router = useRouter();
 
@@ -38,6 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [activeMobileSub, setActiveMobileSub] = useState<string | null>(null);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [bannerIndex, setBannerIndex] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,6 +49,12 @@ export const Header: React.FC<HeaderProps> = ({
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (banners.length <= 1) return;
+    const id = setInterval(() => setBannerIndex((i) => (i + 1) % banners.length), 4500);
+    return () => clearInterval(id);
+  }, [banners.length]);
 
   const handleMouseEnter = (menuName: string) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -61,15 +70,37 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <>
       {/* Top Announcement Bar - Vibrant Red Header */}
+      {banners.length > 0 && (
       <div className="bg-gradient-to-r from-[#8C1316] via-[#A6181B] to-[#8C1316] text-white py-2 px-4 text-xs border-b border-red-500/20">
         <div className="max-w-[1320px] mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <span className="bg-[#EF4444] text-white font-black text-[10px] px-2 py-0.5 rounded uppercase tracking-wider shrink-0 shadow-sm">
-              NEW BATCH 2026
-            </span>
-            <span className="text-red-100 text-xs truncate">
-              Admissions open for <strong className="text-white">SSC CGL Tier I+II</strong>, <strong className="text-white font-bold">Assam ADRE 3.0</strong> & <strong className="text-white font-bold">SBI PO</strong>
-            </span>
+            <AnimatePresence mode="wait">
+              {(() => {
+                const banner = banners[bannerIndex % banners.length];
+                const content = (
+                  <motion.div
+                    key={banner.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.35 }}
+                    className="flex items-center gap-2.5 overflow-hidden"
+                  >
+                    <span className="bg-[#EF4444] text-white font-black text-[10px] px-2 py-0.5 rounded uppercase tracking-wider shrink-0 shadow-sm">
+                      {banner.badge}
+                    </span>
+                    <span className="text-red-100 text-xs truncate">{banner.message}</span>
+                  </motion.div>
+                );
+                return banner.link ? (
+                  <a href={banner.link} className="hover:opacity-90 transition">
+                    {content}
+                  </a>
+                ) : (
+                  content
+                );
+              })()}
+            </AnimatePresence>
           </div>
 
           <div className="hidden md:flex items-center gap-5 text-red-100 text-xs shrink-0 font-medium">
@@ -88,6 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </div>
+      )}
 
       {/* Main Clean Header Navbar */}
       <header
