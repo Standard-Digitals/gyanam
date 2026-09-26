@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import FormField from '../_components/FormField';
+import ImageUploadField from '../_components/ImageUploadField';
 import CurrentAffairsImportButton from '../_components/CurrentAffairsImportButton';
 import type { ParsedCurrentAffairs } from '@/lib/import/currentAffairsImport';
 import { CURRENT_AFFAIRS_CATEGORIES as CATEGORIES } from '@/lib/currentAffairsCategories';
@@ -328,10 +329,8 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
               </div>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <FormField label="Thumbnail URL">
-              <input type="text" placeholder="https://..." value={form.thumbnail} onChange={(e) => setForm({ ...form, thumbnail: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            </FormField>
+          <ImageUploadField label="Thumbnail" value={form.thumbnail} onChange={(url) => setForm({ ...form, thumbnail: url })} />
+          <div className="grid grid-cols-2 gap-3">
             <FormField label="Source Name">
               <input type="text" placeholder="e.g. PIB, The Hindu" value={form.sourceName} onChange={(e) => setForm({ ...form, sourceName: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
             </FormField>
