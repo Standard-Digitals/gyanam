@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { Star, Users, PlayCircle, ArrowUpDown, ChevronDown } from 'lucide-react';
 import ImageUploadField from '../_components/ImageUploadField';
 import FormField from '../_components/FormField';
+import TargetExamsField from '../_components/TargetExamsField';
 import { EXAM_CATEGORIES as CATEGORIES } from '../_components/examCategories';
+import { TARGET_EXAMS } from '@/lib/targetExams';
 
 interface Mentor {
   id: string;
@@ -40,7 +42,7 @@ const EMPTY_FORM = {
   slug: '',
   title: '',
   category: ['SSC'] as string[],
-  targetExam: '',
+  targetExam: [] as string[],
   badge: '',
   rating: 4.8,
   reviewsCount: 0,
@@ -146,7 +148,7 @@ export default function CoursesManager({ courses: initialCourses, mentors }: { c
       slug: c.slug,
       title: c.title,
       category: c.category,
-      targetExam: c.targetExam,
+      targetExam: c.targetExam.split(',').map((s) => s.trim()).filter((e) => TARGET_EXAMS.includes(e)),
       badge: c.badge ?? '',
       rating: c.rating,
       reviewsCount: c.reviewsCount,
@@ -196,7 +198,7 @@ export default function CoursesManager({ courses: initialCourses, mentors }: { c
       slug: form.slug.trim() || slugify(form.title),
       title: form.title,
       category: form.category,
-      targetExam: form.targetExam,
+      targetExam: form.targetExam.join(', '),
       badge: form.badge || undefined,
       rating: Number(form.rating),
       reviewsCount: Number(form.reviewsCount),
@@ -303,14 +305,10 @@ export default function CoursesManager({ courses: initialCourses, mentors }: { c
               })}
             </div>
           </FormField>
-          <div className="grid grid-cols-2 gap-3">
-            <FormField label="Target Exam">
-              <input type="text" placeholder="e.g. SSC CGL, CHSL, CPO" value={form.targetExam} onChange={(e) => setForm({ ...form, targetExam: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            </FormField>
-            <FormField label="Badge (optional)">
-              <input type="text" placeholder="e.g. 🔥 Bestseller" value={form.badge} onChange={(e) => setForm({ ...form, badge: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            </FormField>
-          </div>
+          <TargetExamsField value={form.targetExam} onChange={(next) => setForm({ ...form, targetExam: next })} />
+          <FormField label="Badge (optional)">
+            <input type="text" placeholder="e.g. 🔥 Bestseller" value={form.badge} onChange={(e) => setForm({ ...form, badge: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          </FormField>
 
           <div className="pt-2 border-t border-gray-100">
             <p className="text-[11px] font-bold text-[#888888] uppercase mb-2">Instructor</p>

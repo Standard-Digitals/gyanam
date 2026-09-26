@@ -4,6 +4,8 @@ import {
   Book, BookOpen, FileText, HelpCircle, Newspaper, Rss, GraduationCap, Sigma, ClipboardList, ArrowLeft, type LucideIcon,
 } from 'lucide-react';
 import FormField from '../_components/FormField';
+import TargetExamsField from '../_components/TargetExamsField';
+import { TARGET_EXAMS } from '@/lib/targetExams';
 
 interface Resource {
   id: string;
@@ -30,7 +32,7 @@ const EMPTY_FORM = {
   fileSize: '',
   rating: 4.8,
   description: '',
-  targetExamsText: '',
+  targetExams: [] as string[],
   isHot: false,
   inStock: true,
   price: '',
@@ -77,7 +79,7 @@ export default function ResourcesManager({ resources: initialResources }: { reso
       fileSize: r.fileSize,
       rating: r.rating,
       description: r.description,
-      targetExamsText: r.targetExams.join(', '),
+      targetExams: r.targetExams.filter((e) => TARGET_EXAMS.includes(e)),
       isHot: r.isHot,
       inStock: r.inStock,
       price: r.price?.toString() ?? '',
@@ -108,7 +110,7 @@ export default function ResourcesManager({ resources: initialResources }: { reso
       fileSize: form.fileSize,
       rating: Number(form.rating),
       description: form.description,
-      targetExams: form.targetExamsText.split(',').map((s) => s.trim()).filter(Boolean),
+      targetExams: form.targetExams,
       isHot: form.isHot,
       inStock: form.inStock,
       price: form.price ? Number(form.price) : undefined,
@@ -253,9 +255,7 @@ export default function ResourcesManager({ resources: initialResources }: { reso
                   <input type="text" placeholder="e.g. Gyanam Editorial Team" value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
                 </FormField>
               </div>
-              <FormField label="Target Exams (comma separated)">
-                <input type="text" placeholder="e.g. SSC CGL, SSC CHSL, IBPS PO" value={form.targetExamsText} onChange={(e) => setForm({ ...form, targetExamsText: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-              </FormField>
+              <TargetExamsField value={form.targetExams} onChange={(next) => setForm({ ...form, targetExams: next })} />
               <FormField label="Description">
                 <textarea placeholder="A short description shown on the resource card" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
               </FormField>
