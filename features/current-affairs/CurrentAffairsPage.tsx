@@ -380,6 +380,10 @@ export const CurrentAffairsPage: React.FC<CurrentAffairsPageProps> = ({ items, q
                             loading="lazy"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              const wrapper = e.currentTarget.parentElement;
+                              if (wrapper) wrapper.style.display = 'none';
+                            }}
                           />
                           <div className="absolute top-3 left-3 bg-[#1F1A1C]/80 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider">
                             {item.category}

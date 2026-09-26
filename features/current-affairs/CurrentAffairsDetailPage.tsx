@@ -99,6 +99,9 @@ export const CurrentAffairsDetailPage: React.FC<CurrentAffairsDetailPageProps> =
             alt="Article Banner Background"
             className="w-full h-full object-cover object-center opacity-30 scale-105 filter brightness-75 contrast-125 blur-sm"
             referrerPolicy="no-referrer"
+            onError={(e) => {
+              if (e.currentTarget.src !== sscBankBanner) e.currentTarget.src = sscBankBanner;
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#8C1316] via-[#8C1316]/90 to-[#6B1113]/85" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#8C1316]/60 via-transparent to-[#6B1113]/95" />
@@ -238,11 +241,15 @@ export const CurrentAffairsDetailPage: React.FC<CurrentAffairsDetailPageProps> =
             {/* Featured Image */}
             {article.thumbnail && (
               <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm max-h-[380px] bg-gray-100">
-                <img 
-                  src={article.thumbnail} 
-                  alt={article.title} 
+                <img
+                  src={article.thumbnail}
+                  alt={article.title}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    const wrapper = e.currentTarget.parentElement;
+                    if (wrapper) wrapper.style.display = 'none';
+                  }}
                 />
               </div>
             )}
