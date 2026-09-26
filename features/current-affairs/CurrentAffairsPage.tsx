@@ -13,6 +13,20 @@ import {
 
 const sscBankBanner = 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=1600';
 
+function getPageNumbers(current: number, total: number): (number | 'ellipsis')[] {
+  const pages: (number | 'ellipsis')[] = [];
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) pages.push(i);
+    return pages;
+  }
+  pages.push(1);
+  if (current > 3) pages.push('ellipsis');
+  for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
+  if (current < total - 2) pages.push('ellipsis');
+  pages.push(total);
+  return pages;
+}
+
 interface CurrentAffairsPageProps {
   items: CurrentAffairItem[];
   quizQuestions: DailyQuizQuestion[];
@@ -31,6 +45,8 @@ export const CurrentAffairsPage: React.FC<CurrentAffairsPageProps> = ({ items, q
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('All');
+  const NEWS_PAGE_SIZE = 6;
+  const [newsPage, setNewsPage] = useState<number>(1);
 
   // Bookmarks state in localStorage
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>(() => {
@@ -55,6 +71,11 @@ export const CurrentAffairsPage: React.FC<CurrentAffairsPageProps> = ({ items, q
       setActiveTab(tabParam);
     }
   }, [searchParams]);
+
+  // Jump back to page 1 whenever the news filters change
+  useEffect(() => {
+    setNewsPage(1);
+  }, [selectedCategory, searchQuery, selectedDate]);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -91,6 +112,9 @@ export const CurrentAffairsPage: React.FC<CurrentAffairsPageProps> = ({ items, q
 
     return matchesCategory && matchesSearch && matchesDate;
   });
+
+  const newsTotalPages = Math.max(1, Math.ceil(filteredArticles.length / NEWS_PAGE_SIZE));
+  const paginatedArticles = filteredArticles.slice((newsPage - 1) * NEWS_PAGE_SIZE, newsPage * NEWS_PAGE_SIZE);
 
   // Quiz submission handler
   const handleAnswerSelect = (questionId: number, optionIndex: number) => {
@@ -338,8 +362,9 @@ export const CurrentAffairsPage: React.FC<CurrentAffairsPageProps> = ({ items, q
                   </button>
                 </div>
               ) : (
+                <>
                 <div className="space-y-6">
-                  {filteredArticles.map((item) => (
+                  {paginatedArticles.map((item) => (
                     <motion.div
                       key={item.id}
                       initial={{ opacity: 0, y: 15 }}
@@ -348,10 +373,11 @@ export const CurrentAffairsPage: React.FC<CurrentAffairsPageProps> = ({ items, q
                     >
                       {/* Image Thumbnail */}
                       {item.thumbnail && (
-                        <div className="sm:w-64 h-48 sm:h-auto bg-gray-100 overflow-hidden relative shrink-0">
-                          <img 
-                            src={item.thumbnail} 
-                            alt={item.title} 
+                        <div className="sm:w-64 h-48 bg-gray-100 overflow-hidden relative shrink-0">
+                          <img
+                            src={item.thumbnail}
+                            alt={item.title}
+                            loading="lazy"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             referrerPolicy="no-referrer"
                           />
@@ -432,6 +458,41 @@ export const CurrentAffairsPage: React.FC<CurrentAffairsPageProps> = ({ items, q
                     </motion.div>
                   ))}
                 </div>
+
+                {newsTotalPages > 1 && (
+                  <div className="flex items-center justify-center gap-1.5 pt-2">
+                    <button
+                      disabled={newsPage <= 1}
+                      onClick={() => setNewsPage((p) => Math.max(1, p - 1))}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold border border-red-100 text-[#1F1A1C] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      ‹
+                    </button>
+                    {getPageNumbers(newsPage, newsTotalPages).map((p, i) =>
+                      p === 'ellipsis' ? (
+                        <span key={`e-${i}`} className="w-8 h-8 flex items-center justify-center text-xs text-gray-400">…</span>
+                      ) : (
+                        <button
+                          key={p}
+                          onClick={() => setNewsPage(p)}
+                          className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold cursor-pointer ${
+                            p === newsPage ? 'bg-[#C12223] text-white' : 'border border-red-100 text-[#1F1A1C] hover:bg-[#FFF5F5]'
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      )
+                    )}
+                    <button
+                      disabled={newsPage >= newsTotalPages}
+                      onClick={() => setNewsPage((p) => Math.min(newsTotalPages, p + 1))}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold border border-red-100 text-[#1F1A1C] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      ›
+                    </button>
+                  </div>
+                )}
+                </>
               )}
             </div>
 

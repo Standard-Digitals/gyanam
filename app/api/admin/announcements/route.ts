@@ -9,6 +9,11 @@ const bodySchema = z.object({
   isActive: z.boolean().default(true),
 });
 
+export async function GET() {
+  const banners = await prisma.announcementBanner.findMany({ orderBy: { order: 'asc' } });
+  return NextResponse.json({ banners });
+}
+
 export async function POST(req: NextRequest) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
