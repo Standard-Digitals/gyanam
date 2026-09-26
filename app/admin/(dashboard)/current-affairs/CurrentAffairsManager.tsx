@@ -353,7 +353,12 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
               </div>
             )}
           </div>
-          <ImageUploadField label="Thumbnail" value={form.thumbnail} onChange={(url) => setForm({ ...form, thumbnail: url })} />
+          <ImageUploadField
+            label="Thumbnail"
+            value={form.thumbnail}
+            onChange={(url) => setForm({ ...form, thumbnail: url })}
+            hint="Recommended: 1200×675px (16:9 landscape), under 500KB — keep the important part centered, edges get cropped."
+          />
           <div className="grid grid-cols-2 gap-3">
             <FormField label="Source Name">
               <input type="text" placeholder="e.g. PIB, The Hindu" value={form.sourceName} onChange={(e) => setForm({ ...form, sourceName: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />

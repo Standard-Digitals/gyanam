@@ -5,10 +5,12 @@ export default function ImageUploadField({
   label,
   value,
   onChange,
+  hint,
 }: {
   label: string;
   value: string;
   onChange: (url: string) => void;
+  hint?: string;
 }) {
   const [mode, setMode] = useState<'link' | 'upload'>('link');
   const [uploading, setUploading] = useState(false);
@@ -79,6 +81,8 @@ export default function ImageUploadField({
           {error && <p className="text-[11px] font-semibold text-red-600">{error}</p>}
         </div>
       )}
+
+      {hint && <p className="text-[10px] text-[#888888] mt-1">{hint}</p>}
 
       {value && (
         // eslint-disable-next-line @next/next/no-img-element
