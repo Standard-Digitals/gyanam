@@ -45,7 +45,7 @@ export const CurrentAffairsPage: React.FC<CurrentAffairsPageProps> = ({ items, q
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('All');
-  const NEWS_PAGE_SIZE = 6;
+  const NEWS_PAGE_SIZE = 3;
   const [newsPage, setNewsPage] = useState<number>(1);
 
   // Bookmarks state in localStorage
