@@ -5,6 +5,7 @@ import ImageUploadField from '../_components/ImageUploadField';
 import CurrentAffairsImportButton from '../_components/CurrentAffairsImportButton';
 import type { ParsedCurrentAffairs } from '@/lib/import/currentAffairsImport';
 import { CURRENT_AFFAIRS_CATEGORIES as CATEGORIES } from '@/lib/currentAffairsCategories';
+import { EXAM_CATEGORIES as EXAMS } from '../_components/examCategories';
 
 interface McqQuestion {
   question: string;
@@ -39,7 +40,7 @@ const EMPTY_FORM = {
   readTime: '3 min read',
   summary: '',
   bulletsText: '',
-  impForExamsText: '',
+  impForExams: [] as string[],
   thumbnail: '',
   fullContentText: '',
   keyTakeawaysText: '',
@@ -67,10 +68,13 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
   const [importWarnings, setImportWarnings] = useState<string[]>([]);
 
   const handleImported = (fields: Partial<ParsedCurrentAffairs>, warnings: string[]) => {
-    const { mcqQuestion, ...rest } = fields;
+    const { mcqQuestion, impForExamsText, ...rest } = fields;
     setForm((prev) => ({
       ...prev,
       ...rest,
+      ...(impForExamsText
+        ? { impForExams: EXAMS.filter((exam) => impForExamsText.toLowerCase().includes(exam.toLowerCase())) }
+        : {}),
       ...(mcqQuestion
         ? {
             mcqEnabled: true,
@@ -100,7 +104,7 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
       readTime: item.readTime,
       summary: item.summary,
       bulletsText: item.bullets.join('\n'),
-      impForExamsText: item.impForExams.join('\n'),
+      impForExams: item.impForExams.filter((e) => EXAMS.includes(e)),
       thumbnail: item.thumbnail ?? '',
       fullContentText: item.fullContent.join('\n'),
       keyTakeawaysText: item.keyTakeaways.join('\n'),
@@ -150,7 +154,7 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
       readTime: form.readTime,
       summary: form.summary,
       bullets: toLines(form.bulletsText),
-      impForExams: toLines(form.impForExamsText),
+      impForExams: form.impForExams,
       thumbnail: form.thumbnail || undefined,
       fullContent: toLines(form.fullContentText),
       keyTakeaways: toLines(form.keyTakeawaysText),
@@ -263,8 +267,29 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
           <FormField label="Key Bullet Points (one per line)">
             <textarea placeholder={'e.g.\nRepo rate cut by 0.25% to 6.25%\nEffective from next quarter'} rows={3} value={form.bulletsText} onChange={(e) => setForm({ ...form, bulletsText: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
           </FormField>
-          <FormField label="Important For Exams (one per line)">
-            <textarea placeholder={'e.g.\nSSC CGL — Static GK\nBanking — Financial Awareness'} rows={2} value={form.impForExamsText} onChange={(e) => setForm({ ...form, impForExamsText: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
+          <FormField label="Important For Exams">
+            <div className="flex flex-wrap gap-2">
+              {EXAMS.map((exam) => {
+                const isSelected = form.impForExams.includes(exam);
+                return (
+                  <button
+                    key={exam}
+                    type="button"
+                    onClick={() =>
+                      setForm({
+                        ...form,
+                        impForExams: isSelected ? form.impForExams.filter((e) => e !== exam) : [...form.impForExams, exam],
+                      })
+                    }
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition ${
+                      isSelected ? 'bg-[#C12223] text-white' : 'bg-[#FFF5F5] border border-[#F3DCDD] text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {exam}
+                  </button>
+                );
+              })}
+            </div>
           </FormField>
           <FormField label="Full Content Paragraphs (one per line)">
             <textarea placeholder="Each line becomes one paragraph on the full article page" rows={4} value={form.fullContentText} onChange={(e) => setForm({ ...form, fullContentText: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />

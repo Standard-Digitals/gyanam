@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { CurrentAffairItem } from '../../types';
@@ -297,9 +298,13 @@ export const CurrentAffairsDetailPage: React.FC<CurrentAffairsDetailPageProps> =
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {article.impForExams.map((exam, eIdx) => (
-                    <span key={eIdx} className="px-3 py-1 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 text-xs font-bold">
+                    <Link
+                      key={eIdx}
+                      href={`/courses?category=${encodeURIComponent(exam)}`}
+                      className="px-3 py-1 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 text-xs font-bold hover:bg-[#C12223] hover:text-white hover:border-[#C12223] transition"
+                    >
                       {exam}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               </div>

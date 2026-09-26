@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { EXAM_CATEGORIES } from '../../data/mockData';
 import { Course } from '../../types';
 import { 
@@ -13,6 +13,7 @@ import {
 
 export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const onEnrollCourse = (_course?: Course) => router.push('/?enroll=true');
   const onOpenMentorship = () => router.push('/?mentorship=true');
   const onSelectCourseSlug = (slug: string) => router.push('/courses/' + slug);
@@ -23,8 +24,12 @@ export const CoursePage: React.FC<{ courses: Course[] }> = ({ courses }) => {
     if (onSelectCourseSlug) onSelectCourseSlug(slug);
     ;
   };
-  // Filters & State
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  // Filters & State — a `?category=` in the URL (e.g. linked from a Current Affairs
+  // article's "Relevant for Exams" tags) pre-applies that exam filter on load.
+  const categoryFromUrl = searchParams.get('category');
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    categoryFromUrl && EXAM_CATEGORIES.some((c) => c.id === categoryFromUrl) ? categoryFromUrl : 'all'
+  );
   const [selectedMode, setSelectedMode] = useState<string>('all');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('all');
   const [priceRange, setPriceRange] = useState<string>('all');
