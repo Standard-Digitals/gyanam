@@ -26,7 +26,7 @@ function mapItem(c: PrismaCurrentAffairItem): CurrentAffairItem {
 }
 
 export const getAllCurrentAffairs = cache(async (): Promise<CurrentAffairItem[]> => {
-  const items = await prisma.currentAffairItem.findMany({ orderBy: { createdAt: 'asc' } });
+  const items = await prisma.currentAffairItem.findMany({ orderBy: { createdAt: 'desc' } });
   return items.map(mapItem);
 });
 
