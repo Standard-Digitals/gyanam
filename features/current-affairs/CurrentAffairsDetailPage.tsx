@@ -240,7 +240,7 @@ export const CurrentAffairsDetailPage: React.FC<CurrentAffairsDetailPageProps> =
 
             {/* Featured Image */}
             {article.thumbnail && (
-              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm max-h-[380px] bg-gray-100">
+              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-[380px] bg-gray-100">
                 <img
                   src={article.thumbnail}
                   alt={article.title}
