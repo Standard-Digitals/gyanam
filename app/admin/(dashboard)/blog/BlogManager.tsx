@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import ImageUploadField from '../_components/ImageUploadField';
 import FormField from '../_components/FormField';
+import DateField, { todayHumanDate } from '../_components/DateField';
 
 interface Blog {
   id: string;
@@ -35,7 +36,7 @@ export default function BlogManager({ posts: initialPosts }: { posts: Blog[] }) 
 
   const startCreate = () => {
     setEditingId('new');
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, date: todayHumanDate() });
     setError(null);
   };
 
@@ -144,15 +145,7 @@ export default function BlogManager({ posts: initialPosts }: { posts: Blog[] }) 
             </FormField>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <FormField label="Date">
-              <input
-                type="text"
-                placeholder="e.g. Aug 10, 2026"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold"
-              />
-            </FormField>
+            <DateField value={form.date} onChange={(next) => setForm({ ...form, date: next })} />
             <FormField label="Read Time">
               <input
                 type="text"

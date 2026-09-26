@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import FormField from '../_components/FormField';
 import ImageUploadField from '../_components/ImageUploadField';
+import DateField, { todayHumanDate } from '../_components/DateField';
 import CurrentAffairsImportButton from '../_components/CurrentAffairsImportButton';
 import type { ParsedCurrentAffairs } from '@/lib/import/currentAffairsImport';
 import { CURRENT_AFFAIRS_CATEGORIES as CATEGORIES } from '@/lib/currentAffairsCategories';
@@ -90,7 +91,7 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
 
   const startCreate = () => {
     setEditingId('new');
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, date: todayHumanDate() });
     setError(null);
     setImportWarnings([]);
   };
@@ -251,9 +252,7 @@ export default function CurrentAffairsManager({ items: initialItems }: { items: 
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </FormField>
-            <FormField label="Date">
-              <input type="text" placeholder="e.g. Aug 10, 2026" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            </FormField>
+            <DateField value={form.date} onChange={(next) => setForm({ ...form, date: next })} />
             <FormField label="Read Time">
               <input type="text" placeholder="e.g. 3 min read" value={form.readTime} onChange={(e) => setForm({ ...form, readTime: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
             </FormField>

@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { GripVertical } from 'lucide-react';
 import ImageUploadField from '../_components/ImageUploadField';
 import FormField from '../_components/FormField';
+import DateField, { todayHumanDate } from '../_components/DateField';
 import QuestionEditor from '../_components/QuestionEditor';
 import QuestionImportButton from '../_components/QuestionImportButton';
 import { EXAM_CATEGORIES as CATEGORIES } from '../_components/examCategories';
@@ -94,7 +95,7 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
 
   const startCreate = () => {
     setEditingId('new');
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, date: todayHumanDate() });
     setError(null);
   };
 
@@ -348,9 +349,7 @@ export default function QuizzesManager({ quizzes: initialQuizzes, courses }: { q
             </div>
           </FormField>
           <div className="grid grid-cols-3 gap-3">
-            <FormField label="Date">
-              <input type="text" placeholder="e.g. Aug 10, 2026" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            </FormField>
+            <DateField value={form.date} onChange={(next) => setForm({ ...form, date: next })} />
             <FormField label="Time Limit (minutes)">
               <input type="number" placeholder="5" value={form.timeLimitMinutes} onChange={(e) => setForm({ ...form, timeLimitMinutes: Number(e.target.value) })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
             </FormField>
