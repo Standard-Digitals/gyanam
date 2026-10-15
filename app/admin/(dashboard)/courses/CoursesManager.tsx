@@ -5,6 +5,7 @@ import { Star, Users, PlayCircle, ArrowUpDown, ChevronDown } from 'lucide-react'
 import ImageUploadField from '../_components/ImageUploadField';
 import FormField from '../_components/FormField';
 import TargetExamsField from '../_components/TargetExamsField';
+import DateField, { todayHumanDate } from '../_components/DateField';
 import { EXAM_CATEGORIES as CATEGORIES } from '../_components/examCategories';
 import { TARGET_EXAMS } from '@/lib/targetExams';
 
@@ -136,7 +137,7 @@ export default function CoursesManager({ courses: initialCourses, mentors }: { c
 
   const startCreate = () => {
     setEditingId('new');
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, startDate: todayHumanDate() });
     setSelectedMentorId('');
     setError(null);
     scrollToForm();
@@ -364,9 +365,7 @@ export default function CoursesManager({ courses: initialCourses, mentors }: { c
             <FormField label="Language">
               <input type="text" placeholder="e.g. Bilingual (Hindi + Eng)" value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
             </FormField>
-            <FormField label="Batch Start Date">
-              <input type="text" placeholder="e.g. Batch Starts 28th July" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} className="w-full px-3.5 py-2 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl text-sm font-semibold" />
-            </FormField>
+            <DateField label="Batch Start Date" value={form.startDate} onChange={(next) => setForm({ ...form, startDate: next })} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <FormField label="Original Price (₹)">
