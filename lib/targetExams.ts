@@ -12,6 +12,22 @@ export const TARGET_EXAM_GROUPS: { group: string; exams: string[] }[] = [
     group: 'Assam Govt',
     exams: ['ADRE Grade III', 'ADRE Grade IV', 'APDCL', 'Assam Police SI', 'Assam Police Constable', 'Assam Commando Battalion'],
   },
+  {
+    group: 'Teaching Exams',
+    exams: [
+      'Master Cadre Live Batch',
+      'Master Cadre Recorded Batch',
+      'Lecturer Cadre Live Batch',
+      'Lecturer Cadre Recorded Batch',
+      'PSTET Live Batch',
+      'PSTET Recorded Batch',
+      'CTET Live Batch',
+      'CTET Recorded Batch',
+      'UGC NET Live Batch',
+      'UGC NET Recorded Batch',
+      'UGC NET Offline Batch',
+    ],
+  },
 ];
 
 export const TARGET_EXAMS: string[] = TARGET_EXAM_GROUPS.flatMap((g) => g.exams);

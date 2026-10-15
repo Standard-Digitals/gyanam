@@ -9,6 +9,7 @@ export const EXAM_CATEGORIES = [
   { id: 'State PSC', name: 'State PSCs', icon: 'Landmark', count: '15 Courses' },
   { id: 'UPSC', name: 'UPSC Foundation', icon: 'GraduationCap', count: '12 Courses' },
   { id: 'Defence', name: 'Defence (CDS/NDA)', icon: 'Shield', count: '10 Courses' },
+  { id: 'Teaching Exams', name: 'Teaching Exams (CTET/UGC NET)', icon: 'BookOpen', count: 'New' },
 ];
 
 export const COURSES_DATA: Course[] = [
