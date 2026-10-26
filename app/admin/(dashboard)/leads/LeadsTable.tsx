@@ -19,7 +19,7 @@ interface Lead {
 }
 
 const STATUS_OPTIONS = ['NEW', 'CONTACTED', 'CONVERTED', 'CLOSED'];
-const SOURCE_OPTIONS = ['HERO_QUERY', 'CONTACT_FORM', 'MENTORSHIP'];
+const SOURCE_OPTIONS = ['HERO_QUERY', 'CONTACT_FORM', 'MENTORSHIP', 'AI_MENTOR_CHAT'];
 
 const STATUS_COLORS: Record<string, string> = {
   NEW: 'bg-[#FBF0DF] text-[#B4590A]',
@@ -105,7 +105,7 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
             label="Source"
             value={sourceFilter}
             onChange={setSourceFilter}
-            options={[{ label: 'All sources', value: '' }, ...SOURCE_OPTIONS.map((s) => ({ label: s.replace('_', ' '), value: s }))]}
+            options={[{ label: 'All sources', value: '' }, ...SOURCE_OPTIONS.map((s) => ({ label: s.replace(/_/g, ' '), value: s }))]}
           />
           <FilterSelect
             label="Target Exam"
@@ -139,7 +139,7 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
                 <td className="px-4 py-3 font-semibold text-[#1F1A1C]">{lead.fullName}</td>
                 <td className="px-4 py-3 text-[#555555]">{lead.phone}</td>
                 <td className="px-4 py-3 text-[#555555]">{lead.targetExam || '—'}</td>
-                <td className="px-4 py-3 text-[#555555] text-xs">{lead.source.replace('_', ' ')}</td>
+                <td className="px-4 py-3 text-[#555555] text-xs">{lead.source.replace(/_/g, ' ')}</td>
                 <td className="px-4 py-3 text-[#888888] text-xs">{new Date(lead.createdAt).toLocaleDateString()}</td>
                 <td className="px-4 py-3">
                   <span className="relative inline-block">

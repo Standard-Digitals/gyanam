@@ -20,6 +20,10 @@ import { getCurrentUserProfile } from '@/lib/currentUser';
 import { buildMetadata } from '@/lib/metadata';
 import { getQuizStreak } from '@/lib/data/dashboardAlerts';
 import { getCourseProgress } from '@/lib/data/courseProgress';
+import { getMentorOverview } from '@/lib/data/aiMentor';
+import { MentorBanner } from '@/components/dashboard/AiMentor/MentorBanner';
+import { TodayPlan } from '@/components/dashboard/AiMentor/TodayPlan';
+import { CourseFitCard } from '@/components/dashboard/AiMentor/CourseFitCard';
 
 export const metadata: Metadata = buildMetadata({
   title: 'My Dashboard',
@@ -43,6 +47,8 @@ export default async function DashboardOverviewPage() {
   const user = await getCurrentUserProfile();
   if (!user) return null;
 
+  const firstName = (user.name || `+91 ${user.phone}`).split(' ')[0];
+
   const [
     quizAttemptsCount,
     downloadsCount,
@@ -57,6 +63,7 @@ export default async function DashboardOverviewPage() {
     mockTestAccuracies,
     trendingNews,
     { streak, last7Days },
+    mentor,
   ] = await Promise.all([
     prisma.quizAttempt.count({ where: { userId: user.id } }),
     prisma.downloadLog.count({ where: { userId: user.id } }),
@@ -71,6 +78,7 @@ export default async function DashboardOverviewPage() {
     prisma.mockTestAttempt.findMany({ where: { userId: user.id }, select: { accuracy: true } }),
     prisma.currentAffairItem.findMany({ orderBy: { createdAt: 'desc' }, take: 3 }),
     getQuizStreak(user.id),
+    getMentorOverview(user.id, firstName, user.targetExam),
   ]);
 
   const latestCourse = latestEnrollment
@@ -163,8 +171,13 @@ export default async function DashboardOverviewPage() {
         )}
       </div>
 
+      {mentor.banner && <MentorBanner banner={mentor.banner} />}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+          {mentor.mode === 'mentor' && <TodayPlan plan={mentor.plan} />}
+          {mentor.mode === 'counsellor' && mentor.courseSuggestion && <CourseFitCard course={mentor.courseSuggestion} />}
+
           <div>
             <h3 className="font-heading font-black text-sm text-[#1F1A1C] mb-3">Your snapshot</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">

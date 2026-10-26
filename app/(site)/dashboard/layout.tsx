@@ -5,6 +5,7 @@ import { getQuizStreak, getDashboardNotifications } from '@/lib/data/dashboardAl
 import { DashboardNotificationBell } from '@/components/dashboard/DashboardNotificationBell';
 import { DashboardAccountMenu } from '@/components/dashboard/DashboardAccountMenu';
 import { SidebarNav, BottomNav } from '@/components/dashboard/DashboardNav';
+import { ChatWidget } from '@/components/dashboard/AiMentor/ChatWidget';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUserProfile();
@@ -76,6 +77,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </div>
 
       <BottomNav />
+      <ChatWidget />
     </div>
   );
 }
