@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { getCourseProgress } from '@/lib/data/courseProgress';
+import { getSubjectStrength } from '@/lib/data/performance';
+import { getMyProgress } from '@/lib/data/myProgress';
 
 /**
  * "AI Mentor" (Gyanmitra-style) — in-app only, no OpenAI/WhatsApp/email. Doubts the rules below
@@ -151,8 +153,27 @@ export async function getChatMessages(userId: string, limit = 50): Promise<Mento
 
 const COUNSELLOR_PATTERN = /\b(counsellor|counselor|call me|talk to (a )?(human|person|counsellor|counselor)|speak to someone)\b/i;
 const TEST_PATTERN = /\b(practice test|test on demand|give me a test|mock test|quiz (please|now)?)\b/i;
+const PLAN_PATTERN = /\b(plan|today|schedule|what should i (do|study))\b/i;
+const PROGRESS_PATTERN = /\b(progress|how am i doing|report|rank|improv|percentile|compare)\b/i;
+const MISTAKES_PATTERN = /\b(mistake|wrong|weak|negative mark|where am i losing)\b/i;
 const REMIND_PATTERN = /\bremind me\b/i;
 const GREETING_PATTERN = /^(hi|hello|hey|hola|namaste)\b/i;
+
+async function findAnyOpenTest(userId: string, courseIds: string[]): Promise<{ kind: 'quiz' | 'mock'; title: string } | null> {
+  const [quizzes, mockTests, quizAttempts, mockAttempts] = await Promise.all([
+    prisma.quiz.findMany({ where: { OR: [{ courseId: { in: courseIds } }, { courseId: null }] }, orderBy: { createdAt: 'desc' }, select: { id: true, title: true } }),
+    prisma.mockTest.findMany({ where: { status: 'ACTIVE' }, orderBy: { createdAt: 'desc' }, select: { id: true, title: true } }),
+    prisma.quizAttempt.findMany({ where: { userId }, select: { quizId: true } }),
+    prisma.mockTestAttempt.findMany({ where: { userId }, select: { mockTestId: true } }),
+  ]);
+  const attemptedQuizIds = new Set(quizAttempts.map((a) => a.quizId));
+  const attemptedMockIds = new Set(mockAttempts.map((a) => a.mockTestId));
+  const openQuiz = quizzes.find((q) => !attemptedQuizIds.has(q.id));
+  if (openQuiz) return { kind: 'quiz', title: openQuiz.title };
+  const openMock = mockTests.find((m) => !attemptedMockIds.has(m.id));
+  if (openMock) return { kind: 'mock', title: openMock.title };
+  return null;
+}
 
 async function createDoubtTicket(userId: string, name: string, phone: string, email: string | null, text: string): Promise<string> {
   const ticketNumber = 'GY-TK-' + Math.floor(100000 + Math.random() * 900000);
@@ -184,7 +205,11 @@ async function createCounsellorLead(name: string, phone: string, email: string |
   });
 }
 
-/** Rule-based reply — no OpenAI. Returns the assistant's reply text, having already saved both messages. */
+/**
+ * Rule-based reply — no OpenAI. Each branch pulls the student's real data (course, pending tests,
+ * progress, subject accuracy) so answers are specific to them, not generic — the "background" the
+ * chat needs to answer well. Returns the assistant's reply text, having already saved both messages.
+ */
 export async function sendChatMessage(
   user: { id: string; name: string | null; phone: string; email: string | null; targetExam: string | null },
   text: string
@@ -201,14 +226,37 @@ export async function sendChatMessage(
     await createCounsellorLead(name, user.phone, user.email, user.targetExam, `Requested a counsellor call via AI Mentor chat: "${trimmed}"`);
     reply = "I've asked a counsellor to call you. They usually call within one working day.";
   } else if (TEST_PATTERN.test(trimmed)) {
-    const mock = await prisma.mockTest.findFirst({ where: { status: 'ACTIVE' }, orderBy: { createdAt: 'desc' } });
-    reply = mock
-      ? `"${mock.title}" is open right now — you'll find it under Mock Tests on your dashboard.`
-      : 'No mock test is open right now, but check Mock Tests on your dashboard for the next one — new ones are added often.';
+    const enrollments = await prisma.enrollment.findMany({ where: { userId: user.id, status: 'ACTIVE' }, select: { courseId: true } });
+    const open = await findAnyOpenTest(user.id, enrollments.map((e) => e.courseId));
+    reply = open
+      ? `"${open.title}" is open right now — you'll find it under ${open.kind === 'quiz' ? 'Daily Quiz' : 'Mock Tests'} on your dashboard.`
+      : "You've attempted everything that's open right now — check back soon, new ones are added often.";
+  } else if (PLAN_PATTERN.test(trimmed)) {
+    const overview = await getMentorOverview(user.id, name, user.targetExam);
+    if (overview.mode === 'counsellor') {
+      reply = overview.courseSuggestion
+        ? `You're not enrolled in a course yet, so there's no daily plan — but ${overview.courseSuggestion.title} looks like a good fit for you. Check it out on your dashboard.`
+        : "You're not enrolled in a course yet — browse courses from your dashboard to get started.";
+    } else if (overview.plan.length === 0) {
+      reply = "Nothing left on today's plan — nicely done. Check back tomorrow.";
+    } else {
+      reply = `Today's plan:\n${overview.plan.map((p) => `- ${p.title} (${p.meta})`).join('\n')}`;
+    }
+  } else if (PROGRESS_PATTERN.test(trimmed)) {
+    const data = await getMyProgress(user.id, name);
+    reply = data ? data.summary : 'Enroll in a course to start tracking your progress against the rest of your batch.';
+  } else if (MISTAKES_PATTERN.test(trimmed)) {
+    const subjects = await getSubjectStrength(user.id);
+    if (subjects.length === 0) {
+      reply = "You haven't attempted any quizzes yet, so there's nothing to review — take a Daily Quiz to get started.";
+    } else {
+      const weakest = [...subjects].sort((a, b) => a.avgAccuracy - b.avgAccuracy).slice(0, 3);
+      reply = `Your weakest subjects: ${weakest.map((s) => `${s.subject} (${s.avgAccuracy}% accuracy)`).join(', ')}. Focus revision there first.`;
+    }
   } else if (REMIND_PATTERN.test(trimmed)) {
     reply = "I can't send reminders outside the app yet, but anything overdue will show up at the top of your Overview page — check back there.";
   } else if (GREETING_PATTERN.test(trimmed)) {
-    reply = `Hi ${name}! Ask me a doubt, say "give me a practice test", or "talk to a counsellor" and I'll help.`;
+    reply = `Hi ${name}! Ask about your plan, your progress, your weak subjects, say "give me a practice test", or "talk to a counsellor".`;
   } else {
     const ticketNumber = await createDoubtTicket(user.id, name, user.phone, user.email, trimmed);
     reply = `I've forwarded this to your faculty as ticket ${ticketNumber} — they'll get back to you soon.`;
