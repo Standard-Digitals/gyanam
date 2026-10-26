@@ -164,7 +164,7 @@ const MISTAKES_PATTERN = /\b(mistake|wrong|weak|negative mark|where am i losing)
 const REMIND_PATTERN = /\bremind me\b/i;
 const GREETING_PATTERN = /^(hi|hello|hey|hola|namaste)\b/i;
 const STRATEGY_PATTERN =
-  /\b(crack|clear|pass)\b.*\b(exam|test)\b|\bright approach\b|\bhow (should|do|can) i prepare\b|\bpreparation (tips|strategy)\b|\bhow to (crack|clear|pass|prepare)\b|\bstudy (tips|strategy|plan)\b|\bwinning strategy\b/i;
+  /\b(crack|clear|pass)\b.*\b(exam|test)\b|\bright approach\b|\bhow (should|do|can) i prepare\b|\bpreparation (tips|strategy)\b|\bhow to (crack|clear|pass|prepare)\b|\bstudy (tips|strategy|plan)\b|\bwinning strategy\b|\b(preparation|prepare|prep)\b/i;
 
 // General, institute-info questions — mainly for visitors who haven't set up exam prep.
 const NEW_BATCH_PATTERN = /\b(new|next|upcoming)\b.*\bbatch(es)?\b|\bbatch(es)?\b.*\b(start|begin|open)\b/i;

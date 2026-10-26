@@ -43,7 +43,11 @@ export function ChatWidget() {
       .then((data) => {
         const msgs: ChatMessage[] = data.messages ?? [];
         setMessages(msgs);
-        if (msgs.length > 0) setOnboardingResolved(true); // returning student — skip the first-time choice
+        if (msgs.length > 0) {
+          setOnboardingResolved(true); // returning student — skip the first-time choice
+          // Server truth: no exam set up yet, regardless of what happened in a previous session.
+          if (data.needsExamSetup) setIsGeneralVisitor(true);
+        }
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
