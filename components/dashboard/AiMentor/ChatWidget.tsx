@@ -4,6 +4,7 @@ import { Sparkles, X, Send, Target } from 'lucide-react';
 import { PlanTab } from './PlanTab';
 import { MistakesTab } from './MistakesTab';
 import { ProgressTab } from './ProgressTab';
+import { CoursesTab } from './CoursesTab';
 import { OnboardingFlow } from './OnboardingFlow';
 
 interface ChatMessage {
@@ -20,6 +21,7 @@ const TABS = [
   { key: 'plan', label: 'My Plan' },
   { key: 'mistakes', label: 'My Mistakes' },
   { key: 'progress', label: 'My Progress' },
+  { key: 'courses', label: 'Courses' },
 ] as const;
 type TabKey = (typeof TABS)[number]['key'];
 
@@ -98,6 +100,13 @@ export function ChatWidget() {
       setSending(false);
     }
   };
+
+  const handleTalkToCounsellor = () => {
+    setTab('chat');
+    send('talk to a counsellor');
+  };
+
+  const handleBrowseCourses = () => setTab('courses');
 
   return (
     <>
@@ -233,9 +242,10 @@ export function ChatWidget() {
               </>
             ) : (
               <div className="flex-1 overflow-y-auto bg-[#FFF5F5]">
-                {tab === 'plan' && <PlanTab />}
+                {tab === 'plan' && <PlanTab onTalkToCounsellor={handleTalkToCounsellor} onBrowseCourses={handleBrowseCourses} />}
                 {tab === 'mistakes' && <MistakesTab />}
-                {tab === 'progress' && <ProgressTab />}
+                {tab === 'progress' && <ProgressTab onBrowseCourses={handleBrowseCourses} />}
+                {tab === 'courses' && <CoursesTab />}
               </div>
             )}
           </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUserProfile } from '@/lib/currentUser';
-import { getMyProgress } from '@/lib/data/myProgress';
+import { getMyProgress, getBasicProgress } from '@/lib/data/myProgress';
+import { getSuggestedCourse } from '@/lib/data/aiMentor';
 
 export async function GET() {
   const user = await getCurrentUserProfile();
@@ -8,5 +9,9 @@ export async function GET() {
 
   const firstName = (user.name || 'there').split(' ')[0];
   const data = await getMyProgress(user.id, firstName);
-  return NextResponse.json({ data });
+  if (data) return NextResponse.json({ kind: 'full', data });
+
+  const basic = await getBasicProgress(user.id);
+  const courseSuggestion = await getSuggestedCourse(user.targetExam);
+  return NextResponse.json({ kind: basic ? 'basic' : 'none', data: basic, courseSuggestion });
 }

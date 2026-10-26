@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { getCourseProgress } from '@/lib/data/courseProgress';
 import { getSubjectStrength } from '@/lib/data/performance';
-import { getMyProgress } from '@/lib/data/myProgress';
+import { getMyProgress, getBasicProgress } from '@/lib/data/myProgress';
 
 /**
  * "AI Mentor" (Gyanmitra-style) — in-app only, no OpenAI/WhatsApp/email. Doubts the rules below
@@ -28,12 +28,42 @@ export interface MentorBannerInfo {
   daysOpen: number;
 }
 
+export interface SuggestedCourse {
+  title: string;
+  slug: string;
+  href: string;
+  originalPrice: number;
+  discountPrice: number;
+  reasons: string[];
+}
+
 export interface MentorOverview {
   mode: 'mentor' | 'counsellor';
   firstName: string;
   banner: MentorBannerInfo | null;
   plan: MentorPlanItem[];
-  courseSuggestion: { title: string; href: string; reasons: string[] } | null;
+  courseSuggestion: SuggestedCourse | null;
+}
+
+/** Used both for the "My Plan" counsellor view and chat replies that push a non-enrolled user
+ * toward a specific course — kept in one place so the suggestion is always the same course. */
+export async function getSuggestedCourse(targetExam: string | null): Promise<SuggestedCourse | null> {
+  const course = targetExam
+    ? await prisma.course.findFirst({ where: { targetExam: { contains: targetExam, mode: 'insensitive' } } })
+    : await prisma.course.findFirst({ orderBy: { studentsEnrolled: 'desc' } });
+  if (!course) return null;
+  return {
+    title: course.title,
+    slug: course.slug,
+    href: `/courses/${course.slug}`,
+    originalPrice: course.originalPrice,
+    discountPrice: course.discountPrice,
+    reasons: [
+      targetExam ? `Built for ${targetExam}, which matches what you told us.` : 'One of our most-enrolled batches right now.',
+      'Take a free quiz first — it shows which sections need the most support.',
+      'A counsellor can confirm batch timing, language and fees for you.',
+    ],
+  };
 }
 
 async function findOverdueTest(userId: string, courseIds: string[]) {
@@ -68,26 +98,12 @@ export async function getMentorOverview(userId: string, firstName: string, targe
 
   if (enrollments.length === 0) {
     // Counsellor mode: no active enrollment yet.
-    const course = targetExam
-      ? await prisma.course.findFirst({ where: { targetExam: { contains: targetExam, mode: 'insensitive' } } })
-      : await prisma.course.findFirst({ orderBy: { studentsEnrolled: 'desc' } });
-
     return {
       mode: 'counsellor',
       firstName,
       banner: null,
       plan: [],
-      courseSuggestion: course
-        ? {
-            title: course.title,
-            href: `/courses/${course.slug}`,
-            reasons: [
-              targetExam ? `Built for ${targetExam}, which matches what you told us.` : 'One of our most-enrolled batches right now.',
-              'Take a free quiz first — it shows which sections need the most support.',
-              'A counsellor can confirm batch timing, language and fees for you.',
-            ],
-          }
-        : null,
+      courseSuggestion: await getSuggestedCourse(targetExam),
     };
   }
 
@@ -172,6 +188,8 @@ const FACULTY_PATTERN = /\b(faculty|teacher|instructor|mentor)s?\b|\bwho (teache
 const CENTER_PATTERN = /\b(center|centre)s?\b|\blocation(s)?\b|\bbranch(es)?\b|\bwhere.*(located|office|based)\b/i;
 const TEST_SERIES_PATTERN = /\btest series\b/i;
 const LIVE_BATCH_PATTERN = /\blive\b.*\b(batch(es)?|class(es)?)\b/i;
+const ENROLL_PATTERN = /\benroll(ment|ing|ed)?\b|\bsign up\b|\bjoin (this|the)?\s?(course|batch)\b|\bhow (do|can) i (buy|purchase|pay)\b/i;
+const BROWSE_COURSES_PATTERN = /\b(browse|see|show|view|explore|which|what) (all )?courses\b|\bcourse(s)? (list|catalog|catalogue)\b|\ball (your |the )?courses\b/i;
 
 // Two-step onboarding: asked once per student (until they answer), so later advice is specific to
 // their exam instead of generic. Exact text is also used to detect "this message is the answer".
@@ -327,6 +345,16 @@ export async function sendChatMessage(
   } else if (COUNSELLOR_PATTERN.test(trimmed)) {
     await createCounsellorLead(name, user.phone, user.email, user.targetExam, `Requested a counsellor call via AI Mentor chat: "${trimmed}"`);
     reply = ["I've asked a counsellor to call you.", 'They usually call within one working day.'];
+  } else if (BROWSE_COURSES_PATTERN.test(trimmed)) {
+    reply = ['Tap the "Courses" tab above — I\'ve listed everything there with pricing and details, so you don\'t have to leave this chat.'];
+  } else if (ENROLL_PATTERN.test(trimmed)) {
+    const course = await getSuggestedCourse(user.targetExam);
+    reply = course
+      ? [
+          `Great choice — let's get you into ${course.title}.`,
+          `Open the "My Plan" tab above and tap Enroll Now, or say "talk to a counsellor" and we'll call you to walk you through it instead.`,
+        ]
+      : ['Tap the "Courses" tab above to see everything we offer and enroll directly from there.'];
   } else if (TEST_PATTERN.test(trimmed)) {
     const enrollments = await prisma.enrollment.findMany({ where: { userId: user.id, status: 'ACTIVE' }, select: { courseId: true } });
     const open = await findAnyOpenTest(user.id, enrollments.map((e) => e.courseId));
@@ -337,8 +365,12 @@ export async function sendChatMessage(
     const overview = await getMentorOverview(user.id, name, user.targetExam);
     if (overview.mode === 'counsellor') {
       reply = overview.courseSuggestion
-        ? [`You're not enrolled in a course yet, so there's no daily plan.`, `${overview.courseSuggestion.title} looks like a good fit for you — check it out on your dashboard.`]
-        : ["You're not enrolled in a course yet — browse courses from your dashboard to get started."];
+        ? [
+            `You're not enrolled in a course yet, so there's no daily plan to show you — but here's what I'd suggest.`,
+            `${overview.courseSuggestion.title} is one of our premium, expert-led batches and looks like a strong fit for you — ₹${overview.courseSuggestion.discountPrice} right now (usually ₹${overview.courseSuggestion.originalPrice}).`,
+            'Open the "My Plan" tab above for Enroll Now and Talk to a Counsellor buttons, or just say "enroll now" or "talk to a counsellor" here.',
+          ]
+        : ['You\'re not enrolled in a course yet — tap the "Courses" tab above to see everything we offer.'];
     } else if (overview.plan.length === 0) {
       reply = ['Nothing left on today\'s plan — nicely done. Check back tomorrow.'];
     } else {
@@ -346,7 +378,18 @@ export async function sendChatMessage(
     }
   } else if (PROGRESS_PATTERN.test(trimmed)) {
     const data = await getMyProgress(user.id, name);
-    reply = data ? ["Here's how you're doing:", data.summary] : ['Enroll in a course to start tracking your progress against the rest of your batch.'];
+    if (data) {
+      reply = ["Here's how you're doing:", data.summary];
+    } else {
+      const basic = await getBasicProgress(user.id);
+      reply = basic
+        ? [
+            `You've attempted ${basic.totalAttempts} quiz${basic.totalAttempts === 1 ? '' : 'zes'}/mock test${basic.totalAttempts === 1 ? '' : 's'} so far, averaging ${basic.avgAccuracy}% accuracy.`,
+            basic.weakestSubject ? `${basic.weakestSubject.subject} looks like your weakest area right now.` : 'Keep attempting a mix of subjects so I can spot patterns.',
+            'That\'s the basic picture — for a detailed report compared with your batch, plus a tailored improvement plan, enroll in a course. Check the "My Progress" tab for the full breakdown and an Enroll Now button.',
+          ]
+        : ['Take a free quiz or mock test first so I have something to show you — then enroll in a course for a detailed report compared with your batch.'];
+    }
   } else if (MISTAKES_PATTERN.test(trimmed)) {
     const subjects = await getSubjectStrength(user.id);
     if (subjects.length === 0) {

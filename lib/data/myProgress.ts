@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { getSubjectStrength } from '@/lib/data/performance';
 
 /**
  * "My Progress" — a study-habit score for the logged-in student, compared with everyone else
@@ -313,6 +314,46 @@ export interface MyProgressResult {
   summary: string;
   weekly: WeeklyActivity[];
   recentAttempts: { date: string; accuracy: number }[];
+}
+
+/**
+ * Lightweight stand-in for students who aren't enrolled in any course yet but have taken a free
+ * quiz or mock test — just their own numbers, no cohort comparison (that needs a shared course).
+ * Shown as a teaser with the full report gated behind enrollment, instead of the flat "enroll to
+ * see anything" message `getMyProgress` gives for a `null` result.
+ */
+export interface BasicProgressResult {
+  totalAttempts: number;
+  avgAccuracy: number;
+  recentAttempts: { date: string; accuracy: number }[];
+  bestSubject: { subject: string; avgAccuracy: number } | null;
+  weakestSubject: { subject: string; avgAccuracy: number } | null;
+}
+
+export async function getBasicProgress(userId: string): Promise<BasicProgressResult | null> {
+  const [quizAttempts, mockAttempts] = await Promise.all([
+    prisma.quizAttempt.findMany({ where: { userId }, select: { accuracy: true, submittedAt: true } }),
+    prisma.mockTestAttempt.findMany({ where: { userId }, select: { accuracy: true, submittedAt: true } }),
+  ]);
+  const all = [...quizAttempts, ...mockAttempts];
+  if (all.length === 0) return null;
+
+  const avgAccuracy = Math.round(all.reduce((sum, a) => sum + a.accuracy, 0) / all.length);
+  const recentAttempts = all
+    .sort((a, b) => a.submittedAt.getTime() - b.submittedAt.getTime())
+    .slice(-5)
+    .map((a) => ({ date: a.submittedAt.toISOString(), accuracy: a.accuracy }));
+
+  const subjects = await getSubjectStrength(userId);
+  const sorted = [...subjects].sort((a, b) => b.avgAccuracy - a.avgAccuracy);
+
+  return {
+    totalAttempts: all.length,
+    avgAccuracy,
+    recentAttempts,
+    bestSubject: sorted[0] ? { subject: sorted[0].subject, avgAccuracy: sorted[0].avgAccuracy } : null,
+    weakestSubject: sorted.length ? { subject: sorted[sorted.length - 1].subject, avgAccuracy: sorted[sorted.length - 1].avgAccuracy } : null,
+  };
 }
 
 export async function getMyProgress(userId: string, firstName: string): Promise<MyProgressResult | null> {

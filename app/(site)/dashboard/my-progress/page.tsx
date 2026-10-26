@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { Target, Sparkles, TrendingUp } from 'lucide-react';
 import { getCurrentUserProfile } from '@/lib/currentUser';
 import { buildMetadata } from '@/lib/metadata';
-import { getMyProgress, PROGRESS_PARAMS } from '@/lib/data/myProgress';
+import { getMyProgress, getBasicProgress, PROGRESS_PARAMS } from '@/lib/data/myProgress';
+import { getSuggestedCourse } from '@/lib/data/aiMentor';
 
 export const metadata: Metadata = buildMetadata({
   title: 'My Progress',
@@ -80,13 +81,43 @@ export default async function MyProgressPage() {
   const data = await getMyProgress(user.id, firstName);
 
   if (!data) {
+    const basic = await getBasicProgress(user.id);
+
+    if (basic) {
+      const course = await getSuggestedCourse(user.targetExam);
+      return (
+        <div className="space-y-6">
+          <h1 className="font-heading font-black text-2xl text-[#1F1A1C]">My Progress</h1>
+          <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#F3DCDD] shadow-sm">
+            <p className="text-xs font-black text-[#888888] uppercase tracking-wide mb-4">Basic progress · free attempts</p>
+            <div className="flex items-center gap-5">
+              <ScoreRing value={basic.avgAccuracy} />
+              <div>
+                <p className="text-sm font-bold text-[#1F1A1C]">{basic.totalAttempts} attempt{basic.totalAttempts === 1 ? '' : 's'} so far</p>
+                {basic.weakestSubject && <p className="text-xs text-[#888888] mt-1">Weakest: {basic.weakestSubject.subject} ({basic.weakestSubject.avgAccuracy}%)</p>}
+                {basic.bestSubject && basic.bestSubject.subject !== basic.weakestSubject?.subject && (
+                  <p className="text-xs text-[#888888]">Strongest: {basic.bestSubject.subject} ({basic.bestSubject.avgAccuracy}%)</p>
+                )}
+              </div>
+            </div>
+            <div className="mt-5 bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <p className="text-sm text-[#555555]">This is the basic picture. Enroll in a course for a detailed report compared with your batch, plus a tailored improvement plan.</p>
+              <Link href={course ? course.href : '/courses'} className="shrink-0 px-4 py-2 bg-[#C12223] text-white font-bold text-xs rounded-xl text-center">
+                {course ? 'Enroll Now' : 'Browse Courses'}
+              </Link>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-6">
         <h1 className="font-heading font-black text-2xl text-[#1F1A1C]">My Progress</h1>
         <div className="bg-white p-8 rounded-2xl border border-[#F3DCDD] shadow-sm text-center">
           <Target className="w-8 h-8 text-[#D9B4B5] mx-auto mb-2" />
           <p className="text-sm text-[#888888] max-w-sm mx-auto">
-            Enroll in a course to see your progress score, compare study habits with your course, and get suggestions based on what top performers do differently.
+            Take a free quiz or mock test to start seeing your progress here, or enroll in a course for the full score, cohort comparison and suggestions.
           </p>
           <Link href="/courses" className="inline-block mt-4 px-4 py-2 bg-[#C12223] text-white font-bold text-xs rounded-xl">
             Browse Courses
