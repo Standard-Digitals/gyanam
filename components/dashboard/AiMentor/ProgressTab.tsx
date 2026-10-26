@@ -20,13 +20,14 @@ export function ProgressTab({ onBrowseCourses }: { onBrowseCourses?: () => void 
 
   useEffect(() => {
     fetch('/api/dashboard/ai-mentor/progress')
-      .then((res) => res.json())
-      .then(setResp);
+      .then((res) => (res.ok ? res.json() : null))
+      .then((d) => setResp(d && d.kind ? d : { kind: 'none', data: null }))
+      .catch(() => setResp({ kind: 'none', data: null }));
   }, []);
 
   if (resp === undefined) return <p className="text-xs text-[#888888] p-4">Loading...</p>;
 
-  if (resp.kind === 'none') {
+  if (resp.kind !== 'full' && resp.kind !== 'basic') {
     return (
       <div className="p-6 text-center">
         <Target className="w-7 h-7 text-[#D9B4B5] mx-auto mb-2" />
@@ -44,7 +45,7 @@ export function ProgressTab({ onBrowseCourses }: { onBrowseCourses?: () => void 
     );
   }
 
-  if (resp.kind === 'basic') {
+  if (resp.kind === 'basic' && resp.data) {
     const basic = resp.data as BasicProgressResult;
     const course = resp.courseSuggestion;
     return (
@@ -85,6 +86,15 @@ export function ProgressTab({ onBrowseCourses }: { onBrowseCourses?: () => void 
             See all courses →
           </button>
         )}
+      </div>
+    );
+  }
+
+  if (!resp.data) {
+    return (
+      <div className="p-6 text-center">
+        <Target className="w-7 h-7 text-[#D9B4B5] mx-auto mb-2" />
+        <p className="text-xs text-[#888888] max-w-[240px] mx-auto">Couldn't load your progress — try again.</p>
       </div>
     );
   }

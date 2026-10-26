@@ -9,8 +9,9 @@ export function CoursesTab() {
 
   useEffect(() => {
     fetch('/api/dashboard/ai-mentor/courses')
-      .then((res) => res.json())
-      .then((d) => setCourses(d.courses ?? []));
+      .then((res) => (res.ok ? res.json() : { courses: [] }))
+      .then((d) => setCourses(d.courses ?? []))
+      .catch(() => setCourses([]));
   }, []);
 
   if (courses === null) return <p className="text-xs text-[#888888] p-4">Loading...</p>;
