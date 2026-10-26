@@ -4,6 +4,7 @@ import { Sparkles, X, Send } from 'lucide-react';
 import { PlanTab } from './PlanTab';
 import { MistakesTab } from './MistakesTab';
 import { ProgressTab } from './ProgressTab';
+import { OnboardingFlow } from './OnboardingFlow';
 
 interface ChatMessage {
   id: string;
@@ -26,6 +27,7 @@ export function ChatWidget() {
   const [tab, setTab] = useState<TabKey>('chat');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [onboardingResolved, setOnboardingResolved] = useState(false);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,11 +38,23 @@ export function ChatWidget() {
     fetch('/api/dashboard/ai-mentor/messages')
       .then((res) => res.json())
       .then((data) => {
-        setMessages(data.messages ?? []);
+        const msgs: ChatMessage[] = data.messages ?? [];
+        setMessages(msgs);
+        if (msgs.length > 0) setOnboardingResolved(true); // returning student — skip the first-time choice
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
   }, [open, loaded]);
+
+  const handleOnboardingDone = (reply: string) => {
+    const now = Date.now();
+    setMessages((prev) => [
+      ...prev,
+      { id: `onb-u-${now}`, role: 'user', content: 'Set up my exam preparation', createdAt: new Date().toISOString() },
+      { id: `onb-a-${now}`, role: 'assistant', content: reply, createdAt: new Date().toISOString() },
+    ]);
+    setOnboardingResolved(true);
+  };
 
   useEffect(() => {
     if (tab === 'chat') scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -112,7 +126,9 @@ export function ChatWidget() {
           </div>
 
           <div className="flex-1 min-h-0 w-full max-w-2xl mx-auto flex flex-col overflow-hidden">
-            {tab === 'chat' ? (
+            {tab === 'chat' && loaded && messages.length === 0 && !onboardingResolved ? (
+              <OnboardingFlow onSkip={() => setOnboardingResolved(true)} onDone={handleOnboardingDone} />
+            ) : tab === 'chat' ? (
               <>
                 <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-3 bg-[#FFF5F5]">
                   {messages.length === 0 && loaded && (

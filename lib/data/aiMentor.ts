@@ -183,6 +183,19 @@ async function buildStrategyAdvice(userId: string, examName: string, examDate: s
   return lines.join('\n');
 }
 
+/**
+ * Used when the student picks "Exam Preparation" on first opening the chat and fills the
+ * target-exam/exam-date form, instead of the free-text two-step onboarding above. Saves both to
+ * the profile and writes the exchange into chat history so it reads naturally in the Chat tab.
+ */
+export async function completeOnboardingForm(userId: string, targetExam: string, examDate: string): Promise<string> {
+  await prisma.user.update({ where: { id: userId }, data: { targetExam, examDate } });
+  await prisma.aiMentorMessage.create({ data: { userId, role: 'user', content: `I'm preparing for ${targetExam}, around ${examDate}.` } });
+  const reply = await buildStrategyAdvice(userId, targetExam, examDate);
+  await prisma.aiMentorMessage.create({ data: { userId, role: 'assistant', content: reply } });
+  return reply;
+}
+
 async function findAnyOpenTest(userId: string, courseIds: string[]): Promise<{ kind: 'quiz' | 'mock'; title: string } | null> {
   const [quizzes, mockTests, quizAttempts, mockAttempts] = await Promise.all([
     prisma.quiz.findMany({ where: { OR: [{ courseId: { in: courseIds } }, { courseId: null }] }, orderBy: { createdAt: 'desc' }, select: { id: true, title: true } }),
