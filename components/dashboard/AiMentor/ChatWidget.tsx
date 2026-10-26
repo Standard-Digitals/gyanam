@@ -13,7 +13,8 @@ interface ChatMessage {
   createdAt: string;
 }
 
-const SUGGESTIONS = ["What's my plan today?", 'How is my progress?', 'What is the right approach to crack my exam?', 'Give me a practice test'];
+const PREP_SUGGESTIONS = ["What's my plan today?", 'How is my progress?', 'What is the right approach to crack my exam?', 'Give me a practice test'];
+const GENERAL_SUGGESTIONS = ['When does a new batch start?', 'Who are the faculty?', 'Where are your centers?', 'When do new test series start?'];
 const TABS = [
   { key: 'chat', label: 'Chat' },
   { key: 'plan', label: 'My Plan' },
@@ -28,6 +29,7 @@ export function ChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [onboardingResolved, setOnboardingResolved] = useState(false);
+  const [isGeneralVisitor, setIsGeneralVisitor] = useState(false);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,14 +48,21 @@ export function ChatWidget() {
       .catch(() => setLoaded(true));
   }, [open, loaded]);
 
-  const handleOnboardingDone = (reply: string) => {
-    const now = Date.now();
-    setMessages((prev) => [
-      ...prev,
-      { id: `onb-u-${now}`, role: 'user', content: 'Set up my exam preparation', createdAt: new Date().toISOString() },
-      { id: `onb-a-${now}`, role: 'assistant', content: reply, createdAt: new Date().toISOString() },
-    ]);
+  // Shows each reply chunk one at a time with a short "typing" pause in between, instead of
+  // dumping the whole answer in one bubble — reads like a person replying, not a report.
+  const appendRepliesSequentially = async (replies: string[]) => {
+    for (const content of replies) {
+      setSending(true);
+      await new Promise((r) => setTimeout(r, 450 + Math.random() * 400));
+      setMessages((prev) => [...prev, { id: `reply-${Date.now()}-${Math.random().toString(36).slice(2)}`, role: 'assistant', content, createdAt: new Date().toISOString() }]);
+    }
+    setSending(false);
+  };
+
+  const handleOnboardingDone = async (replies: string[]) => {
+    setMessages((prev) => [...prev, { id: `onb-u-${Date.now()}`, role: 'user', content: 'Set up my exam preparation', createdAt: new Date().toISOString() }]);
     setOnboardingResolved(true);
+    await appendRepliesSequentially(replies);
   };
 
   useEffect(() => {
@@ -76,10 +85,9 @@ export function ChatWidget() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
-      setMessages((prev) => [...prev, { id: `reply-${Date.now()}`, role: 'assistant', content: data.reply, createdAt: new Date().toISOString() }]);
+      await appendRepliesSequentially(data.replies ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not send that — try again');
-    } finally {
       setSending(false);
     }
   };
@@ -127,7 +135,13 @@ export function ChatWidget() {
 
           <div className="flex-1 min-h-0 w-full max-w-2xl mx-auto flex flex-col overflow-hidden">
             {tab === 'chat' && loaded && messages.length === 0 && !onboardingResolved ? (
-              <OnboardingFlow onSkip={() => setOnboardingResolved(true)} onDone={handleOnboardingDone} />
+              <OnboardingFlow
+                onSkip={() => {
+                  setIsGeneralVisitor(true);
+                  setOnboardingResolved(true);
+                }}
+                onDone={handleOnboardingDone}
+              />
             ) : tab === 'chat' ? (
               <>
                 <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-3 bg-[#FFF5F5]">
@@ -159,7 +173,7 @@ export function ChatWidget() {
 
                 {messages.length === 0 && loaded && (
                   <div className="px-4 sm:px-6 pb-2 flex flex-wrap gap-1.5 shrink-0">
-                    {SUGGESTIONS.map((s) => (
+                    {(isGeneralVisitor ? GENERAL_SUGGESTIONS : PREP_SUGGESTIONS).map((s) => (
                       <button
                         key={s}
                         onClick={() => send(s)}

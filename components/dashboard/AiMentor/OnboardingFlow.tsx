@@ -29,7 +29,7 @@ const FORM_STAGES: Stage[] = ['group', 'exam', 'date'];
 
 interface Props {
   onSkip: () => void;
-  onDone: (reply: string) => void;
+  onDone: (replies: string[]) => void;
 }
 
 function StepHeader({ stage, onBack }: { stage: Stage; onBack: () => void }) {
@@ -75,7 +75,7 @@ export function OnboardingFlow({ onSkip, onDone }: Props) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
-      onDone(data.reply);
+      onDone(data.replies ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save that — try again');
     } finally {

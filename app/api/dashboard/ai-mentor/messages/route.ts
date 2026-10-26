@@ -21,9 +21,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid request' }, { status: 400 });
   }
 
-  const reply = await sendChatMessage(
+  const replies = await sendChatMessage(
     { id: user.id, name: user.name, phone: user.phone, email: user.email, targetExam: user.targetExam, examDate: user.examDate },
     parsed.data.text
   );
-  return NextResponse.json({ reply });
+  return NextResponse.json({ replies });
 }
