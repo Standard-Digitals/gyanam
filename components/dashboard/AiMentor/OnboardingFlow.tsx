@@ -1,9 +1,21 @@
 'use client';
 import { useState } from 'react';
-import { Sparkles, MessageCircle, GraduationCap } from 'lucide-react';
+import {
+  Sparkles, MessageCircle, GraduationCap, ArrowLeft, Award, Building2, Train, Shield, MapPin, BookOpen, type LucideIcon,
+} from 'lucide-react';
 import { TARGET_EXAM_GROUPS } from '@/lib/targetExams';
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+const GROUP_ICONS: Record<string, LucideIcon> = {
+  SSC: Award,
+  Banking: Building2,
+  Railway: Train,
+  UPSC: GraduationCap,
+  Defence: Shield,
+  'Assam Govt': MapPin,
+  'Teaching Exams': BookOpen,
+};
 
 function formatMonthInput(value: string): string {
   // value is "YYYY-MM" from <input type="month">
@@ -12,14 +24,37 @@ function formatMonthInput(value: string): string {
   return `${MONTH_NAMES[month - 1]} ${year}`;
 }
 
+type Stage = 'choice' | 'group' | 'exam' | 'date';
+const FORM_STAGES: Stage[] = ['group', 'exam', 'date'];
+
 interface Props {
   onSkip: () => void;
   onDone: (reply: string) => void;
 }
 
+function StepHeader({ stage, onBack }: { stage: Stage; onBack: () => void }) {
+  const stepNum = FORM_STAGES.indexOf(stage) + 1;
+  return (
+    <div className="flex items-center gap-3 mb-5">
+      <button onClick={onBack} className="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg bg-white border border-[#F3DCDD] hover:border-[#C12223] cursor-pointer">
+        <ArrowLeft className="w-4 h-4 text-[#1F1A1C]" />
+      </button>
+      <div className="flex-1">
+        <div className="flex items-center gap-1">
+          {FORM_STAGES.map((s, i) => (
+            <div key={s} className={`h-1.5 flex-1 rounded-full ${i < stepNum ? 'bg-[#C12223]' : 'bg-[#F3DCDD]'}`} />
+          ))}
+        </div>
+        <p className="text-[10px] font-bold text-[#888888] uppercase tracking-wide mt-1.5">Step {stepNum} of {FORM_STAGES.length}</p>
+      </div>
+    </div>
+  );
+}
+
 /** Shown once, the very first time a student opens the chat: general queries, or set up exam prep? */
 export function OnboardingFlow({ onSkip, onDone }: Props) {
-  const [stage, setStage] = useState<'choice' | 'form'>('choice');
+  const [stage, setStage] = useState<Stage>('choice');
+  const [group, setGroup] = useState<string | null>(null);
   const [targetExam, setTargetExam] = useState('');
   const [examMonth, setExamMonth] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -56,7 +91,7 @@ export function OnboardingFlow({ onSkip, onDone }: Props) {
         <p className="text-xs text-[#888888] mt-1.5 max-w-xs">What brings you here today?</p>
         <div className="flex flex-col gap-3 mt-6 w-full max-w-xs">
           <button
-            onClick={() => setStage('form')}
+            onClick={() => setStage('group')}
             className="flex items-center gap-3 bg-white border-2 border-[#C12223] rounded-2xl p-4 text-left hover:bg-[#FFF5F5] transition cursor-pointer"
           >
             <div className="w-9 h-9 rounded-xl bg-[#FDEAE9] text-[#C12223] flex items-center justify-center shrink-0">
@@ -84,39 +119,82 @@ export function OnboardingFlow({ onSkip, onDone }: Props) {
     );
   }
 
+  if (stage === 'group') {
+    return (
+      <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 bg-[#FFF5F5]">
+        <div className="max-w-md mx-auto">
+          <StepHeader stage="group" onBack={() => setStage('choice')} />
+          <h2 className="font-heading font-black text-base text-[#1F1A1C] mb-1">Which field are you targeting?</h2>
+          <p className="text-xs text-[#888888] mb-5">Pick the closest one — you'll narrow it down next.</p>
+          <div className="grid grid-cols-2 gap-3">
+            {TARGET_EXAM_GROUPS.map(({ group: g }) => {
+              const Icon = GROUP_ICONS[g] ?? GraduationCap;
+              return (
+                <button
+                  key={g}
+                  onClick={() => {
+                    setGroup(g);
+                    setTargetExam('');
+                    setStage('exam');
+                  }}
+                  className="flex flex-col items-center gap-2 bg-white border border-[#F3DCDD] rounded-2xl p-4 text-center hover:border-[#C12223] hover:shadow-md transition cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[#FDEAE9] text-[#C12223] flex items-center justify-center">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-bold text-[#1F1A1C]">{g}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (stage === 'exam') {
+    const exams = TARGET_EXAM_GROUPS.find((g) => g.group === group)?.exams ?? [];
+    return (
+      <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 bg-[#FFF5F5]">
+        <div className="max-w-md mx-auto">
+          <StepHeader stage="exam" onBack={() => setStage('group')} />
+          <h2 className="font-heading font-black text-base text-[#1F1A1C] mb-1">Which exam, exactly?</h2>
+          <p className="text-xs text-[#888888] mb-5">{group}</p>
+          <div className="flex flex-col gap-2">
+            {exams.map((exam) => (
+              <button
+                key={exam}
+                onClick={() => {
+                  setTargetExam(exam);
+                  setStage('date');
+                }}
+                className="flex items-center justify-between bg-white border border-[#F3DCDD] rounded-xl px-4 py-3 text-left hover:border-[#C12223] hover:bg-[#FFF5F5] transition cursor-pointer"
+              >
+                <span className="text-sm font-bold text-[#1F1A1C]">{exam}</span>
+                <ArrowLeft className="w-4 h-4 text-[#C12223] rotate-180" />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 bg-[#FFF5F5]">
       <div className="max-w-md mx-auto">
-        <h2 className="font-heading font-black text-base text-[#1F1A1C] mb-1">Tell me about your exam</h2>
-        <p className="text-xs text-[#888888] mb-5">So your plan, progress and advice are tailored to you — not generic.</p>
+        <StepHeader stage="date" onBack={() => setStage('exam')} />
+        <h2 className="font-heading font-black text-base text-[#1F1A1C] mb-1">Last thing — when is it?</h2>
+        <p className="text-xs text-[#888888] mb-5">
+          Preparing for <strong className="text-[#1F1A1C]">{targetExam}</strong>. Month and year is enough.
+        </p>
 
-        <label className="text-[11px] font-bold text-[#888888] uppercase tracking-wide block mb-1.5">Target Exam</label>
-        <div className="space-y-2.5 mb-5">
-          {TARGET_EXAM_GROUPS.map(({ group, exams }) => (
-            <div key={group} className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[10px] font-extrabold text-gray-400 uppercase w-20 shrink-0">{group}</span>
-              {exams.map((exam) => (
-                <button
-                  key={exam}
-                  type="button"
-                  onClick={() => setTargetExam(exam)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition ${
-                    targetExam === exam ? 'bg-[#C12223] text-white' : 'bg-white border border-[#F3DCDD] text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  {exam}
-                </button>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        <label className="text-[11px] font-bold text-[#888888] uppercase tracking-wide block mb-1.5">Roughly when is it?</label>
         <input
           type="month"
           value={examMonth}
           onChange={(e) => setExamMonth(e.target.value)}
-          className="w-full px-3.5 py-2.5 bg-white border border-[#F3DCDD] rounded-xl text-sm font-semibold mb-4"
+          autoFocus
+          className="w-full px-3.5 py-3 bg-white border border-[#F3DCDD] rounded-xl text-base font-semibold mb-4"
         />
 
         {error && <p className="text-xs font-semibold text-red-600 mb-3">{error}</p>}
