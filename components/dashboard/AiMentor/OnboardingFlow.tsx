@@ -28,7 +28,13 @@ type Stage = 'choice' | 'group' | 'exam' | 'date';
 const FORM_STAGES: Stage[] = ['group', 'exam', 'date'];
 
 interface Props {
-  onSkip: () => void;
+  /** Defaults to 'choice' (first-time open). Pass 'group' to jump straight into the exam-picker,
+   * e.g. when re-opened later from the persistent "Set up my exam prep" button. */
+  initialStage?: Stage;
+  /** Only meaningful when initialStage is 'choice' — picking "Just a general query". */
+  onSkip?: () => void;
+  /** Closes the form without completing it — used by the re-open path (no 'choice' step to fall back to). */
+  onClose?: () => void;
   onDone: (replies: string[]) => void;
 }
 
@@ -51,14 +57,23 @@ function StepHeader({ stage, onBack }: { stage: Stage; onBack: () => void }) {
   );
 }
 
-/** Shown once, the very first time a student opens the chat: general queries, or set up exam prep? */
-export function OnboardingFlow({ onSkip, onDone }: Props) {
-  const [stage, setStage] = useState<Stage>('choice');
+/**
+ * Shown the very first time a student opens the chat (general queries, or set up exam prep?), and
+ * reopenable any time afterwards from the persistent "Set up my exam prep" button — in which case
+ * it skips straight to the exam-picker (initialStage="group") since the choice has already been made.
+ */
+export function OnboardingFlow({ initialStage = 'choice', onSkip, onClose, onDone }: Props) {
+  const [stage, setStage] = useState<Stage>(initialStage);
   const [group, setGroup] = useState<string | null>(null);
   const [targetExam, setTargetExam] = useState('');
   const [examMonth, setExamMonth] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // "Back" from the first form step, and "Skip for now", both need somewhere to go — the 'choice'
+  // screen if there is one, otherwise just close back out to the chat.
+  const cancel = onClose ?? onSkip ?? (() => {});
+  const backFromGroup = initialStage === 'choice' ? () => setStage('choice') : cancel;
 
   const submit = async () => {
     if (!targetExam || !examMonth) {
@@ -123,7 +138,7 @@ export function OnboardingFlow({ onSkip, onDone }: Props) {
     return (
       <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 bg-[#FFF5F5]">
         <div className="max-w-md mx-auto">
-          <StepHeader stage="group" onBack={() => setStage('choice')} />
+          <StepHeader stage="group" onBack={backFromGroup} />
           <h2 className="font-heading font-black text-base text-[#1F1A1C] mb-1">Which field are you targeting?</h2>
           <p className="text-xs text-[#888888] mb-5">Pick the closest one — you'll narrow it down next.</p>
           <div className="grid grid-cols-2 gap-3">
@@ -207,7 +222,7 @@ export function OnboardingFlow({ onSkip, onDone }: Props) {
           >
             {submitting ? 'Saving...' : 'Get my guidance'}
           </button>
-          <button onClick={onSkip} className="px-4 py-2.5 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl cursor-pointer">
+          <button onClick={cancel} className="px-4 py-2.5 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl cursor-pointer">
             Skip for now
           </button>
         </div>

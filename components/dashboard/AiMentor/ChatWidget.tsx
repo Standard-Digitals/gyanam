@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { Sparkles, X, Send } from 'lucide-react';
+import { Sparkles, X, Send, Target } from 'lucide-react';
 import { PlanTab } from './PlanTab';
 import { MistakesTab } from './MistakesTab';
 import { ProgressTab } from './ProgressTab';
@@ -30,6 +30,7 @@ export function ChatWidget() {
   const [loaded, setLoaded] = useState(false);
   const [onboardingResolved, setOnboardingResolved] = useState(false);
   const [isGeneralVisitor, setIsGeneralVisitor] = useState(false);
+  const [showPrepForm, setShowPrepForm] = useState(false);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +63,8 @@ export function ChatWidget() {
   const handleOnboardingDone = async (replies: string[]) => {
     setMessages((prev) => [...prev, { id: `onb-u-${Date.now()}`, role: 'user', content: 'Set up my exam preparation', createdAt: new Date().toISOString() }]);
     setOnboardingResolved(true);
+    setIsGeneralVisitor(false);
+    setShowPrepForm(false);
     await appendRepliesSequentially(replies);
   };
 
@@ -142,6 +145,8 @@ export function ChatWidget() {
                 }}
                 onDone={handleOnboardingDone}
               />
+            ) : tab === 'chat' && showPrepForm ? (
+              <OnboardingFlow initialStage="group" onClose={() => setShowPrepForm(false)} onDone={handleOnboardingDone} />
             ) : tab === 'chat' ? (
               <>
                 <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-3 bg-[#FFF5F5]">
@@ -182,6 +187,18 @@ export function ChatWidget() {
                         {s}
                       </button>
                     ))}
+                  </div>
+                )}
+
+                {isGeneralVisitor && (
+                  <div className="px-4 sm:px-6 pb-2 shrink-0">
+                    <button
+                      onClick={() => setShowPrepForm(true)}
+                      className="flex items-center gap-2 w-full justify-center px-3.5 py-2 bg-[#FDEAE9] text-[#C12223] font-bold text-xs rounded-xl hover:bg-[#F3DCDD] transition cursor-pointer"
+                    >
+                      <Target className="w-3.5 h-3.5" />
+                      Set up my exam preparation
+                    </button>
                   </div>
                 )}
 
