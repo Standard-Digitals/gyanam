@@ -17,6 +17,7 @@ model User {
   name       String?
   email      String?
   targetExam String?
+  examDate   String? // free text, e.g. "March 2026" — collected by AI Mentor chat when asked for exam strategy advice
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

@@ -158,6 +158,30 @@ const PROGRESS_PATTERN = /\b(progress|how am i doing|report|rank|improv|percenti
 const MISTAKES_PATTERN = /\b(mistake|wrong|weak|negative mark|where am i losing)\b/i;
 const REMIND_PATTERN = /\bremind me\b/i;
 const GREETING_PATTERN = /^(hi|hello|hey|hola|namaste)\b/i;
+const STRATEGY_PATTERN =
+  /\b(crack|clear|pass)\b.*\b(exam|test)\b|\bright approach\b|\bhow (should|do|can) i prepare\b|\bpreparation (tips|strategy)\b|\bhow to (crack|clear|pass|prepare)\b|\bstudy (tips|strategy|plan)\b|\bwinning strategy\b/i;
+
+// Two-step onboarding: asked once per student (until they answer), so later advice is specific to
+// their exam instead of generic. Exact text is also used to detect "this message is the answer".
+const EXAM_NAME_PROMPT = "Happy to guide you! Which exam are you preparing for?";
+const EXAM_DATE_PROMPT = "Got it. Roughly when is it (month and year is fine)? I'll tailor the advice to that.";
+
+async function buildStrategyAdvice(userId: string, examName: string, examDate: string | null): Promise<string> {
+  const subjects = await getSubjectStrength(userId);
+  const weakest = subjects.length ? [...subjects].sort((a, b) => a.avgAccuracy - b.avgAccuracy)[0] : null;
+
+  const lines = [
+    `Here's what consistently works for ${examName}${examDate ? ` (${examDate})` : ''}:`,
+    '- Daily practice: 30-45 minutes every day beats one long session a week.',
+    '- Attempt tests regularly — full mocks and sectional tests build exam temperament, not just knowledge.',
+    '- Review every wrong answer after a test — know why you got it wrong, not just that you did.',
+    '- Keep a revision schedule — revisit weak topics within a few days of a test, not weeks later.',
+    '- Make short notes or flashcards for formulas, dates and facts you keep forgetting.',
+  ];
+  if (weakest) lines.push(`Right now your weakest subject is ${weakest.subject} (${weakest.avgAccuracy}% accuracy) — start your revision there.`);
+  lines.push('Ask me "what\'s my plan today" anytime and I\'ll turn this into a daily checklist.');
+  return lines.join('\n');
+}
 
 async function findAnyOpenTest(userId: string, courseIds: string[]): Promise<{ kind: 'quiz' | 'mock'; title: string } | null> {
   const [quizzes, mockTests, quizAttempts, mockAttempts] = await Promise.all([
@@ -211,7 +235,7 @@ async function createCounsellorLead(name: string, phone: string, email: string |
  * chat needs to answer well. Returns the assistant's reply text, having already saved both messages.
  */
 export async function sendChatMessage(
-  user: { id: string; name: string | null; phone: string; email: string | null; targetExam: string | null },
+  user: { id: string; name: string | null; phone: string; email: string | null; targetExam: string | null; examDate: string | null },
   text: string
 ): Promise<string> {
   const trimmed = text.trim().slice(0, 1000);
@@ -222,7 +246,30 @@ export async function sendChatMessage(
   const name = user.name || 'there';
   let reply: string;
 
-  if (COUNSELLOR_PATTERN.test(trimmed)) {
+  // What the assistant asked last — used to tell whether this new message is the answer
+  // to the exam-name/exam-date onboarding question, regardless of what it also matches below.
+  const lastAssistant = await prisma.aiMentorMessage.findFirst({
+    where: { userId: user.id, role: 'assistant' },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (lastAssistant?.content === EXAM_NAME_PROMPT) {
+    const examName = trimmed.slice(0, 120);
+    await prisma.user.update({ where: { id: user.id }, data: { targetExam: examName } });
+    reply = user.examDate ? await buildStrategyAdvice(user.id, examName, user.examDate) : EXAM_DATE_PROMPT;
+  } else if (lastAssistant?.content === EXAM_DATE_PROMPT) {
+    const examDate = trimmed.slice(0, 60);
+    await prisma.user.update({ where: { id: user.id }, data: { examDate } });
+    reply = await buildStrategyAdvice(user.id, user.targetExam || 'your exam', examDate);
+  } else if (STRATEGY_PATTERN.test(trimmed)) {
+    if (!user.targetExam) {
+      reply = EXAM_NAME_PROMPT;
+    } else if (!user.examDate) {
+      reply = EXAM_DATE_PROMPT;
+    } else {
+      reply = await buildStrategyAdvice(user.id, user.targetExam, user.examDate);
+    }
+  } else if (COUNSELLOR_PATTERN.test(trimmed)) {
     await createCounsellorLead(name, user.phone, user.email, user.targetExam, `Requested a counsellor call via AI Mentor chat: "${trimmed}"`);
     reply = "I've asked a counsellor to call you. They usually call within one working day.";
   } else if (TEST_PATTERN.test(trimmed)) {
@@ -256,7 +303,7 @@ export async function sendChatMessage(
   } else if (REMIND_PATTERN.test(trimmed)) {
     reply = "I can't send reminders outside the app yet, but anything overdue will show up at the top of your Overview page — check back there.";
   } else if (GREETING_PATTERN.test(trimmed)) {
-    reply = `Hi ${name}! Ask about your plan, your progress, your weak subjects, say "give me a practice test", or "talk to a counsellor".`;
+    reply = `Hi ${name}! Ask about your plan, your progress, your weak subjects, how to crack your exam, say "give me a practice test", or "talk to a counsellor".`;
   } else {
     const ticketNumber = await createDoubtTicket(user.id, name, user.phone, user.email, trimmed);
     reply = `I've forwarded this to your faculty as ticket ${ticketNumber} — they'll get back to you soon.`;

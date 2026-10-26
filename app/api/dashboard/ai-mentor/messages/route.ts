@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   }
 
   const reply = await sendChatMessage(
-    { id: user.id, name: user.name, phone: user.phone, email: user.email, targetExam: user.targetExam },
+    { id: user.id, name: user.name, phone: user.phone, email: user.email, targetExam: user.targetExam, examDate: user.examDate },
     parsed.data.text
   );
   return NextResponse.json({ reply });

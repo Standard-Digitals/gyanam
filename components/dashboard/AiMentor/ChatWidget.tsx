@@ -12,7 +12,7 @@ interface ChatMessage {
   createdAt: string;
 }
 
-const SUGGESTIONS = ["What's my plan today?", 'How is my progress?', 'Give me a practice test', 'Talk to a counsellor'];
+const SUGGESTIONS = ["What's my plan today?", 'How is my progress?', 'What is the right approach to crack my exam?', 'Give me a practice test'];
 const TABS = [
   { key: 'chat', label: 'Chat' },
   { key: 'plan', label: 'My Plan' },
