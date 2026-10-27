@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, FileText, PlayCircle, BarChart3, UserCheck, MessageSquare, Download, Layers, Shield, ArrowRight } from 'lucide-react';
+import { Sparkles, FileText, PlayCircle, BarChart3, UserCheck, MessageSquare, Download, Layers, Shield, ArrowRight, Bot } from 'lucide-react';
 
 interface BentoGridProps {
   onOpenMentorship: () => void;
@@ -161,7 +161,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ onOpenMentorship, onExplor
             </a>
           </motion.div>
 
-          {/* Bento Card 6: 1-on-1 Mentorship & Doubt Solving (Span 12) */}
+          {/* Bento Card 6: AI Mentor & 1-on-1 Mentorship (Span 12) */}
           <motion.div
             whileHover={{ y: -4 }}
             transition={{ duration: 0.2 }}
@@ -169,27 +169,42 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ onOpenMentorship, onExplor
           >
             <div className="flex items-center gap-5">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#EF4444] to-[#B91C1C] text-white flex items-center justify-center shrink-0 shadow-lg shadow-[#C12223]/30">
-                <UserCheck className="w-8 h-8" />
+                <Bot className="w-8 h-8" />
               </div>
               <div>
-                <span className="px-2.5 py-0.5 bg-[#C12223]/10 text-[#C12223] text-[10px] font-extrabold uppercase rounded-full">
-                  1-on-1 Personal Mentorship
+                <span className="px-2.5 py-0.5 bg-[#C12223]/10 text-[#C12223] text-[10px] font-extrabold uppercase rounded-full inline-flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" /> New: GYANM AI Mentor
                 </span>
                 <h3 className="font-heading font-extrabold text-2xl text-[#1F1A1C] mt-1">
-                  Never Study Alone. Get Assigned a Dedicated Mentor.
+                  Never Study Alone. Your AI Mentor Is Available 24/7.
                 </h3>
                 <p className="text-xs sm:text-sm text-[#555555] max-w-xl mt-1">
-                  Connect with selected officers for weekly progress reviews, strategy tweaks, and 24/7 WhatsApp doubt clearing.
+                  Ask doubts anytime, get a personalised daily study plan, track your weak topics from mock test mistakes, and get the right course suggested for your target exam. Need a human touch? Talk to a counsellor in one tap.
                 </p>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {['Instant Doubt Solving', 'Daily Study Plan', 'Mistake Tracker', 'Progress Reports'].map(f => (
+                    <span key={f} className="px-2.5 py-1 bg-white border border-[#F3DCDD] text-[#1F1A1C] text-[10px] font-bold rounded-lg">
+                      ✓ {f}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <button
-              onClick={onOpenMentorship}
-              className="px-6 py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-extrabold text-sm rounded-xl shadow-lg shadow-[#C12223]/25 hover:scale-105 transition shrink-0 cursor-pointer"
-            >
-              Book Free Mentorship Session
-            </button>
+            <div className="flex flex-col gap-2 shrink-0 w-full md:w-auto">
+              <a
+                href="/dashboard"
+                className="px-6 py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-extrabold text-sm rounded-xl shadow-lg shadow-[#C12223]/25 hover:scale-105 transition text-center flex items-center justify-center gap-2"
+              >
+                <MessageSquare className="w-4 h-4" /> Chat with AI Mentor
+              </a>
+              <button
+                onClick={onOpenMentorship}
+                className="px-6 py-3 bg-white border border-[#F3DCDD] hover:border-[#C12223] text-[#1F1A1C] hover:text-[#C12223] font-bold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-2"
+              >
+                <UserCheck className="w-4 h-4" /> Book Free Mentorship Session
+              </button>
+            </div>
           </motion.div>
 
         </div>

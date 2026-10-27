@@ -67,7 +67,7 @@ export const FAQSection: React.FC<{ faqs: FAQItem[] }> = ({ faqs }) => {
 
         {/* Accordion List */}
         <div className="max-w-3xl mx-auto space-y-4">
-          {filteredFaqs.map(faq => {
+          {filteredFaqs.slice(0, 5).map(faq => {
             const isOpen = openId === faq.id;
             return (
               <div
@@ -106,6 +106,17 @@ export const FAQSection: React.FC<{ faqs: FAQItem[] }> = ({ faqs }) => {
             );
           })}
         </div>
+
+        {filteredFaqs.length > 5 && (
+          <div className="mt-8 flex justify-center">
+            <Link
+              href="/faq"
+              className="px-8 py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold text-sm rounded-xl shadow-lg shadow-[#C12223]/25 flex items-center gap-2 hover:opacity-95 transition"
+            >
+              View More <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
 
         {/* Still Have Questions Box */}
         <div className="mt-12 p-6 sm:p-8 bg-[#FFF5F5] rounded-3xl border border-[#F3DCDD] max-w-2xl mx-auto text-center space-y-4">

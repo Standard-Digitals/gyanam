@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import type { CurrentAffairItem, DailyQuizQuestion } from '@/types';
 import { Sparkles, BookOpen, CheckCircle, Flame, Download, HelpCircle, ArrowRight, RefreshCw } from 'lucide-react';
@@ -73,13 +74,14 @@ export const CurrentAffairs: React.FC<CurrentAffairsProps> = ({ items, quizQuest
 
         {/* Tab Content: News & Analysis */}
         {activeTab === 'news' && (
-          <div className="grid lg:grid-cols-3 gap-8">
-            {items.map(item => (
+          <>
+          <div className="grid md:grid-cols-2 gap-8">
+            {items.slice(0, 6).map(item => (
+              <Link key={item.id} href={`/current-affairs/${item.slug ?? item.id}`} className="block h-full">
               <motion.div
-                key={item.id}
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
-                className="bg-white rounded-3xl p-6 border border-[#F3DCDD] shadow-xl flex flex-col justify-between group"
+                className="h-full bg-white rounded-3xl p-6 border border-[#F3DCDD] shadow-xl flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -121,8 +123,19 @@ export const CurrentAffairs: React.FC<CurrentAffairsProps> = ({ items, quizQuest
                   <span className="text-xs text-[#888888] font-semibold">{item.readTime}</span>
                 </div>
               </motion.div>
+              </Link>
             ))}
           </div>
+
+          <div className="mt-10 flex justify-center">
+            <Link
+              href="/current-affairs"
+              className="px-8 py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold text-sm rounded-xl shadow-lg shadow-[#C12223]/25 flex items-center gap-2 hover:opacity-95 transition"
+            >
+              Read More <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          </>
         )}
 
         {/* Tab Content: Daily 5-MCQ Live Test */}

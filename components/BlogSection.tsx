@@ -30,7 +30,7 @@ export const BlogSection: React.FC<{ posts: BlogPost[] }> = ({ posts }) => {
 
         {/* Blog Posts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {posts.map(post => (
+          {posts.slice(0, 3).map(post => (
             <motion.div
               key={post.id}
               whileHover={{ y: -4 }}

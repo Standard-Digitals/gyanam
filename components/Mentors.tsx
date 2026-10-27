@@ -16,6 +16,7 @@ export const Mentors: React.FC<MentorsProps> = ({ mentors, onOpenMentorship }) =
   const [selectedFilter, setSelectedFilter] = useState<string>('All');
   const [activeMentorModal, setActiveMentorModal] = useState<Mentor | null>(null);
   const [hoveredMentorId, setHoveredMentorId] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   const filterCategories = [
     { id: 'All', label: 'All Faculty' },
@@ -76,7 +77,7 @@ export const Mentors: React.FC<MentorsProps> = ({ mentors, onOpenMentorship }) =
 
         {/* Mentors Grid - Fresh Modern Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
-          {filteredMentors.map((m) => {
+          {(showAll ? filteredMentors : filteredMentors.slice(0, 4)).map((m) => {
             const isHovered = hoveredMentorId === m.id;
 
             return (
@@ -221,6 +222,17 @@ export const Mentors: React.FC<MentorsProps> = ({ mentors, onOpenMentorship }) =
             );
           })}
         </div>
+
+        {filteredMentors.length > 4 && (
+          <div className="mt-10 flex justify-center">
+            <button
+              onClick={() => setShowAll(v => !v)}
+              className="px-8 py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold text-sm rounded-xl shadow-lg shadow-[#C12223]/25 flex items-center gap-2 hover:opacity-95 transition cursor-pointer"
+            >
+              {showAll ? 'Show Less' : 'View More'} <ChevronDown className={`w-4 h-4 transition-transform ${showAll ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+        )}
 
         {/* Bottom Banner */}
         <div className="mt-16 bg-gradient-to-r from-[#8C1316] via-[#A6181B] to-[#B91C1C] rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden border border-red-400/30">

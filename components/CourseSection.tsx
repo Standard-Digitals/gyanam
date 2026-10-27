@@ -1,9 +1,10 @@
 'use client';
-import React from 'react';
+import React, { useRef } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { EXAM_CATEGORIES } from '@/data/mockData';
 import { Course } from '@/types';
-import { Star, Users, Clock, ArrowRight, ShieldCheck, Sparkles, BookOpen } from 'lucide-react';
+import { Star, Users, Clock, ArrowRight, ShieldCheck, Sparkles, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CourseSectionProps {
   courses: Course[];
@@ -23,6 +24,13 @@ export const CourseSection: React.FC<CourseSectionProps> = ({
   const filteredCourses = selectedCategory === 'all'
     ? courses
     : courses.filter(c => c.category.includes(selectedCategory as Course['category'][number]));
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  // Scroll by one visible "page" of cards
+  const scrollBy = (dir: 1 | -1) => {
+    const el = sliderRef.current;
+    if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: 'smooth' });
+  };
 
   return (
     <section id="courses" className="py-20 bg-white border-t border-[#F3DCDD]">
@@ -60,14 +68,33 @@ export const CourseSection: React.FC<CourseSectionProps> = ({
           </div>
         </div>
 
-        {/* Course Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Course Cards Slider */}
+        <div className="relative">
+          <button
+            onClick={() => scrollBy(-1)}
+            aria-label="Previous"
+            className="hidden sm:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white border border-[#F3DCDD] shadow-lg text-[#C12223] items-center justify-center hover:bg-[#C12223] hover:text-white transition"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => scrollBy(1)}
+            aria-label="Next"
+            className="hidden sm:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white border border-[#F3DCDD] shadow-lg text-[#C12223] items-center justify-center hover:bg-[#C12223] hover:text-white transition"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+        <div
+          ref={sliderRef}
+          className="flex gap-8 overflow-x-auto snap-x snap-mandatory scroll-smooth pt-2 pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {filteredCourses.map(course => (
             <motion.div
               key={course.id}
               whileHover={{ y: -6 }}
               transition={{ duration: 0.2 }}
-              className="bg-white rounded-3xl border border-[#F3DCDD] shadow-xl hover:shadow-2xl overflow-hidden flex flex-col justify-between group"
+              className="snap-start shrink-0 w-full md:w-[calc((100%-2rem)/2)] lg:w-[calc((100%-4rem)/3)] bg-white rounded-3xl border border-[#F3DCDD] shadow-xl hover:shadow-2xl overflow-hidden flex flex-col justify-between group"
             >
               <div>
                 {/* Course Thumbnail */}
@@ -166,6 +193,16 @@ export const CourseSection: React.FC<CourseSectionProps> = ({
               </div>
             </motion.div>
           ))}
+        </div>
+        </div>
+
+        <div className="mt-8 flex justify-center">
+          <Link
+            href="/courses"
+            className="px-8 py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold text-sm rounded-xl shadow-lg shadow-[#C12223]/25 flex items-center gap-2 hover:opacity-95 transition"
+          >
+            View More <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     </section>

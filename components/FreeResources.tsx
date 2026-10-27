@@ -1,11 +1,19 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import type { FreeResource } from '@/types';
-import { Download, FileText, CheckCircle2, Star, Sparkles, ArrowRight } from 'lucide-react';
+import { Download, FileText, CheckCircle2, Star, Sparkles, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const FreeResources: React.FC<{ resources: FreeResource[] }> = ({ resources }) => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  // Scroll by one visible "page" of cards
+  const scrollBy = (dir: 1 | -1) => {
+    const el = sliderRef.current;
+    if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: 'smooth' });
+  };
 
   const handleDownload = async (resId: string) => {
     setDownloadingId(resId);
@@ -36,14 +44,33 @@ export const FreeResources: React.FC<{ resources: FreeResource[] }> = ({ resourc
           </p>
         </div>
 
-        {/* Resources Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Resources Slider */}
+        <div className="relative">
+          <button
+            onClick={() => scrollBy(-1)}
+            aria-label="Previous"
+            className="hidden sm:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white border border-[#F3DCDD] shadow-lg text-[#C12223] items-center justify-center hover:bg-[#C12223] hover:text-white transition"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => scrollBy(1)}
+            aria-label="Next"
+            className="hidden sm:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white border border-[#F3DCDD] shadow-lg text-[#C12223] items-center justify-center hover:bg-[#C12223] hover:text-white transition"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+        <div
+          ref={sliderRef}
+          className="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pt-2 pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {resources.map(res => (
             <motion.div
               key={res.id}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.2 }}
-              className="bg-[#FFF5F5] rounded-3xl p-6 border border-[#F3DCDD] shadow-xl hover:shadow-2xl flex flex-col justify-between group"
+              className="snap-start shrink-0 w-full md:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-4.5rem)/4)] bg-[#FFF5F5] rounded-3xl p-6 border border-[#F3DCDD] shadow-xl hover:shadow-2xl flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -90,6 +117,16 @@ export const FreeResources: React.FC<{ resources: FreeResource[] }> = ({ resourc
               </div>
             </motion.div>
           ))}
+        </div>
+        </div>
+
+        <div className="mt-8 flex justify-center">
+          <Link
+            href="/study-material"
+            className="px-8 py-3.5 bg-gradient-to-r from-[#EF4444] to-[#B91C1C] text-white font-bold text-sm rounded-xl shadow-lg shadow-[#C12223]/25 flex items-center gap-2 hover:opacity-95 transition"
+          >
+            View More <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
 
       </div>
