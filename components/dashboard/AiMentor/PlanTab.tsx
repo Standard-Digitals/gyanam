@@ -27,6 +27,7 @@ function ScheduleChart({ schedule }: { schedule: WeeklySchedule }) {
             <div className="h-2 bg-[#F3DCDD] rounded-full overflow-hidden">
               <div className="h-full bg-[#C12223] rounded-full" style={{ width: `${(b.minutes / maxMinutes) * 100}%` }} />
             </div>
+            {b.topic && <p className="text-[11px] text-[#C12223] font-semibold mt-1">Today: {b.topic}</p>}
           </div>
         ))}
       </div>

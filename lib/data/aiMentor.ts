@@ -492,6 +492,8 @@ async function buildPlanIntro(profile: StrategyProfile): Promise<ReplyWithSugges
 export interface ScheduleBlock {
   subject: string;
   minutes: number;
+  // Only present once `attachTodaysTopics` has run — never stored on the schedule itself.
+  topic?: string | null;
 }
 
 // Four core subjects most of our exams share, plus a dedicated revision block — a real subject-
@@ -551,20 +553,112 @@ function formatScheduleMessage(schedule: WeeklySchedule): string {
   return `Monday – Saturday (daily):\n${weekday}\n\nSunday:\n${schedule.sundayPlan}`;
 }
 
+// Fallback when no enrolled/matching course has subject-tagged chapters yet — rotates by day so
+// it isn't the same two topics forever, but is still a generic placeholder, not real syllabus data.
 const SUBJECT_TOPICS: Record<string, string[]> = {
-  'Quantitative Aptitude': ['Percentage', 'Ratio & Proportion'],
-  Reasoning: ['Puzzles', 'Seating Arrangement'],
-  English: ['Reading Comprehension', 'Error Spotting'],
-  'General Awareness': ['Current Affairs', 'Static GK'],
+  'Quantitative Aptitude': ['Percentage', 'Ratio & Proportion', 'Profit & Loss', 'Time & Work', 'Simplification'],
+  Reasoning: ['Puzzles', 'Seating Arrangement', 'Blood Relations', 'Coding-Decoding', 'Syllogism'],
+  English: ['Reading Comprehension', 'Error Spotting', 'Para Jumbles', 'Cloze Test', 'Vocabulary'],
+  'General Awareness': ['Current Affairs', 'Static GK', 'Banking Awareness', 'Science GK', 'History & Polity'],
   'Revision & timed practice': ['Review mistakes from recent quizzes', 'One timed mini-test'],
 };
 
+const dayIndex = () => Math.floor(Date.now() / DAY);
+
+// Matches a course's Chapter (curriculum content admins already enter, e.g. "Module 1:
+// Quantitative Aptitude") to one of the schedule's core subjects, so the day-plan can show the
+// student's real next topic in that subject instead of a generic placeholder.
+const CHAPTER_SUBJECT_KEYWORDS: Record<string, string[]> = {
+  'Quantitative Aptitude': ['quant', 'math', 'numerical', 'arithmetic'],
+  Reasoning: ['reasoning', 'logical'],
+  English: ['english', 'verbal', 'grammar'],
+  'General Awareness': ['general awareness', 'general studies', 'gk', 'current affairs', 'static gk', 'awareness'],
+};
+
+function matchChapterSubject(chapterTitle: string): string | null {
+  const lower = chapterTitle.toLowerCase();
+  for (const [subject, keywords] of Object.entries(CHAPTER_SUBJECT_KEYWORDS)) {
+    if (keywords.some((kw) => lower.includes(kw))) return subject;
+  }
+  return null;
+}
+
+/** One subject-tagged chapter per subject (first match, in chapter order) — then, for a real
+ * student, the next topic they haven't completed yet (so it advances with their own progress);
+ * for a course being previewed without enrollment, a day-rotated topic from that chapter instead. */
+async function topicsFromCourse(courseId: string, userId: string | null): Promise<Map<string, string>> {
+  const chapters = await prisma.chapter.findMany({ where: { courseId }, orderBy: { order: 'asc' }, select: { id: true, title: true } });
+  const chapterIdBySubject = new Map<string, string>();
+  for (const ch of chapters) {
+    const subject = matchChapterSubject(ch.title);
+    if (subject && !chapterIdBySubject.has(subject)) chapterIdBySubject.set(subject, ch.id);
+  }
+  if (chapterIdBySubject.size === 0) return new Map();
+
+  const chapterIds = [...chapterIdBySubject.values()];
+  const topics = await prisma.topic.findMany({ where: { chapterId: { in: chapterIds } }, orderBy: { order: 'asc' }, select: { id: true, chapterId: true, title: true } });
+  const topicsByChapter = new Map<string, { id: string; title: string }[]>();
+  for (const t of topics) {
+    const list = topicsByChapter.get(t.chapterId) ?? [];
+    list.push({ id: t.id, title: t.title });
+    topicsByChapter.set(t.chapterId, list);
+  }
+
+  let completedIds = new Set<string>();
+  if (userId && topics.length > 0) {
+    const progress = await prisma.topicProgress.findMany({ where: { userId, topicId: { in: topics.map((t) => t.id) } }, select: { topicId: true } });
+    completedIds = new Set(progress.map((p) => p.topicId));
+  }
+
+  const result = new Map<string, string>();
+  for (const [subject, chapterId] of chapterIdBySubject) {
+    const list = topicsByChapter.get(chapterId) ?? [];
+    if (list.length === 0) continue;
+    const next = userId ? list.find((t) => !completedIds.has(t.id)) : undefined;
+    const pick = next ?? list[dayIndex() % list.length];
+    result.set(subject, pick.title);
+  }
+  return result;
+}
+
+/** Today's focus topic per schedule subject — from the student's enrolled course's real
+ * curriculum when it has subject-tagged chapters, a matching course's curriculum as a preview
+ * when they aren't enrolled yet, or the generic rotating fallback otherwise. */
+async function getTodaysTopics(userId: string, courseId: string | null, targetExam: string | null): Promise<Map<string, string>> {
+  let fromCourse = new Map<string, string>();
+  if (courseId) {
+    fromCourse = await topicsFromCourse(courseId, userId);
+  } else {
+    const category = matchExamCategory(targetExam);
+    if (category) {
+      const course = await prisma.course.findFirst({ where: { category: { has: category } }, orderBy: { studentsEnrolled: 'desc' }, select: { id: true } });
+      if (course) fromCourse = await topicsFromCourse(course.id, null);
+    }
+  }
+
+  const result = new Map<string, string>();
+  for (const subject of Object.keys(SUBJECT_TOPICS)) {
+    const fallbackList = SUBJECT_TOPICS[subject];
+    const fallback = fallbackList.length ? fallbackList[dayIndex() % fallbackList.length] : undefined;
+    const pick = fromCourse.get(subject) ?? fallback;
+    if (pick) result.set(subject, pick);
+  }
+  return result;
+}
+
+/** Attaches `getTodaysTopics` to a saved schedule right before it's shown — topics are computed
+ * fresh on every read (not stored on the schedule) so they keep advancing with course progress
+ * and day rotation instead of freezing at whatever was true when the schedule was first built. */
+export async function attachTodaysTopics(schedule: WeeklySchedule, userId: string, targetExam: string | null): Promise<WeeklySchedule> {
+  const enrollment = await prisma.enrollment.findFirst({ where: { userId, status: 'ACTIVE' }, orderBy: { enrolledAt: 'desc' }, select: { courseId: true } });
+  const topics = await getTodaysTopics(userId, enrollment?.courseId ?? null, targetExam);
+  return { ...schedule, weekdayBlocks: schedule.weekdayBlocks.map((b) => ({ ...b, topic: topics.get(b.subject) ?? null })) };
+}
+
+/** Expects a schedule already run through `attachTodaysTopics`. */
 function formatDetailedScheduleMessage(schedule: WeeklySchedule): string {
   const weekday = schedule.weekdayBlocks
-    .map((b) => {
-      const topics = SUBJECT_TOPICS[b.subject];
-      return topics ? `${b.minutes} min — ${b.subject}\n   → Focus: ${topics.join(', ')}` : `${b.minutes} min — ${b.subject}`;
-    })
+    .map((b) => (b.topic ? `${b.minutes} min — ${b.subject}\n   → Focus: ${b.topic}` : `${b.minutes} min — ${b.subject}`))
     .join('\n');
   return `Monday – Saturday (daily):\n${weekday}\n\nSunday:\n${schedule.sundayPlan}`;
 }
@@ -912,10 +1006,12 @@ export async function sendChatMessage(
     if (declines) {
       reply = [READY_FOR_DIAGNOSTIC_PROMPT];
       suggestions = READY_FOR_DIAGNOSTIC_SUGGESTIONS;
+    } else if (user.dailyScheduleBlocks) {
+      const withTopics = await attachTodaysTopics(user.dailyScheduleBlocks, user.id, user.targetExam);
+      reply = [formatDetailedScheduleMessage(withTopics), READY_FOR_DIAGNOSTIC_PROMPT];
+      suggestions = READY_FOR_DIAGNOSTIC_SUGGESTIONS;
     } else {
-      reply = user.dailyScheduleBlocks
-        ? [formatDetailedScheduleMessage(user.dailyScheduleBlocks), READY_FOR_DIAGNOSTIC_PROMPT]
-        : [READY_FOR_DIAGNOSTIC_PROMPT];
+      reply = [READY_FOR_DIAGNOSTIC_PROMPT];
       suggestions = READY_FOR_DIAGNOSTIC_SUGGESTIONS;
     }
   } else if (pendingAnswer === READY_FOR_DIAGNOSTIC_PROMPT) {
@@ -1072,9 +1168,11 @@ export async function sendChatMessage(
       : ["You've attempted everything that's open right now — check back soon, new ones are added often."];
     suggestions = defaultSuggestions(!!user.targetExam);
   } else if (PLAN_PATTERN.test(trimmed) && user.dailyScheduleBlocks) {
-    // Already built a personalized routine earlier — show the same saved chart instead of the
-    // generic plan/counsellor logic below, or regenerating it.
-    reply = ["Here's your daily study routine:", formatScheduleMessage(user.dailyScheduleBlocks)];
+    // Already built a personalized routine earlier — show the same saved routine (with today's
+    // specific topic per subject) instead of the generic plan/counsellor logic below, or
+    // regenerating it.
+    const withTopics = await attachTodaysTopics(user.dailyScheduleBlocks, user.id, user.targetExam);
+    reply = ["Here's your daily study routine:", formatDetailedScheduleMessage(withTopics)];
     suggestions = defaultSuggestions(!!user.targetExam);
   } else if (PLAN_PATTERN.test(trimmed)) {
     const overview = await getMentorOverview(user.id, name, user.targetExam);
