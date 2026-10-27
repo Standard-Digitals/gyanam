@@ -765,7 +765,17 @@ export async function sendChatMessage(
     orderBy: { createdAt: 'desc' },
   });
 
-  if (lastAssistant?.content === EXAM_NAME_PROMPT) {
+  // A clear, different ask — "what's my plan today", "give me a test", "talk to a counsellor" —
+  // always gets answered right away instead of being silently swallowed as the literal answer to
+  // whatever intake question is still pending (e.g. typing "what's my plan today" while
+  // WEAK_SUBJECT_PROMPT was outstanding used to get saved as the weak-subject answer and the
+  // student's actual question was never addressed, which read as the chat being stuck). The
+  // pending question itself is left unanswered in the DB, so it's asked again next time the
+  // student triggers that intake flow.
+  const interruptsIntake = PLAN_PATTERN.test(trimmed) || TEST_PATTERN.test(trimmed) || COUNSELLOR_PATTERN.test(trimmed);
+  const pendingAnswer = interruptsIntake ? null : lastAssistant?.content;
+
+  if (pendingAnswer === EXAM_NAME_PROMPT) {
     const examName = trimmed.slice(0, 120);
     await prisma.user.update({ where: { id: user.id }, data: { targetExam: examName } });
     const enrolled = await isUserEnrolled(user.id);
@@ -794,7 +804,7 @@ export async function sendChatMessage(
       reply = result.messages;
       suggestions = result.suggestions;
     }
-  } else if (lastAssistant?.content === EXAM_DATE_CONFIRM_PROMPT) {
+  } else if (pendingAnswer === EXAM_DATE_CONFIRM_PROMPT) {
     const wantsOwnDate = /^\s*(i have|exact|official|no|different|change|my own)\b/i.test(trimmed);
     if (wantsOwnDate) {
       await prisma.user.update({ where: { id: user.id }, data: { pendingExamDateSuggestion: null } });
@@ -814,7 +824,7 @@ export async function sendChatMessage(
         suggestions = result.suggestions;
       }
     }
-  } else if (lastAssistant?.content === EXAM_DATE_PROMPT) {
+  } else if (pendingAnswer === EXAM_DATE_PROMPT) {
     const examDate = trimmed.slice(0, 60);
     await prisma.user.update({ where: { id: user.id }, data: { examDate } });
     const enrolled = await isUserEnrolled(user.id);
@@ -827,7 +837,7 @@ export async function sendChatMessage(
       reply = result.messages;
       suggestions = result.suggestions;
     }
-  } else if (lastAssistant?.content === QUALIFICATION_PROMPT) {
+  } else if (pendingAnswer === QUALIFICATION_PROMPT) {
     const qualification = trimmed.slice(0, 120);
     await prisma.user.update({ where: { id: user.id }, data: { qualification } });
     const next = nextIntakeQuestion({ ...user, qualification }, true);
@@ -839,13 +849,13 @@ export async function sendChatMessage(
       reply = result.messages;
       suggestions = result.suggestions;
     }
-  } else if (lastAssistant?.content === MARKS_PROMPT) {
+  } else if (pendingAnswer === MARKS_PROMPT) {
     const marksPercentage = trimmed.slice(0, 60);
     await prisma.user.update({ where: { id: user.id }, data: { marksPercentage } });
     const result = await buildCourseIntro(user.targetExam);
     reply = result.messages;
     suggestions = result.suggestions;
-  } else if (lastAssistant?.content === BEGINNER_CHECK_PROMPT) {
+  } else if (pendingAnswer === BEGINNER_CHECK_PROMPT) {
     const examStage = trimmed.slice(0, 60);
     await prisma.user.update({ where: { id: user.id }, data: { examStage } });
     const next = nextStrategyQuestion({ ...user, examStage });
@@ -857,7 +867,7 @@ export async function sendChatMessage(
       reply = result.messages;
       suggestions = result.suggestions;
     }
-  } else if (lastAssistant?.content === STUDY_HOURS_PROMPT) {
+  } else if (pendingAnswer === STUDY_HOURS_PROMPT) {
     const studyHoursPerDay = trimmed.slice(0, 40);
     await prisma.user.update({ where: { id: user.id }, data: { studyHoursPerDay } });
     const next = nextStrategyQuestion({ ...user, studyHoursPerDay });
@@ -869,7 +879,7 @@ export async function sendChatMessage(
       reply = result.messages;
       suggestions = result.suggestions;
     }
-  } else if (lastAssistant?.content === WEAK_SUBJECT_PROMPT) {
+  } else if (pendingAnswer === WEAK_SUBJECT_PROMPT) {
     const weakSubject = trimmed.slice(0, 60);
     await prisma.user.update({ where: { id: user.id }, data: { weakSubject } });
     const next = nextStrategyQuestion({ ...user, weakSubject });
@@ -881,13 +891,13 @@ export async function sendChatMessage(
       reply = result.messages;
       suggestions = result.suggestions;
     }
-  } else if (lastAssistant?.content === SYLLABUS_PROGRESS_PROMPT) {
+  } else if (pendingAnswer === SYLLABUS_PROGRESS_PROMPT) {
     const syllabusProgress = trimmed.slice(0, 40);
     await prisma.user.update({ where: { id: user.id }, data: { syllabusProgress } });
     const result = await finishStrategyIntake(user.id, { ...user, syllabusProgress });
     reply = result.messages;
     suggestions = result.suggestions;
-  } else if (lastAssistant?.content === READY_FOR_SCHEDULE_PROMPT) {
+  } else if (pendingAnswer === READY_FOR_SCHEDULE_PROMPT) {
     const declines = /^\s*(no|not now|nah+|nope|skip|later|maybe later)\b/i.test(trimmed);
     if (declines) {
       reply = ['No problem — ask me "what\'s my plan today" whenever you\'re ready to see it.'];
@@ -897,7 +907,7 @@ export async function sendChatMessage(
       reply = result.messages;
       suggestions = result.suggestions;
     }
-  } else if (lastAssistant?.content === DETAILED_PLAN_PROMPT) {
+  } else if (pendingAnswer === DETAILED_PLAN_PROMPT) {
     const declines = /^\s*(no|not now|nah+|nope|skip|that's enough|thats enough)\b/i.test(trimmed);
     if (declines) {
       reply = [READY_FOR_DIAGNOSTIC_PROMPT];
@@ -908,7 +918,7 @@ export async function sendChatMessage(
         : [READY_FOR_DIAGNOSTIC_PROMPT];
       suggestions = READY_FOR_DIAGNOSTIC_SUGGESTIONS;
     }
-  } else if (lastAssistant?.content === READY_FOR_DIAGNOSTIC_PROMPT) {
+  } else if (pendingAnswer === READY_FOR_DIAGNOSTIC_PROMPT) {
     const declines = /^\s*(no|not now|maybe later|later|nah+|nope|skip)\b/i.test(trimmed);
     if (declines) {
       const enrolled = await isUserEnrolled(user.id);
@@ -925,7 +935,7 @@ export async function sendChatMessage(
       reply = result.messages;
       suggestions = result.suggestions;
     }
-  } else if (lastAssistant?.content === OFFER_COURSE_PROMPT) {
+  } else if (pendingAnswer === OFFER_COURSE_PROMPT) {
     const declines = /^\s*(no|not now|nah+|nope|skip|later|maybe later)\b/i.test(trimmed);
     if (declines) {
       reply = ['No problem — ask anytime you\'re ready, or say "talk to a counsellor" if you\'d rather speak to someone.'];
@@ -935,7 +945,7 @@ export async function sendChatMessage(
       reply = result.messages;
       suggestions = result.suggestions;
     }
-  } else if (lastAssistant?.content === COURSE_DETAILS_PROMPT) {
+  } else if (pendingAnswer === COURSE_DETAILS_PROMPT) {
     const declines = /^\s*(no|not right now|nah+|nope|skip|later|maybe later)\b/i.test(trimmed);
     if (declines) {
       reply = ['No problem — ask anytime, or say "talk to a counsellor" if you\'d rather speak to someone.'];
@@ -945,12 +955,12 @@ export async function sendChatMessage(
       reply = result.messages;
       suggestions = result.suggestions;
     }
-  } else if (lastAssistant?.content === COURSE_ACTION_PROMPT) {
+  } else if (pendingAnswer === COURSE_ACTION_PROMPT) {
     const wantsCounsellor = /^\s*(talk|counsellor|counselor|call)\b/i.test(trimmed);
     const result = wantsCounsellor ? await buildCounsellorReply(user, name, trimmed) : await buildEnrollReply(user.targetExam);
     reply = result.messages;
     suggestions = result.suggestions;
-  } else if (lastAssistant?.content === CONFIRM_EXAM_PROMPT) {
+  } else if (pendingAnswer === CONFIRM_EXAM_PROMPT) {
     const saysDifferent = /^\s*(no|nah+|nope|nahi|different|change|wrong|galat)\b/i.test(trimmed);
     if (saysDifferent) {
       // Clear every exam-specific answer, not just the exam itself — otherwise a switch to a
