@@ -2,7 +2,15 @@ import { prisma } from '@/lib/prisma';
 import { getCourseProgress } from '@/lib/data/courseProgress';
 import { getSubjectStrength } from '@/lib/data/performance';
 import { getMyProgress, getBasicProgress } from '@/lib/data/myProgress';
-import { EXAM_NAME_PROMPT, EXAM_DATE_PROMPT, QUALIFICATION_PROMPT, MARKS_PROMPT } from '@/lib/aiMentorPrompts';
+import { suggestExamPeriod } from '@/lib/data/examDateSuggestion';
+import {
+  EXAM_NAME_PROMPT,
+  EXAM_DATE_PROMPT,
+  QUALIFICATION_PROMPT,
+  MARKS_PROMPT,
+  CONFIRM_EXAM_PROMPT,
+  EXAM_DATE_CONFIRM_PROMPT,
+} from '@/lib/aiMentorPrompts';
 
 /**
  * "AI Mentor" (Gyanmitra-style) — in-app only, no OpenAI/WhatsApp/email. Doubts the rules below
@@ -359,6 +367,7 @@ export async function sendChatMessage(
     qualification: string | null;
     marksPercentage: string | null;
     chatResetAt: Date | null;
+    pendingExamDateSuggestion: string | null;
   },
   text: string
 ): Promise<string[]> {
@@ -384,7 +393,35 @@ export async function sendChatMessage(
     await prisma.user.update({ where: { id: user.id }, data: { targetExam: examName } });
     const enrolled = await isUserEnrolled(user.id);
     const next = nextIntakeQuestion({ ...user, targetExam: examName }, !enrolled);
-    reply = next ? [next] : await finishIntake(user.id, examName, user.examDate || '');
+    if (next === EXAM_DATE_PROMPT) {
+      // Best-effort OpenAI suggestion for when this exam is usually conducted, offered as a
+      // confirmable starting point (never asserted as fact) — falls back to asking outright if
+      // OPENAI_API_KEY isn't set or the lookup doesn't come back confident.
+      const suggestion = await suggestExamPeriod(examName);
+      if (suggestion) {
+        await prisma.user.update({ where: { id: user.id }, data: { pendingExamDateSuggestion: suggestion } });
+        reply = [
+          `${examName} exams are typically conducted around ${suggestion} — but this shifts year to year, so go by the official notification if you already have it.`,
+          EXAM_DATE_CONFIRM_PROMPT,
+        ];
+      } else {
+        reply = [EXAM_DATE_PROMPT];
+      }
+    } else {
+      reply = next ? [next] : await finishIntake(user.id, examName, user.examDate || '');
+    }
+  } else if (lastAssistant?.content === EXAM_DATE_CONFIRM_PROMPT) {
+    const wantsOwnDate = /^\s*(i have|exact|official|no|different|change|my own)\b/i.test(trimmed);
+    if (wantsOwnDate) {
+      await prisma.user.update({ where: { id: user.id }, data: { pendingExamDateSuggestion: null } });
+      reply = [EXAM_DATE_PROMPT];
+    } else {
+      const examDate = user.pendingExamDateSuggestion || 'soon';
+      await prisma.user.update({ where: { id: user.id }, data: { examDate, pendingExamDateSuggestion: null } });
+      const enrolled = await isUserEnrolled(user.id);
+      const next = nextIntakeQuestion({ ...user, examDate }, !enrolled);
+      reply = next ? [next] : await finishIntake(user.id, user.targetExam || 'your exam', examDate);
+    }
   } else if (lastAssistant?.content === EXAM_DATE_PROMPT) {
     const examDate = trimmed.slice(0, 60);
     await prisma.user.update({ where: { id: user.id }, data: { examDate } });
@@ -400,6 +437,20 @@ export async function sendChatMessage(
     const marksPercentage = trimmed.slice(0, 60);
     await prisma.user.update({ where: { id: user.id }, data: { marksPercentage } });
     reply = await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+  } else if (lastAssistant?.content === CONFIRM_EXAM_PROMPT) {
+    const saysDifferent = /^\s*(no|nah+|nope|nahi|different|change|wrong|galat)\b/i.test(trimmed);
+    if (saysDifferent) {
+      await prisma.user.update({ where: { id: user.id }, data: { targetExam: null, examDate: null } });
+      reply = [EXAM_NAME_PROMPT];
+    } else {
+      const enrolled = await isUserEnrolled(user.id);
+      const next = nextIntakeQuestion(user, !enrolled);
+      reply = next ? [next] : await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+    }
+  } else if (!lastAssistant && user.targetExam && (STRATEGY_PATTERN.test(trimmed) || COURSE_GUIDANCE_PATTERN.test(trimmed))) {
+    // First message of this conversation thread, and we already have an exam on file from a
+    // previous session — confirm it's still right instead of silently assuming or re-asking.
+    reply = [`You mentioned earlier you're preparing for ${user.targetExam}.`, CONFIRM_EXAM_PROMPT];
   } else if (STRATEGY_PATTERN.test(trimmed)) {
     const enrolled = await isUserEnrolled(user.id);
     const next = nextIntakeQuestion(user, !enrolled);

@@ -6,3 +6,5 @@ export const EXAM_NAME_PROMPT = "Happy to guide you! Which exam are you preparin
 export const EXAM_DATE_PROMPT = "Got it. Roughly when is it (month and year is fine)? I'll tailor the advice to that.";
 export const QUALIFICATION_PROMPT = "What's your highest qualification right now — for example, 12th pass, graduate, or post-graduate?";
 export const MARKS_PROMPT = 'Roughly what percentage or marks did you score in that?';
+export const CONFIRM_EXAM_PROMPT = 'Is that still the plan, or has it changed?';
+export const EXAM_DATE_CONFIRM_PROMPT = 'Is that roughly right, or do you already have the official date?';

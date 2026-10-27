@@ -6,7 +6,14 @@ import { MistakesTab } from './MistakesTab';
 import { ProgressTab } from './ProgressTab';
 import { CoursesTab } from './CoursesTab';
 import { OnboardingFlow } from './OnboardingFlow';
-import { EXAM_NAME_PROMPT, EXAM_DATE_PROMPT, QUALIFICATION_PROMPT, MARKS_PROMPT } from '@/lib/aiMentorPrompts';
+import {
+  EXAM_NAME_PROMPT,
+  EXAM_DATE_PROMPT,
+  QUALIFICATION_PROMPT,
+  MARKS_PROMPT,
+  CONFIRM_EXAM_PROMPT,
+  EXAM_DATE_CONFIRM_PROMPT,
+} from '@/lib/aiMentorPrompts';
 
 interface ChatMessage {
   id: string;
@@ -19,6 +26,8 @@ const PREP_SUGGESTIONS = ["What's my plan today?", 'How is my progress?', 'What 
 const GENERAL_SUGGESTIONS = ['When does a new batch start?', 'Who are the faculty?', 'Where are your centers?', 'When do new test series start?'];
 const QUALIFICATION_SUGGESTIONS = ['12th Pass', 'Graduate', 'Post-graduate', 'Diploma'];
 const MARKS_SUGGESTIONS = ['Below 50%', '50-70%', '70-90%', 'Above 90%'];
+const CONFIRM_EXAM_SUGGESTIONS = ['Yes, same exam', "No, it's changed"];
+const EXAM_DATE_CONFIRM_SUGGESTIONS = ["Yes, that's about right", 'I have the exact date'];
 // Prompts that expect a specific free-text answer (an exam name, a month/year) — no quick-reply
 // chips make sense there, so they're excluded from the generic "assistant just spoke" fallback.
 const FREE_TEXT_PROMPTS = new Set([EXAM_NAME_PROMPT, EXAM_DATE_PROMPT]);
@@ -131,24 +140,27 @@ export function ChatWidget() {
 
   // Quick-reply chips so the student can tap instead of typing wherever the answer is really a
   // pick from a short list — which prompt the assistant just asked decides which set (if any).
+  const PROMPT_SUGGESTIONS: Record<string, string[]> = {
+    [QUALIFICATION_PROMPT]: QUALIFICATION_SUGGESTIONS,
+    [MARKS_PROMPT]: MARKS_SUGGESTIONS,
+    [CONFIRM_EXAM_PROMPT]: CONFIRM_EXAM_SUGGESTIONS,
+    [EXAM_DATE_CONFIRM_PROMPT]: EXAM_DATE_CONFIRM_SUGGESTIONS,
+  };
   const lastMessage = messages[messages.length - 1];
   const lastBotContent = lastMessage?.role === 'assistant' ? lastMessage.content : undefined;
-  const quickReplies: string[] | null =
-    messages.length === 0
-      ? isGeneralVisitor
-        ? GENERAL_SUGGESTIONS
-        : PREP_SUGGESTIONS
-      : lastBotContent === QUALIFICATION_PROMPT
-        ? QUALIFICATION_SUGGESTIONS
-        : lastBotContent === MARKS_PROMPT
-          ? MARKS_SUGGESTIONS
-          : lastBotContent && FREE_TEXT_PROMPTS.has(lastBotContent)
-            ? null
-            : lastMessage?.role === 'assistant'
-              ? isGeneralVisitor
-                ? GENERAL_SUGGESTIONS
-                : PREP_SUGGESTIONS
-              : null;
+  const genericSuggestions = isGeneralVisitor ? GENERAL_SUGGESTIONS : PREP_SUGGESTIONS;
+  let quickReplies: string[] | null;
+  if (messages.length === 0) {
+    quickReplies = genericSuggestions;
+  } else if (lastBotContent && PROMPT_SUGGESTIONS[lastBotContent]) {
+    quickReplies = PROMPT_SUGGESTIONS[lastBotContent];
+  } else if (lastBotContent && FREE_TEXT_PROMPTS.has(lastBotContent)) {
+    quickReplies = null;
+  } else if (lastMessage?.role === 'assistant') {
+    quickReplies = genericSuggestions;
+  } else {
+    quickReplies = null;
+  }
 
   return (
     <>

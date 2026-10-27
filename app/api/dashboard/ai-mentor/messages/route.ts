@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
       qualification: user.qualification,
       marksPercentage: user.marksPercentage,
       chatResetAt: user.chatResetAt,
+      pendingExamDateSuggestion: user.pendingExamDateSuggestion,
     },
     parsed.data.text
   );
