@@ -17,6 +17,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid request' }, { status: 400 });
   }
 
-  const replies = await completeOnboardingForm(user.id, parsed.data.targetExam, parsed.data.examDate);
-  return NextResponse.json({ replies });
+  const { messages: replies, suggestions } = await completeOnboardingForm(user.id, parsed.data.targetExam, parsed.data.examDate);
+  return NextResponse.json({ replies, suggestions });
 }

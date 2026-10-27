@@ -35,7 +35,7 @@ interface Props {
   onSkip?: () => void;
   /** Closes the form without completing it — used by the re-open path (no 'choice' step to fall back to). */
   onClose?: () => void;
-  onDone: (replies: string[]) => void;
+  onDone: (replies: string[], suggestions: string[]) => void;
 }
 
 function StepHeader({ stage, onBack }: { stage: Stage; onBack: () => void }) {
@@ -90,7 +90,7 @@ export function OnboardingFlow({ initialStage = 'choice', onSkip, onClose, onDon
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
-      onDone(data.replies ?? []);
+      onDone(data.replies ?? [], data.suggestions ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save that — try again');
     } finally {

@@ -299,11 +299,12 @@ model SiteSettings {
 }
 
 model AiMentorMessage {
-  id        String   @id @default(cuid())
-  userId    String
-  role      String // 'user' | 'assistant'
-  content   String
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  userId      String
+  role        String // 'user' | 'assistant'
+  content     String
+  suggestions String[] @default([]) // quick-reply chip labels for this message — context-specific, set by the branch that produced it
+  createdAt   DateTime @default(now())
 
   @@index([userId])
   @@index([createdAt])

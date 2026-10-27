@@ -11,6 +11,8 @@ import {
   CONFIRM_EXAM_PROMPT,
   EXAM_DATE_CONFIRM_PROMPT,
   OFFER_COURSE_PROMPT,
+  PREP_SUGGESTIONS,
+  GENERAL_SUGGESTIONS,
 } from '@/lib/aiMentorPrompts';
 
 /**
@@ -169,6 +171,7 @@ export interface MentorChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  suggestions: string[];
   createdAt: string;
 }
 
@@ -180,7 +183,13 @@ export async function getChatMessages(userId: string, after: Date | null, limit 
     orderBy: { createdAt: 'desc' },
     take: limit,
   });
-  return rows.reverse().map((r) => ({ id: r.id, role: r.role as 'user' | 'assistant', content: r.content, createdAt: r.createdAt.toISOString() }));
+  return rows.reverse().map((r) => ({
+    id: r.id,
+    role: r.role as 'user' | 'assistant',
+    content: r.content,
+    suggestions: r.suggestions,
+    createdAt: r.createdAt.toISOString(),
+  }));
 }
 
 /** Hides the chat thread so far without deleting it — stamps `chatResetAt`, which every read in
@@ -240,18 +249,63 @@ async function isUserEnrolled(userId: string): Promise<boolean> {
   return !!enrollment;
 }
 
+// Each reply carries its own quick-reply chip labels, computed here (not guessed from the
+// rendered text on the client) so the chips always match what the bot actually just asked.
+const QUALIFICATION_SUGGESTIONS = ['12th Pass', 'Graduate', 'Post-graduate', 'Diploma'];
+const MARKS_SUGGESTIONS = ['Below 50%', '50-70%', '70-90%', 'Above 90%'];
+const CONFIRM_EXAM_SUGGESTIONS = ['Yes, same exam', "No, it's changed"];
+const EXAM_DATE_CONFIRM_SUGGESTIONS = ["Yes, that's about right", 'I have the exact date'];
+const OFFER_COURSE_SUGGESTIONS = ['Yes, show me', 'Not now'];
+const ENROLL_OR_COUNSELLOR_SUGGESTIONS = ['Enroll now', 'Talk to a counsellor'];
+const TALK_TO_COUNSELLOR_SUGGESTIONS = ['Talk to a counsellor'];
+const BROWSE_OR_COUNSELLOR_SUGGESTIONS = ['Browse Courses', 'Talk to a counsellor'];
+
+/** Chips for a reply that ends by asking one of the fixed intake prompts — keeps every branch
+ * that hands off to `nextIntakeQuestion` from having to know each prompt's chip set itself. */
+function suggestionsForPrompt(prompt: string): string[] {
+  switch (prompt) {
+    case QUALIFICATION_PROMPT:
+      return QUALIFICATION_SUGGESTIONS;
+    case MARKS_PROMPT:
+      return MARKS_SUGGESTIONS;
+    case CONFIRM_EXAM_PROMPT:
+      return CONFIRM_EXAM_SUGGESTIONS;
+    case EXAM_DATE_CONFIRM_PROMPT:
+      return EXAM_DATE_CONFIRM_SUGGESTIONS;
+    case OFFER_COURSE_PROMPT:
+      return OFFER_COURSE_SUGGESTIONS;
+    default:
+      return []; // EXAM_NAME_PROMPT, EXAM_DATE_PROMPT — free text, no chips make sense
+  }
+}
+
+function defaultSuggestions(hasTargetExam: boolean): string[] {
+  return hasTargetExam ? PREP_SUGGESTIONS : GENERAL_SUGGESTIONS;
+}
+
+interface ReplyWithSuggestions {
+  messages: string[];
+  suggestions: string[];
+}
+
 /** A specific, premium-framed course pitch with clear next steps — used once the intake has
  * enough to recommend something, whether that's reached via chat or the onboarding form. */
-async function buildCourseRecommendation(targetExam: string | null): Promise<string[]> {
+async function buildCourseRecommendation(targetExam: string | null): Promise<ReplyWithSuggestions> {
   const course = await getSuggestedCourse(targetExam);
   if (!course) {
-    return ['I don\'t have a specific course to recommend right now — tap the "Courses" tab above to browse everything we offer.'];
+    return {
+      messages: ['I don\'t have a specific course to recommend right now — tap the "Courses" tab above to browse everything we offer.'],
+      suggestions: ['Browse Courses'],
+    };
   }
-  return [
-    `Based on what you've told me, ${course.title} looks like the right fit for you.`,
-    `It's one of our premium, expert-led batches — ₹${course.discountPrice} right now (usually ₹${course.originalPrice}).`,
-    'Open the "My Plan" tab above for Enroll Now and Talk to a Counsellor buttons, or just say "enroll now" or "talk to a counsellor" here — I\'ll pass along what you\'ve told me so you won\'t have to repeat yourself.',
-  ];
+  return {
+    messages: [
+      `Based on what you've told me, ${course.title} looks like the right fit for you.`,
+      `It's one of our premium, expert-led batches — ₹${course.discountPrice} right now (usually ₹${course.originalPrice}).`,
+      'Open the "My Plan" tab above for Enroll Now and Talk to a Counsellor buttons, or just say "enroll now" or "talk to a counsellor" here — I\'ll pass along what you\'ve told me so you won\'t have to repeat yourself.',
+    ],
+    suggestions: ENROLL_OR_COUNSELLOR_SUGGESTIONS,
+  };
 }
 
 /**
@@ -283,14 +337,14 @@ async function buildStrategyAdvice(userId: string, examName: string, examDate: s
 
 /** Terminal step of the intake — strategy advice for everyone, plus a course pitch for students
  * who aren't enrolled yet, since at that point we finally have enough to recommend something. */
-async function finishIntake(userId: string, targetExam: string, examDate: string): Promise<string[]> {
+async function finishIntake(userId: string, targetExam: string, examDate: string): Promise<ReplyWithSuggestions> {
   const strategy = await buildStrategyAdvice(userId, targetExam, examDate);
   const enrolled = await isUserEnrolled(userId);
-  if (enrolled) return strategy;
+  if (enrolled) return { messages: strategy, suggestions: defaultSuggestions(true) };
   // Don't dump the course pitch right after the advice — ask first. A wall of 8 messages in one
   // go reads like a lecture, not a conversation; asking turns it back into a two-way exchange and
   // means the pitch only shows up for someone who actually wants it.
-  return [...strategy, OFFER_COURSE_PROMPT];
+  return { messages: [...strategy, OFFER_COURSE_PROMPT], suggestions: OFFER_COURSE_SUGGESTIONS };
 }
 
 /**
@@ -298,14 +352,16 @@ async function finishIntake(userId: string, targetExam: string, examDate: string
  * target-exam/exam-date form, instead of the free-text two-step onboarding above. Saves both to
  * the profile and writes the exchange into chat history so it reads naturally in the Chat tab.
  */
-export async function completeOnboardingForm(userId: string, targetExam: string, examDate: string): Promise<string[]> {
+export async function completeOnboardingForm(userId: string, targetExam: string, examDate: string): Promise<ReplyWithSuggestions> {
   await prisma.user.update({ where: { id: userId }, data: { targetExam, examDate } });
   await prisma.aiMentorMessage.create({ data: { userId, role: 'user', content: `I'm preparing for ${targetExam}, around ${examDate}.` } });
-  const replies = await finishIntake(userId, targetExam, examDate);
-  for (const content of replies) {
-    await prisma.aiMentorMessage.create({ data: { userId, role: 'assistant', content } });
+  const { messages, suggestions } = await finishIntake(userId, targetExam, examDate);
+  for (let i = 0; i < messages.length; i++) {
+    await prisma.aiMentorMessage.create({
+      data: { userId, role: 'assistant', content: messages[i], suggestions: i === messages.length - 1 ? suggestions : [] },
+    });
   }
-  return replies;
+  return { messages, suggestions };
 }
 
 async function findAnyOpenTest(userId: string, courseIds: string[]): Promise<{ kind: 'quiz' | 'mock'; title: string } | null> {
@@ -374,7 +430,7 @@ export async function sendChatMessage(
     pendingExamDateSuggestion: string | null;
   },
   text: string
-): Promise<string[]> {
+): Promise<ReplyWithSuggestions> {
   const trimmed = text.trim().slice(0, 1000);
   if (!trimmed) throw new Error('Message cannot be empty');
 
@@ -382,6 +438,7 @@ export async function sendChatMessage(
 
   const name = user.name || 'there';
   let reply: string[];
+  let suggestions: string[] = defaultSuggestions(!!user.targetExam);
 
   // What the assistant asked last — used to tell whether this new message is the answer
   // to the exam-name/exam-date onboarding question, regardless of what it also matches below.
@@ -408,87 +465,151 @@ export async function sendChatMessage(
           `${examName} exams are typically conducted around ${suggestion} — but this shifts year to year, so go by the official notification if you already have it.`,
           EXAM_DATE_CONFIRM_PROMPT,
         ];
+        suggestions = EXAM_DATE_CONFIRM_SUGGESTIONS;
       } else {
         reply = [EXAM_DATE_PROMPT];
+        suggestions = [];
       }
+    } else if (next) {
+      reply = [next];
+      suggestions = suggestionsForPrompt(next);
     } else {
-      reply = next ? [next] : await finishIntake(user.id, examName, user.examDate || '');
+      const result = await finishIntake(user.id, examName, user.examDate || '');
+      reply = result.messages;
+      suggestions = result.suggestions;
     }
   } else if (lastAssistant?.content === EXAM_DATE_CONFIRM_PROMPT) {
     const wantsOwnDate = /^\s*(i have|exact|official|no|different|change|my own)\b/i.test(trimmed);
     if (wantsOwnDate) {
       await prisma.user.update({ where: { id: user.id }, data: { pendingExamDateSuggestion: null } });
       reply = [EXAM_DATE_PROMPT];
+      suggestions = [];
     } else {
       const examDate = user.pendingExamDateSuggestion || 'soon';
       await prisma.user.update({ where: { id: user.id }, data: { examDate, pendingExamDateSuggestion: null } });
       const enrolled = await isUserEnrolled(user.id);
       const next = nextIntakeQuestion({ ...user, examDate }, !enrolled);
-      reply = next ? [next] : await finishIntake(user.id, user.targetExam || 'your exam', examDate);
+      if (next) {
+        reply = [next];
+        suggestions = suggestionsForPrompt(next);
+      } else {
+        const result = await finishIntake(user.id, user.targetExam || 'your exam', examDate);
+        reply = result.messages;
+        suggestions = result.suggestions;
+      }
     }
   } else if (lastAssistant?.content === EXAM_DATE_PROMPT) {
     const examDate = trimmed.slice(0, 60);
     await prisma.user.update({ where: { id: user.id }, data: { examDate } });
     const enrolled = await isUserEnrolled(user.id);
     const next = nextIntakeQuestion({ ...user, examDate }, !enrolled);
-    reply = next ? [next] : await finishIntake(user.id, user.targetExam || 'your exam', examDate);
+    if (next) {
+      reply = [next];
+      suggestions = suggestionsForPrompt(next);
+    } else {
+      const result = await finishIntake(user.id, user.targetExam || 'your exam', examDate);
+      reply = result.messages;
+      suggestions = result.suggestions;
+    }
   } else if (lastAssistant?.content === QUALIFICATION_PROMPT) {
     const qualification = trimmed.slice(0, 120);
     await prisma.user.update({ where: { id: user.id }, data: { qualification } });
     const next = nextIntakeQuestion({ ...user, qualification }, true);
-    reply = next ? [next] : await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+    if (next) {
+      reply = [next];
+      suggestions = suggestionsForPrompt(next);
+    } else {
+      const result = await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+      reply = result.messages;
+      suggestions = result.suggestions;
+    }
   } else if (lastAssistant?.content === MARKS_PROMPT) {
     const marksPercentage = trimmed.slice(0, 60);
     await prisma.user.update({ where: { id: user.id }, data: { marksPercentage } });
-    reply = await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+    const result = await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+    reply = result.messages;
+    suggestions = result.suggestions;
   } else if (lastAssistant?.content === OFFER_COURSE_PROMPT) {
     const declines = /^\s*(no|not now|nah+|nope|skip|later|maybe later)\b/i.test(trimmed);
-    reply = declines
-      ? ['No problem — ask anytime you\'re ready, or say "talk to a counsellor" if you\'d rather speak to someone.']
-      : await buildCourseRecommendation(user.targetExam);
+    if (declines) {
+      reply = ['No problem — ask anytime you\'re ready, or say "talk to a counsellor" if you\'d rather speak to someone.'];
+      suggestions = TALK_TO_COUNSELLOR_SUGGESTIONS;
+    } else {
+      const result = await buildCourseRecommendation(user.targetExam);
+      reply = result.messages;
+      suggestions = result.suggestions;
+    }
   } else if (lastAssistant?.content === CONFIRM_EXAM_PROMPT) {
     const saysDifferent = /^\s*(no|nah+|nope|nahi|different|change|wrong|galat)\b/i.test(trimmed);
     if (saysDifferent) {
       await prisma.user.update({ where: { id: user.id }, data: { targetExam: null, examDate: null } });
       reply = [EXAM_NAME_PROMPT];
+      suggestions = [];
     } else {
       const enrolled = await isUserEnrolled(user.id);
       const next = nextIntakeQuestion(user, !enrolled);
-      reply = next ? [next] : await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+      if (next) {
+        reply = [next];
+        suggestions = suggestionsForPrompt(next);
+      } else {
+        const result = await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+        reply = result.messages;
+        suggestions = result.suggestions;
+      }
     }
   } else if (!lastAssistant && user.targetExam && (STRATEGY_PATTERN.test(trimmed) || COURSE_GUIDANCE_PATTERN.test(trimmed))) {
     // First message of this conversation thread, and we already have an exam on file from a
     // previous session — confirm it's still right instead of silently assuming or re-asking.
     reply = [`You mentioned earlier you're preparing for ${user.targetExam}.`, CONFIRM_EXAM_PROMPT];
+    suggestions = CONFIRM_EXAM_SUGGESTIONS;
   } else if (STRATEGY_PATTERN.test(trimmed)) {
     const enrolled = await isUserEnrolled(user.id);
     const next = nextIntakeQuestion(user, !enrolled);
-    reply = next ? [next] : await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+    if (next) {
+      reply = [next];
+      suggestions = suggestionsForPrompt(next);
+    } else {
+      const result = await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+      reply = result.messages;
+      suggestions = result.suggestions;
+    }
   } else if (COURSE_GUIDANCE_PATTERN.test(trimmed)) {
     const enrolled = await isUserEnrolled(user.id);
     if (enrolled) {
       reply = ["You're already enrolled, so there's no new course to pick.", 'Check the "My Plan" tab above for what to do today.'];
+      suggestions = defaultSuggestions(true);
     } else {
       const next = nextIntakeQuestion(user, true);
-      reply = next ? [next] : await buildCourseRecommendation(user.targetExam);
+      if (next) {
+        reply = [next];
+        suggestions = suggestionsForPrompt(next);
+      } else {
+        const result = await buildCourseRecommendation(user.targetExam);
+        reply = result.messages;
+        suggestions = result.suggestions;
+      }
     }
   } else if (NEW_BATCH_PATTERN.test(trimmed) || LIVE_BATCH_PATTERN.test(trimmed)) {
     const course = await prisma.course.findFirst({ orderBy: { createdAt: 'desc' } });
     reply = course
       ? [`Our newest batch is "${course.title}".`, `It starts ${course.startDate} — you'll find full timings on the Courses page.`]
       : ['No new batches announced right now — check the Courses page, new ones get added often.'];
+    suggestions = BROWSE_OR_COUNSELLOR_SUGGESTIONS;
   } else if (FACULTY_PATTERN.test(trimmed)) {
     const mentors = await prisma.mentor.findMany({ orderBy: { rating: 'desc' }, take: 4 });
     reply = mentors.length
       ? ["Here's who's teaching right now:", mentors.map((m) => `${m.name} — ${m.subject} (${m.title})`).join('\n')]
       : ["I don't have faculty details handy right now — the About page has our full team."];
+    suggestions = BROWSE_OR_COUNSELLOR_SUGGESTIONS;
   } else if (CENTER_PATTERN.test(trimmed)) {
     reply = ['Our centers: Chandigarh, Guwahati, New Delhi and Assam.', 'Want a counsellor to help you find the nearest one? Just say "talk to a counsellor".'];
+    suggestions = TALK_TO_COUNSELLOR_SUGGESTIONS;
   } else if (TEST_SERIES_PATTERN.test(trimmed)) {
     const mock = await prisma.mockTest.findFirst({ orderBy: { createdAt: 'desc' } });
     reply = mock
       ? [`Our latest test series is "${mock.title}".`, "You'll find it under Mock Tests on your dashboard."]
       : ['No new test series right now — check Mock Tests on your dashboard, new ones are added often.'];
+    suggestions = ['Give me a practice test', 'Browse Courses'];
   } else if (COUNSELLOR_PATTERN.test(trimmed)) {
     const profileBits = [
       user.targetExam ? `Target exam: ${user.targetExam}` : null,
@@ -503,8 +624,10 @@ export async function sendChatMessage(
     reply = profileBits.length
       ? ["I've asked a counsellor to call you.", "I've passed along what you've told me so you won't have to repeat yourself.", 'They usually call within one working day.']
       : ["I've asked a counsellor to call you.", 'They usually call within one working day.'];
+    suggestions = defaultSuggestions(!!user.targetExam);
   } else if (BROWSE_COURSES_PATTERN.test(trimmed)) {
     reply = ['Tap the "Courses" tab above — I\'ve listed everything there with pricing and details, so you don\'t have to leave this chat.'];
+    suggestions = TALK_TO_COUNSELLOR_SUGGESTIONS;
   } else if (ENROLL_PATTERN.test(trimmed)) {
     const course = await getSuggestedCourse(user.targetExam);
     reply = course
@@ -513,28 +636,38 @@ export async function sendChatMessage(
           `Open the "My Plan" tab above and tap Enroll Now, or say "talk to a counsellor" and we'll call you to walk you through it instead.`,
         ]
       : ['Tap the "Courses" tab above to see everything we offer and enroll directly from there.'];
+    suggestions = TALK_TO_COUNSELLOR_SUGGESTIONS;
   } else if (TEST_PATTERN.test(trimmed)) {
     const enrollments = await prisma.enrollment.findMany({ where: { userId: user.id, status: 'ACTIVE' }, select: { courseId: true } });
     const open = await findAnyOpenTest(user.id, enrollments.map((e) => e.courseId));
     reply = open
       ? [`"${open.title}" is open right now — you'll find it under ${open.kind === 'quiz' ? 'Daily Quiz' : 'Mock Tests'} on your dashboard.`]
       : ["You've attempted everything that's open right now — check back soon, new ones are added often."];
+    suggestions = defaultSuggestions(!!user.targetExam);
   } else if (PLAN_PATTERN.test(trimmed)) {
     const overview = await getMentorOverview(user.id, name, user.targetExam);
     if (overview.mode === 'counsellor') {
       const next = nextIntakeQuestion(user, true);
-      reply = next
-        ? [`You're not enrolled in a course yet, so there's no daily plan to show you — but let's find the right one.`, next]
-        : await buildCourseRecommendation(user.targetExam);
+      if (next) {
+        reply = [`You're not enrolled in a course yet, so there's no daily plan to show you — but let's find the right one.`, next];
+        suggestions = suggestionsForPrompt(next);
+      } else {
+        const result = await buildCourseRecommendation(user.targetExam);
+        reply = result.messages;
+        suggestions = result.suggestions;
+      }
     } else if (overview.plan.length === 0) {
       reply = ['Nothing left on today\'s plan — nicely done. Check back tomorrow.'];
+      suggestions = defaultSuggestions(true);
     } else {
       reply = ["Here's today's plan:", overview.plan.map((p) => `- ${p.title} (${p.meta})`).join('\n')];
+      suggestions = defaultSuggestions(true);
     }
   } else if (PROGRESS_PATTERN.test(trimmed)) {
     const data = await getMyProgress(user.id, name);
     if (data) {
       reply = ["Here's how you're doing:", data.summary];
+      suggestions = defaultSuggestions(true);
     } else {
       const basic = await getBasicProgress(user.id);
       reply = basic
@@ -544,6 +677,7 @@ export async function sendChatMessage(
             'That\'s the basic picture — for a detailed report compared with your batch, plus a tailored improvement plan, enroll in a course. Check the "My Progress" tab for the full breakdown and an Enroll Now button.',
           ]
         : ['Take a free quiz or mock test first so I have something to show you — then enroll in a course for a detailed report compared with your batch.'];
+      suggestions = basic ? ENROLL_OR_COUNSELLOR_SUGGESTIONS : defaultSuggestions(!!user.targetExam);
     }
   } else if (MISTAKES_PATTERN.test(trimmed)) {
     const subjects = await getSubjectStrength(user.id);
@@ -553,17 +687,23 @@ export async function sendChatMessage(
       const weakest = [...subjects].sort((a, b) => a.avgAccuracy - b.avgAccuracy).slice(0, 3);
       reply = [`Your weakest subjects: ${weakest.map((s) => `${s.subject} (${s.avgAccuracy}% accuracy)`).join(', ')}.`, 'Focus revision there first.'];
     }
+    suggestions = defaultSuggestions(!!user.targetExam);
   } else if (REMIND_PATTERN.test(trimmed)) {
     reply = ["I can't send reminders outside the app yet, but anything overdue will show up at the top of your Overview page — check back there."];
+    suggestions = defaultSuggestions(!!user.targetExam);
   } else if (GREETING_PATTERN.test(trimmed)) {
     reply = lastAssistant ? [`Welcome back, ${name}!`, 'How can I help you today?'] : [`Hi ${name}!`, 'How can I help you today?'];
+    suggestions = defaultSuggestions(!!user.targetExam);
   } else {
     const ticketNumber = await createDoubtTicket(user.id, name, user.phone, user.email, trimmed);
     reply = ['Got it, let me get that in front of your faculty.', `Forwarded as ticket ${ticketNumber} — they'll get back to you soon.`];
+    suggestions = defaultSuggestions(!!user.targetExam);
   }
 
-  for (const content of reply) {
-    await prisma.aiMentorMessage.create({ data: { userId: user.id, role: 'assistant', content } });
+  for (let i = 0; i < reply.length; i++) {
+    await prisma.aiMentorMessage.create({
+      data: { userId: user.id, role: 'assistant', content: reply[i], suggestions: i === reply.length - 1 ? suggestions : [] },
+    });
   }
-  return reply;
+  return { messages: reply, suggestions };
 }

@@ -6,33 +6,16 @@ import { MistakesTab } from './MistakesTab';
 import { ProgressTab } from './ProgressTab';
 import { CoursesTab } from './CoursesTab';
 import { OnboardingFlow } from './OnboardingFlow';
-import {
-  EXAM_NAME_PROMPT,
-  EXAM_DATE_PROMPT,
-  QUALIFICATION_PROMPT,
-  MARKS_PROMPT,
-  CONFIRM_EXAM_PROMPT,
-  EXAM_DATE_CONFIRM_PROMPT,
-  OFFER_COURSE_PROMPT,
-} from '@/lib/aiMentorPrompts';
+import { PREP_SUGGESTIONS, GENERAL_SUGGESTIONS } from '@/lib/aiMentorPrompts';
 
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  suggestions?: string[];
   createdAt: string;
 }
 
-const PREP_SUGGESTIONS = ["What's my plan today?", 'How is my progress?', 'What is the right approach to crack my exam?', 'Give me a practice test'];
-const GENERAL_SUGGESTIONS = ['When does a new batch start?', 'Who are the faculty?', 'Where are your centers?', 'When do new test series start?'];
-const QUALIFICATION_SUGGESTIONS = ['12th Pass', 'Graduate', 'Post-graduate', 'Diploma'];
-const MARKS_SUGGESTIONS = ['Below 50%', '50-70%', '70-90%', 'Above 90%'];
-const CONFIRM_EXAM_SUGGESTIONS = ['Yes, same exam', "No, it's changed"];
-const EXAM_DATE_CONFIRM_SUGGESTIONS = ["Yes, that's about right", 'I have the exact date'];
-const OFFER_COURSE_SUGGESTIONS = ['Yes, show me', 'Not now'];
-// Prompts that expect a specific free-text answer (an exam name, a month/year) — no quick-reply
-// chips make sense there, so they're excluded from the generic "assistant just spoke" fallback.
-const FREE_TEXT_PROMPTS = new Set([EXAM_NAME_PROMPT, EXAM_DATE_PROMPT]);
 const TABS = [
   { key: 'chat', label: 'Chat' },
   { key: 'plan', label: 'My Plan' },
@@ -73,22 +56,32 @@ export function ChatWidget() {
   }, [open, loaded]);
 
   // Shows each reply chunk one at a time with a short "typing" pause in between, instead of
-  // dumping the whole answer in one bubble — reads like a person replying, not a report.
-  const appendRepliesSequentially = async (replies: string[]) => {
-    for (const content of replies) {
+  // dumping the whole answer in one bubble — reads like a person replying, not a report. Only the
+  // last chunk carries the quick-reply chips, matching how the server attaches them.
+  const appendRepliesSequentially = async (replies: string[], suggestions: string[] = []) => {
+    for (let i = 0; i < replies.length; i++) {
       setSending(true);
       await new Promise((r) => setTimeout(r, 450 + Math.random() * 400));
-      setMessages((prev) => [...prev, { id: `reply-${Date.now()}-${Math.random().toString(36).slice(2)}`, role: 'assistant', content, createdAt: new Date().toISOString() }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `reply-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          role: 'assistant',
+          content: replies[i],
+          suggestions: i === replies.length - 1 ? suggestions : [],
+          createdAt: new Date().toISOString(),
+        },
+      ]);
     }
     setSending(false);
   };
 
-  const handleOnboardingDone = async (replies: string[]) => {
+  const handleOnboardingDone = async (replies: string[], suggestions: string[]) => {
     setMessages((prev) => [...prev, { id: `onb-u-${Date.now()}`, role: 'user', content: 'Set up my exam preparation', createdAt: new Date().toISOString() }]);
     setOnboardingResolved(true);
     setIsGeneralVisitor(false);
     setShowPrepForm(false);
-    await appendRepliesSequentially(replies);
+    await appendRepliesSequentially(replies, suggestions);
   };
 
   useEffect(() => {
@@ -111,7 +104,7 @@ export function ChatWidget() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
-      await appendRepliesSequentially(data.replies ?? []);
+      await appendRepliesSequentially(data.replies ?? [], data.suggestions ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not send that — try again');
       setSending(false);
@@ -140,30 +133,18 @@ export function ChatWidget() {
     setTab('chat');
   };
 
-  // Quick-reply chips so the student can tap instead of typing wherever the answer is really a
-  // pick from a short list — which prompt the assistant just asked decides which set (if any).
-  const PROMPT_SUGGESTIONS: Record<string, string[]> = {
-    [QUALIFICATION_PROMPT]: QUALIFICATION_SUGGESTIONS,
-    [MARKS_PROMPT]: MARKS_SUGGESTIONS,
-    [CONFIRM_EXAM_PROMPT]: CONFIRM_EXAM_SUGGESTIONS,
-    [EXAM_DATE_CONFIRM_PROMPT]: EXAM_DATE_CONFIRM_SUGGESTIONS,
-    [OFFER_COURSE_PROMPT]: OFFER_COURSE_SUGGESTIONS,
-  };
+  // Quick-reply chips so the student can tap instead of typing — each reply now carries its own
+  // context-specific chip labels from the server, computed by whichever branch produced it, so
+  // they actually reflect what was just discussed instead of always showing the same 4 buttons.
   const lastMessage = messages[messages.length - 1];
-  const lastBotContent = lastMessage?.role === 'assistant' ? lastMessage.content : undefined;
-  const genericSuggestions = isGeneralVisitor ? GENERAL_SUGGESTIONS : PREP_SUGGESTIONS;
-  let quickReplies: string[] | null;
-  if (messages.length === 0) {
-    quickReplies = genericSuggestions;
-  } else if (lastBotContent && PROMPT_SUGGESTIONS[lastBotContent]) {
-    quickReplies = PROMPT_SUGGESTIONS[lastBotContent];
-  } else if (lastBotContent && FREE_TEXT_PROMPTS.has(lastBotContent)) {
-    quickReplies = null;
-  } else if (lastMessage?.role === 'assistant') {
-    quickReplies = genericSuggestions;
-  } else {
-    quickReplies = null;
-  }
+  const quickReplies: string[] | null =
+    messages.length === 0
+      ? isGeneralVisitor
+        ? GENERAL_SUGGESTIONS
+        : PREP_SUGGESTIONS
+      : lastMessage?.role === 'assistant' && lastMessage.suggestions && lastMessage.suggestions.length > 0
+        ? lastMessage.suggestions
+        : null;
 
   return (
     <>
