@@ -11,6 +11,10 @@ import {
   CONFIRM_EXAM_PROMPT,
   EXAM_DATE_CONFIRM_PROMPT,
   OFFER_COURSE_PROMPT,
+  BEGINNER_CHECK_PROMPT,
+  STUDY_HOURS_PROMPT,
+  WEAK_SUBJECT_PROMPT,
+  SYLLABUS_PROGRESS_PROMPT,
   PREP_SUGGESTIONS,
   GENERAL_SUGGESTIONS,
 } from '@/lib/aiMentorPrompts';
@@ -244,9 +248,41 @@ function nextIntakeQuestion(profile: IntakeProfile, needsQualification: boolean)
   return null;
 }
 
+// Separate, strategy-only intake (exam stage, daily hours, weak subject, syllabus coverage) —
+// asked only for "how do I crack my exam" / build-a-plan requests, never mixed with the
+// qualification/marks intake above, which only matters for a course recommendation or
+// counsellor handoff. Both share the same targetExam/examDate questions; User.pendingIntakeFlow
+// records which one is in progress so answering those shared questions resumes into the right one.
+interface StrategyProfile {
+  targetExam: string | null;
+  examDate: string | null;
+  examStage: string | null;
+  studyHoursPerDay: string | null;
+  weakSubject: string | null;
+  syllabusProgress: string | null;
+}
+
+function nextStrategyQuestion(profile: StrategyProfile): string | null {
+  if (!profile.targetExam) return EXAM_NAME_PROMPT;
+  if (!profile.examDate) return EXAM_DATE_PROMPT;
+  if (!profile.examStage) return BEGINNER_CHECK_PROMPT;
+  if (!profile.studyHoursPerDay) return STUDY_HOURS_PROMPT;
+  if (!profile.weakSubject) return WEAK_SUBJECT_PROMPT;
+  if (!profile.syllabusProgress) return SYLLABUS_PROGRESS_PROMPT;
+  return null;
+}
+
 async function isUserEnrolled(userId: string): Promise<boolean> {
   const enrollment = await prisma.enrollment.findFirst({ where: { userId, status: 'ACTIVE' } });
   return !!enrollment;
+}
+
+/** Stamps which intake is in progress — only matters right before asking the shared
+ * targetExam/examDate questions, since every later question is flow-specific and unambiguous. */
+async function tagPendingFlow(userId: string, nextPrompt: string | null, flow: 'strategy' | 'course'): Promise<void> {
+  if (nextPrompt === EXAM_NAME_PROMPT || nextPrompt === EXAM_DATE_PROMPT) {
+    await prisma.user.update({ where: { id: userId }, data: { pendingIntakeFlow: flow } });
+  }
 }
 
 // Each reply carries its own quick-reply chip labels, computed here (not guessed from the
@@ -259,9 +295,14 @@ const OFFER_COURSE_SUGGESTIONS = ['Yes, show me', 'Not now'];
 const ENROLL_OR_COUNSELLOR_SUGGESTIONS = ['Enroll now', 'Talk to a counsellor'];
 const TALK_TO_COUNSELLOR_SUGGESTIONS = ['Talk to a counsellor'];
 const BROWSE_OR_COUNSELLOR_SUGGESTIONS = ['Browse Courses', 'Talk to a counsellor'];
+const BEGINNER_CHECK_SUGGESTIONS = ['Just starting out', "I've been preparing a while"];
+const STUDY_HOURS_SUGGESTIONS = ['Less than 1 hour', '1-2 hours', '2-4 hours', '4+ hours'];
+const WEAK_SUBJECT_SUGGESTIONS = ['Quantitative Aptitude', 'Reasoning', 'English', 'General Awareness', 'Not sure yet'];
+const SYLLABUS_PROGRESS_SUGGESTIONS = ['Just starting', 'Less than 25%', '25-50%', '50-75%', 'Almost done'];
 
 /** Chips for a reply that ends by asking one of the fixed intake prompts — keeps every branch
- * that hands off to `nextIntakeQuestion` from having to know each prompt's chip set itself. */
+ * that hands off to `nextIntakeQuestion`/`nextStrategyQuestion` from having to know each
+ * prompt's chip set itself. */
 function suggestionsForPrompt(prompt: string): string[] {
   switch (prompt) {
     case QUALIFICATION_PROMPT:
@@ -274,6 +315,14 @@ function suggestionsForPrompt(prompt: string): string[] {
       return EXAM_DATE_CONFIRM_SUGGESTIONS;
     case OFFER_COURSE_PROMPT:
       return OFFER_COURSE_SUGGESTIONS;
+    case BEGINNER_CHECK_PROMPT:
+      return BEGINNER_CHECK_SUGGESTIONS;
+    case STUDY_HOURS_PROMPT:
+      return STUDY_HOURS_SUGGESTIONS;
+    case WEAK_SUBJECT_PROMPT:
+      return WEAK_SUBJECT_SUGGESTIONS;
+    case SYLLABUS_PROGRESS_PROMPT:
+      return SYLLABUS_PROGRESS_SUGGESTIONS;
     default:
       return []; // EXAM_NAME_PROMPT, EXAM_DATE_PROMPT — free text, no chips make sense
   }
@@ -336,7 +385,10 @@ async function buildStrategyAdvice(userId: string, examName: string, examDate: s
 }
 
 /** Terminal step of the intake — strategy advice for everyone, plus a course pitch for students
- * who aren't enrolled yet, since at that point we finally have enough to recommend something. */
+ * who aren't enrolled yet, since at that point we finally have enough to recommend something.
+ * Used by the onboarding-form path only; the chat-driven "how do I crack my exam" flow uses
+ * `finishStrategyIntake` below instead, which personalizes the schedule from the student's own
+ * answers rather than handing everyone the same template. */
 async function finishIntake(userId: string, targetExam: string, examDate: string): Promise<ReplyWithSuggestions> {
   const strategy = await buildStrategyAdvice(userId, targetExam, examDate);
   const enrolled = await isUserEnrolled(userId);
@@ -345,6 +397,58 @@ async function finishIntake(userId: string, targetExam: string, examDate: string
   // go reads like a lecture, not a conversation; asking turns it back into a two-way exchange and
   // means the pitch only shows up for someone who actually wants it.
   return { messages: [...strategy, OFFER_COURSE_PROMPT], suggestions: OFFER_COURSE_SUGGESTIONS };
+}
+
+// One schedule per daily-hours bucket — a realistic starting point for that much time, not a
+// one-size-fits-all template. Falls back to the "1-2 hours" schedule for an unrecognized answer.
+const HOURS_SCHEDULE: Record<string, string> = {
+  'Less than 1 hour':
+    "Let's keep this realistic: 20-30 minutes daily — one short practice set (10-15 questions), then review every wrong answer carefully. Short but EVERY day beats one long session a week.",
+  '1-2 hours':
+    "Here's a routine that fits your time: 45-60 minutes daily — alternate between a focused practice set and revising your weak topics.",
+  '2-4 hours':
+    'With this much time: one practice test every other day (sectional or full-length), plus 45-60 minutes of revision on the days in between.',
+  '4+ hours':
+    "You've got strong time on your hands — a full-length or sectional test daily, plus dedicated revision of every wrong answer. At this pace, consistency will show results fast.",
+};
+
+/**
+ * Builds the plan from what the student actually told us (beginner or not, daily hours, weak
+ * subject, syllabus coverage) instead of a generic template — a short summary that names those
+ * specifics, the hours-matched schedule, then a nudge to a diagnostic quiz, each its own message.
+ */
+async function buildPersonalizedPlan(profile: StrategyProfile): Promise<string[]> {
+  const isBeginner = profile.examStage === 'Just starting out';
+  const hasWeakSubject = profile.weakSubject && profile.weakSubject !== 'Not sure yet';
+
+  const msgs: string[] = [];
+  msgs.push(
+    `Got it — ${isBeginner ? "since you're just starting out, " : ''}we'll build this around ${
+      hasWeakSubject ? profile.weakSubject : 'your weak areas'
+    } and the ${profile.studyHoursPerDay ?? 'time'} you have daily.`
+  );
+
+  const schedule = (profile.studyHoursPerDay && HOURS_SCHEDULE[profile.studyHoursPerDay]) || HOURS_SCHEDULE['1-2 hours'];
+  msgs.push(isBeginner ? `${schedule} We'll ease into full-length tests once the basics feel solid.` : schedule);
+
+  msgs.push(
+    hasWeakSubject
+      ? `Start every day's revision with ${profile.weakSubject} — that's where the biggest gains are right now.`
+      : "Take a quiz or two this week so I can tell you exactly where to focus revision."
+  );
+
+  msgs.push('Let\'s start with a quick diagnostic — take today\'s Daily Quiz so I can see exactly where you stand. Ask me "what\'s my plan today" anytime after that.');
+  return msgs;
+}
+
+/** Terminal step of the strategy intake — the personalized plan above, plus a course pitch for
+ * students who aren't enrolled yet, asked first rather than dumped alongside it. */
+async function finishStrategyIntake(userId: string, profile: StrategyProfile): Promise<ReplyWithSuggestions> {
+  const plan = await buildPersonalizedPlan(profile);
+  const enrolled = await isUserEnrolled(userId);
+  await prisma.user.update({ where: { id: userId }, data: { pendingIntakeFlow: null } });
+  if (enrolled) return { messages: plan, suggestions: defaultSuggestions(true) };
+  return { messages: [...plan, OFFER_COURSE_PROMPT], suggestions: OFFER_COURSE_SUGGESTIONS };
 }
 
 /**
@@ -426,6 +530,11 @@ export async function sendChatMessage(
     examDate: string | null;
     qualification: string | null;
     marksPercentage: string | null;
+    examStage: string | null;
+    studyHoursPerDay: string | null;
+    weakSubject: string | null;
+    syllabusProgress: string | null;
+    pendingIntakeFlow: string | null;
     chatResetAt: Date | null;
     pendingExamDateSuggestion: string | null;
   },
@@ -440,6 +549,14 @@ export async function sendChatMessage(
   let reply: string[];
   let suggestions: string[] = defaultSuggestions(!!user.targetExam);
 
+  // Which intake is in progress — 'course' only when explicitly tagged by the course-guidance
+  // paths below; everything else (including unset) resolves into the strategy/plan intake.
+  const flow = user.pendingIntakeFlow;
+  const resolveNext = (profile: IntakeProfile & StrategyProfile, enrolled: boolean): string | null =>
+    flow === 'course' ? nextIntakeQuestion(profile, !enrolled) : nextStrategyQuestion(profile);
+  const resolveFinish = async (profile: IntakeProfile & StrategyProfile): Promise<ReplyWithSuggestions> =>
+    flow === 'course' ? buildCourseRecommendation(profile.targetExam) : finishStrategyIntake(user.id, profile);
+
   // What the assistant asked last — used to tell whether this new message is the answer
   // to the exam-name/exam-date onboarding question, regardless of what it also matches below.
   // Scoped to after the student's last "New Conversation" reset, if any, so a reset student never
@@ -453,7 +570,7 @@ export async function sendChatMessage(
     const examName = trimmed.slice(0, 120);
     await prisma.user.update({ where: { id: user.id }, data: { targetExam: examName } });
     const enrolled = await isUserEnrolled(user.id);
-    const next = nextIntakeQuestion({ ...user, targetExam: examName }, !enrolled);
+    const next = resolveNext({ ...user, targetExam: examName }, enrolled);
     if (next === EXAM_DATE_PROMPT) {
       // Best-effort OpenAI suggestion for when this exam is usually conducted, offered as a
       // confirmable starting point (never asserted as fact) — falls back to asking outright if
@@ -474,7 +591,7 @@ export async function sendChatMessage(
       reply = [next];
       suggestions = suggestionsForPrompt(next);
     } else {
-      const result = await finishIntake(user.id, examName, user.examDate || '');
+      const result = await resolveFinish({ ...user, targetExam: examName });
       reply = result.messages;
       suggestions = result.suggestions;
     }
@@ -488,12 +605,12 @@ export async function sendChatMessage(
       const examDate = user.pendingExamDateSuggestion || 'soon';
       await prisma.user.update({ where: { id: user.id }, data: { examDate, pendingExamDateSuggestion: null } });
       const enrolled = await isUserEnrolled(user.id);
-      const next = nextIntakeQuestion({ ...user, examDate }, !enrolled);
+      const next = resolveNext({ ...user, examDate }, enrolled);
       if (next) {
         reply = [next];
         suggestions = suggestionsForPrompt(next);
       } else {
-        const result = await finishIntake(user.id, user.targetExam || 'your exam', examDate);
+        const result = await resolveFinish({ ...user, examDate });
         reply = result.messages;
         suggestions = result.suggestions;
       }
@@ -502,12 +619,12 @@ export async function sendChatMessage(
     const examDate = trimmed.slice(0, 60);
     await prisma.user.update({ where: { id: user.id }, data: { examDate } });
     const enrolled = await isUserEnrolled(user.id);
-    const next = nextIntakeQuestion({ ...user, examDate }, !enrolled);
+    const next = resolveNext({ ...user, examDate }, enrolled);
     if (next) {
       reply = [next];
       suggestions = suggestionsForPrompt(next);
     } else {
-      const result = await finishIntake(user.id, user.targetExam || 'your exam', examDate);
+      const result = await resolveFinish({ ...user, examDate });
       reply = result.messages;
       suggestions = result.suggestions;
     }
@@ -519,14 +636,56 @@ export async function sendChatMessage(
       reply = [next];
       suggestions = suggestionsForPrompt(next);
     } else {
-      const result = await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+      const result = await buildCourseRecommendation(user.targetExam);
       reply = result.messages;
       suggestions = result.suggestions;
     }
   } else if (lastAssistant?.content === MARKS_PROMPT) {
     const marksPercentage = trimmed.slice(0, 60);
     await prisma.user.update({ where: { id: user.id }, data: { marksPercentage } });
-    const result = await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+    const result = await buildCourseRecommendation(user.targetExam);
+    reply = result.messages;
+    suggestions = result.suggestions;
+  } else if (lastAssistant?.content === BEGINNER_CHECK_PROMPT) {
+    const examStage = trimmed.slice(0, 60);
+    await prisma.user.update({ where: { id: user.id }, data: { examStage } });
+    const next = nextStrategyQuestion({ ...user, examStage });
+    if (next) {
+      reply = [next];
+      suggestions = suggestionsForPrompt(next);
+    } else {
+      const result = await finishStrategyIntake(user.id, { ...user, examStage });
+      reply = result.messages;
+      suggestions = result.suggestions;
+    }
+  } else if (lastAssistant?.content === STUDY_HOURS_PROMPT) {
+    const studyHoursPerDay = trimmed.slice(0, 40);
+    await prisma.user.update({ where: { id: user.id }, data: { studyHoursPerDay } });
+    const next = nextStrategyQuestion({ ...user, studyHoursPerDay });
+    if (next) {
+      reply = [next];
+      suggestions = suggestionsForPrompt(next);
+    } else {
+      const result = await finishStrategyIntake(user.id, { ...user, studyHoursPerDay });
+      reply = result.messages;
+      suggestions = result.suggestions;
+    }
+  } else if (lastAssistant?.content === WEAK_SUBJECT_PROMPT) {
+    const weakSubject = trimmed.slice(0, 60);
+    await prisma.user.update({ where: { id: user.id }, data: { weakSubject } });
+    const next = nextStrategyQuestion({ ...user, weakSubject });
+    if (next) {
+      reply = [next];
+      suggestions = suggestionsForPrompt(next);
+    } else {
+      const result = await finishStrategyIntake(user.id, { ...user, weakSubject });
+      reply = result.messages;
+      suggestions = result.suggestions;
+    }
+  } else if (lastAssistant?.content === SYLLABUS_PROGRESS_PROMPT) {
+    const syllabusProgress = trimmed.slice(0, 40);
+    await prisma.user.update({ where: { id: user.id }, data: { syllabusProgress } });
+    const result = await finishStrategyIntake(user.id, { ...user, syllabusProgress });
     reply = result.messages;
     suggestions = result.suggestions;
   } else if (lastAssistant?.content === OFFER_COURSE_PROMPT) {
@@ -547,12 +706,12 @@ export async function sendChatMessage(
       suggestions = [];
     } else {
       const enrolled = await isUserEnrolled(user.id);
-      const next = nextIntakeQuestion(user, !enrolled);
+      const next = resolveNext(user, enrolled);
       if (next) {
         reply = [next];
         suggestions = suggestionsForPrompt(next);
       } else {
-        const result = await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+        const result = await resolveFinish(user);
         reply = result.messages;
         suggestions = result.suggestions;
       }
@@ -560,16 +719,21 @@ export async function sendChatMessage(
   } else if (!lastAssistant && user.targetExam && (STRATEGY_PATTERN.test(trimmed) || COURSE_GUIDANCE_PATTERN.test(trimmed))) {
     // First message of this conversation thread, and we already have an exam on file from a
     // previous session — confirm it's still right instead of silently assuming or re-asking.
+    // Tag which intake this belongs to now, since "yes"/"no" alone won't carry that later.
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { pendingIntakeFlow: STRATEGY_PATTERN.test(trimmed) ? 'strategy' : 'course' },
+    });
     reply = [`You mentioned earlier you're preparing for ${user.targetExam}.`, CONFIRM_EXAM_PROMPT];
     suggestions = CONFIRM_EXAM_SUGGESTIONS;
   } else if (STRATEGY_PATTERN.test(trimmed)) {
-    const enrolled = await isUserEnrolled(user.id);
-    const next = nextIntakeQuestion(user, !enrolled);
+    const next = nextStrategyQuestion(user);
+    await tagPendingFlow(user.id, next, 'strategy');
     if (next) {
       reply = [next];
       suggestions = suggestionsForPrompt(next);
     } else {
-      const result = await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+      const result = await finishStrategyIntake(user.id, user);
       reply = result.messages;
       suggestions = result.suggestions;
     }
@@ -580,6 +744,7 @@ export async function sendChatMessage(
       suggestions = defaultSuggestions(true);
     } else {
       const next = nextIntakeQuestion(user, true);
+      await tagPendingFlow(user.id, next, 'course');
       if (next) {
         reply = [next];
         suggestions = suggestionsForPrompt(next);
@@ -648,6 +813,7 @@ export async function sendChatMessage(
     const overview = await getMentorOverview(user.id, name, user.targetExam);
     if (overview.mode === 'counsellor') {
       const next = nextIntakeQuestion(user, true);
+      await tagPendingFlow(user.id, next, 'course');
       if (next) {
         reply = [`You're not enrolled in a course yet, so there's no daily plan to show you — but let's find the right one.`, next];
         suggestions = suggestionsForPrompt(next);

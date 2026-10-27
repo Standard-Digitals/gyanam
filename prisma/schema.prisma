@@ -20,6 +20,11 @@ model User {
   examDate                  String? // free text, e.g. "March 2026" — collected by AI Mentor chat when asked for exam strategy advice
   qualification             String? // free text, e.g. "12th pass", "Graduate" — collected by AI Mentor chat before recommending a course
   marksPercentage           String? // free text, e.g. "78%" — collected alongside qualification for the same reason
+  examStage                 String? // "beginner" | "experienced" — self-reported before building a personalized study schedule
+  studyHoursPerDay          String? // e.g. "1-2 hours" — self-reported daily study time, drives which schedule template is used
+  weakSubject               String? // self-reported toughest subject, or "Not sure yet"
+  syllabusProgress          String? // e.g. "25-50%" — self-reported syllabus coverage
+  pendingIntakeFlow         String? // "strategy" | "course" — which intake sequence is mid-flight, so answering the shared exam-name/exam-date questions resumes into the right one
   chatResetAt               DateTime? // set when the student taps "New Conversation" in AI Mentor chat — messages before this are hidden from the chat view, but stay in the database
   pendingExamDateSuggestion String? // scratch field: an OpenAI-suggested exam period awaiting the student's yes/no confirmation; cleared once answered
   createdAt                 DateTime  @default(now())

@@ -10,6 +10,14 @@ export const CONFIRM_EXAM_PROMPT = 'Is that still the plan, or has it changed?';
 export const EXAM_DATE_CONFIRM_PROMPT = 'Is that roughly right, or do you already have the official date?';
 export const OFFER_COURSE_PROMPT = 'Want me to suggest a course that fits this plan?';
 
+// Strategy-specific intake — collected only when building a personalized study schedule (the
+// "how do I crack my exam" flow), kept separate from qualification/marks above, which are only
+// asked when the student actually wants a course recommendation or a counsellor.
+export const BEGINNER_CHECK_PROMPT = 'Have you started preparing already, or are you a complete beginner?';
+export const STUDY_HOURS_PROMPT = 'How many hours can you realistically study each day?';
+export const WEAK_SUBJECT_PROMPT = 'Which subject do you find toughest right now?';
+export const SYLLABUS_PROGRESS_PROMPT = 'How much of the syllabus have you covered so far?';
+
 // Shown before any message exists yet (truly empty chat) — the only suggestion set the client
 // still needs directly, since every other reply now carries its own `suggestions` from the server.
 export const PREP_SUGGESTIONS = ["What's my plan today?", 'How is my progress?', 'What is the right approach to crack my exam?', 'Give me a practice test'];
