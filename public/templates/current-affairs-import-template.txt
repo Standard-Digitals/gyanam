@@ -6,12 +6,12 @@ INSTRUCTIONS (delete this instructions block before pasting/uploading, or leave 
    except Title): Title, Category, Date, Read Time, Source, Author, Thumbnail,
    Syllabus Tag.
    - Category must exactly match one of: Important Days, Person in News,
-     Appointments, Place/State in News, International News/Organisations,
-     Summits, Polity/E-Governance, Geography and Environment, Economy,
-     Agriculture, History / Art & Culture, Science and Tech, Defence and
-     Space, Ranking, Index and Reports, Policy, Programmes and Schemes,
-     Awards and Honours, Health and Disease, Books & Authors, Sports &
-     Miscellaneous.
+     Appointments, Place in News, State in News, International News,
+     Organisations, Summits, Polity, E-Governance, Geography, Environment,
+     Economy, Agriculture, History, Art & Culture, Science and Tech,
+     Defence, Space, Ranking, Index and Reports, Policy, Programmes and
+     Schemes, Awards and Honours, Health and Disease, Books & Authors,
+     Sports, Miscellaneous.
      If it doesn't match, it's skipped and you pick it manually after import.
    - Syllabus Tag is optional, e.g. "GS Paper 3, Prelims Focus".
 2. Use these section headers on their own line, followed by the content below
