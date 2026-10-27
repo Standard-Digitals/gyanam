@@ -15,7 +15,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Login required' }, { status: 401 });
 
   const enrollments = await prisma.enrollment.findMany({ where: { userId: user.id, status: 'ACTIVE' }, select: { courseId: true } });
-  const open = await findAnyOpenTest(user.id, enrollments.map((e) => e.courseId));
+  const open = await findAnyOpenTest(user.id, enrollments.map((e) => e.courseId), user.targetExam);
   if (!open) return NextResponse.json({ kind: null });
 
   if (open.kind === 'quiz') {

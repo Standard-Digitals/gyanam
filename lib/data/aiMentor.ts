@@ -619,21 +619,66 @@ export async function completeOnboardingForm(userId: string, targetExam: string,
   return { messages, suggestions };
 }
 
+// Quiz/MockTest.examCategory holds one of these admin-facing group names (see
+// app/admin/(dashboard)/_components/examCategories.ts), not the specific exam the student typed
+// into chat (e.g. "Bank Clerk", "SSC cgl") — this maps free text to the right group by keyword so
+// "give me a practice test" doesn't hand back a quiz for a completely different exam.
+const EXAM_CATEGORY_KEYWORDS: Record<string, string[]> = {
+  SSC: ['ssc'],
+  Banking: ['bank', 'ibps', 'sbi', 'rrb po'],
+  Railway: ['railway', 'rrb', 'ntpc', 'rpf', 'alp'],
+  UPSC: ['upsc', 'civil services'],
+  'State PSC': ['state pcs', 'psc'],
+  Defence: ['cds', 'nda', 'afcat', 'capf', 'defence'],
+  'Assam Govt': ['adre', 'apdcl', 'assam'],
+  'Teaching Exams': ['tet', 'ugc net', 'cadre', 'teaching'],
+};
+
+function matchExamCategory(targetExam: string | null): string | null {
+  if (!targetExam) return null;
+  const lower = targetExam.toLowerCase();
+  for (const [category, keywords] of Object.entries(EXAM_CATEGORY_KEYWORDS)) {
+    if (keywords.some((kw) => lower.includes(kw))) return category;
+  }
+  return null;
+}
+
 /** Exported so the "Test" chat tab can look up the same open test and fetch its full questions,
- * without duplicating this attempted-vs-catalog comparison. */
-export async function findAnyOpenTest(userId: string, courseIds: string[]): Promise<{ kind: 'quiz' | 'mock'; id: string; title: string } | null> {
+ * without duplicating this attempted-vs-catalog comparison. Prefers a test tagged for the
+ * student's own exam category; falls back to any open one so an uncommon exam name never dead-ends. */
+export async function findAnyOpenTest(
+  userId: string,
+  courseIds: string[],
+  targetExam: string | null
+): Promise<{ kind: 'quiz' | 'mock'; id: string; title: string } | null> {
+  const category = matchExamCategory(targetExam);
   const [quizzes, mockTests, quizAttempts, mockAttempts] = await Promise.all([
-    prisma.quiz.findMany({ where: { OR: [{ courseId: { in: courseIds } }, { courseId: null }] }, orderBy: { createdAt: 'desc' }, select: { id: true, title: true } }),
-    prisma.mockTest.findMany({ where: { status: 'ACTIVE' }, orderBy: { createdAt: 'desc' }, select: { id: true, title: true } }),
+    prisma.quiz.findMany({
+      where: { OR: [{ courseId: { in: courseIds } }, { courseId: null }] },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, title: true, examCategory: true },
+    }),
+    prisma.mockTest.findMany({
+      where: { status: 'ACTIVE' },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, title: true, examCategory: true },
+    }),
     prisma.quizAttempt.findMany({ where: { userId }, select: { quizId: true } }),
     prisma.mockTestAttempt.findMany({ where: { userId }, select: { mockTestId: true } }),
   ]);
   const attemptedQuizIds = new Set(quizAttempts.map((a) => a.quizId));
   const attemptedMockIds = new Set(mockAttempts.map((a) => a.mockTestId));
-  const openQuiz = quizzes.find((q) => !attemptedQuizIds.has(q.id));
+  const openQuizzes = quizzes.filter((q) => !attemptedQuizIds.has(q.id));
+  const openMocks = mockTests.filter((m) => !attemptedMockIds.has(m.id));
+
+  const matchedQuiz = category ? openQuizzes.find((q) => q.examCategory.includes(category)) : undefined;
+  const openQuiz = matchedQuiz ?? openQuizzes[0];
   if (openQuiz) return { kind: 'quiz', id: openQuiz.id, title: openQuiz.title };
-  const openMock = mockTests.find((m) => !attemptedMockIds.has(m.id));
+
+  const matchedMock = category ? openMocks.find((m) => m.examCategory === category) : undefined;
+  const openMock = matchedMock ?? openMocks[0];
   if (openMock) return { kind: 'mock', id: openMock.id, title: openMock.title };
+
   return null;
 }
 
@@ -1011,7 +1056,7 @@ export async function sendChatMessage(
     suggestions = result.suggestions;
   } else if (TEST_PATTERN.test(trimmed)) {
     const enrollments = await prisma.enrollment.findMany({ where: { userId: user.id, status: 'ACTIVE' }, select: { courseId: true } });
-    const open = await findAnyOpenTest(user.id, enrollments.map((e) => e.courseId));
+    const open = await findAnyOpenTest(user.id, enrollments.map((e) => e.courseId), user.targetExam);
     reply = open
       ? [`"${open.title}" is open right now — tap the "Test" tab above to take it right here.`]
       : ["You've attempted everything that's open right now — check back soon, new ones are added often."];
