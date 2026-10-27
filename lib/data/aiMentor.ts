@@ -820,7 +820,23 @@ export async function sendChatMessage(
   } else if (lastAssistant?.content === CONFIRM_EXAM_PROMPT) {
     const saysDifferent = /^\s*(no|nah+|nope|nahi|different|change|wrong|galat)\b/i.test(trimmed);
     if (saysDifferent) {
-      await prisma.user.update({ where: { id: user.id }, data: { targetExam: null, examDate: null } });
+      // Clear every exam-specific answer, not just the exam itself — otherwise a switch to a
+      // different exam silently reuses the old exam's beginner/hours/weak-subject/syllabus (or
+      // qualification/marks) answers instead of asking fresh ones for the new exam.
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          targetExam: null,
+          examDate: null,
+          examStage: null,
+          studyHoursPerDay: null,
+          weakSubject: null,
+          syllabusProgress: null,
+          qualification: null,
+          marksPercentage: null,
+          pendingExamDateSuggestion: null,
+        },
+      });
       reply = [EXAM_NAME_PROMPT];
       suggestions = [];
     } else {
