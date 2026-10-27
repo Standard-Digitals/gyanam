@@ -18,6 +18,11 @@ export const STUDY_HOURS_PROMPT = 'How many hours can you realistically study ea
 export const WEAK_SUBJECT_PROMPT = 'Which subject do you find toughest right now?';
 export const SYLLABUS_PROGRESS_PROMPT = 'How much of the syllabus have you covered so far?';
 
+// Course reveal is split into two turns — name/fit first, price/next-step only if the student
+// asks for it — instead of dumping both at once.
+export const COURSE_DETAILS_PROMPT = 'Want to know the price and what\'s included?';
+export const COURSE_ACTION_PROMPT = 'Want to enroll now, or talk to a counsellor first?';
+
 // Shown before any message exists yet (truly empty chat) — the only suggestion set the client
 // still needs directly, since every other reply now carries its own `suggestions` from the server.
 export const PREP_SUGGESTIONS = ["What's my plan today?", 'How is my progress?', 'What is the right approach to crack my exam?', 'Give me a practice test'];

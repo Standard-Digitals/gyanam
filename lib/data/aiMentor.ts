@@ -15,6 +15,8 @@ import {
   STUDY_HOURS_PROMPT,
   WEAK_SUBJECT_PROMPT,
   SYLLABUS_PROGRESS_PROMPT,
+  COURSE_DETAILS_PROMPT,
+  COURSE_ACTION_PROMPT,
   PREP_SUGGESTIONS,
   GENERAL_SUGGESTIONS,
 } from '@/lib/aiMentorPrompts';
@@ -299,6 +301,7 @@ const BEGINNER_CHECK_SUGGESTIONS = ['Just starting out', "I've been preparing a 
 const STUDY_HOURS_SUGGESTIONS = ['Less than 1 hour', '1-2 hours', '2-4 hours', '4+ hours'];
 const WEAK_SUBJECT_SUGGESTIONS = ['Quantitative Aptitude', 'Reasoning', 'English', 'General Awareness', 'Not sure yet'];
 const SYLLABUS_PROGRESS_SUGGESTIONS = ['Just starting', 'Less than 25%', '25-50%', '50-75%', 'Almost done'];
+const COURSE_DETAILS_SUGGESTIONS = ['Tell me more', 'Not right now'];
 
 /** Chips for a reply that ends by asking one of the fixed intake prompts — keeps every branch
  * that hands off to `nextIntakeQuestion`/`nextStrategyQuestion` from having to know each
@@ -323,6 +326,10 @@ function suggestionsForPrompt(prompt: string): string[] {
       return WEAK_SUBJECT_SUGGESTIONS;
     case SYLLABUS_PROGRESS_PROMPT:
       return SYLLABUS_PROGRESS_SUGGESTIONS;
+    case COURSE_DETAILS_PROMPT:
+      return COURSE_DETAILS_SUGGESTIONS;
+    case COURSE_ACTION_PROMPT:
+      return ENROLL_OR_COUNSELLOR_SUGGESTIONS;
     default:
       return []; // EXAM_NAME_PROMPT, EXAM_DATE_PROMPT — free text, no chips make sense
   }
@@ -337,23 +344,72 @@ interface ReplyWithSuggestions {
   suggestions: string[];
 }
 
-/** A specific, premium-framed course pitch with clear next steps — used once the intake has
- * enough to recommend something, whether that's reached via chat or the onboarding form. */
-async function buildCourseRecommendation(targetExam: string | null): Promise<ReplyWithSuggestions> {
+const NO_COURSE_REPLY: ReplyWithSuggestions = {
+  messages: ['I don\'t have a specific course to recommend right now — tap the "Courses" tab above to browse everything we offer.'],
+  suggestions: ['Browse Courses'],
+};
+
+/** First of two course-reveal turns — just the name and why it fits, then asks before showing
+ * price or next steps, instead of dumping the whole pitch in one go. */
+async function buildCourseIntro(targetExam: string | null): Promise<ReplyWithSuggestions> {
   const course = await getSuggestedCourse(targetExam);
-  if (!course) {
-    return {
-      messages: ['I don\'t have a specific course to recommend right now — tap the "Courses" tab above to browse everything we offer.'],
-      suggestions: ['Browse Courses'],
-    };
-  }
+  if (!course) return NO_COURSE_REPLY;
+  return {
+    messages: [`Based on what you've told me, ${course.title} looks like a great fit for you.`, COURSE_DETAILS_PROMPT],
+    suggestions: COURSE_DETAILS_SUGGESTIONS,
+  };
+}
+
+/** Second course-reveal turn — price and the actual next step, only once the student asks. */
+async function buildCourseDetails(targetExam: string | null): Promise<ReplyWithSuggestions> {
+  const course = await getSuggestedCourse(targetExam);
+  if (!course) return NO_COURSE_REPLY;
   return {
     messages: [
-      `Based on what you've told me, ${course.title} looks like the right fit for you.`,
       `It's one of our premium, expert-led batches — ₹${course.discountPrice} right now (usually ₹${course.originalPrice}).`,
-      'Open the "My Plan" tab above for Enroll Now and Talk to a Counsellor buttons, or just say "enroll now" or "talk to a counsellor" here — I\'ll pass along what you\'ve told me so you won\'t have to repeat yourself.',
+      COURSE_ACTION_PROMPT,
     ],
     suggestions: ENROLL_OR_COUNSELLOR_SUGGESTIONS,
+  };
+}
+
+/** Shared by the "enroll now" trigger and the COURSE_ACTION_PROMPT answer — same next step
+ * either way, so there's one place to keep it consistent. */
+async function buildEnrollReply(targetExam: string | null): Promise<ReplyWithSuggestions> {
+  const course = await getSuggestedCourse(targetExam);
+  return {
+    messages: course
+      ? [
+          `Great choice — let's get you into ${course.title}.`,
+          `Open the "My Plan" tab above and tap Enroll Now, or say "talk to a counsellor" and we'll call you to walk you through it instead.`,
+        ]
+      : ['Tap the "Courses" tab above to see everything we offer and enroll directly from there.'],
+    suggestions: TALK_TO_COUNSELLOR_SUGGESTIONS,
+  };
+}
+
+/** Shared by the "talk to a counsellor" trigger and the COURSE_ACTION_PROMPT answer — forwards
+ * whatever profile we have (exam, date, qualification, marks) so the counsellor has context. */
+async function buildCounsellorReply(
+  user: { phone: string; email: string | null; targetExam: string | null; examDate: string | null; qualification: string | null; marksPercentage: string | null },
+  name: string,
+  trimmed: string
+): Promise<ReplyWithSuggestions> {
+  const profileBits = [
+    user.targetExam ? `Target exam: ${user.targetExam}` : null,
+    user.examDate ? `Exam date: ${user.examDate}` : null,
+    user.qualification ? `Qualification: ${user.qualification}` : null,
+    user.marksPercentage ? `Marks: ${user.marksPercentage}` : null,
+  ].filter(Boolean);
+  const note = profileBits.length
+    ? `Requested a counsellor call via AI Mentor chat. Profile — ${profileBits.join(' | ')}. Message: "${trimmed}"`
+    : `Requested a counsellor call via AI Mentor chat: "${trimmed}"`;
+  await createCounsellorLead(name, user.phone, user.email, user.targetExam, note);
+  return {
+    messages: profileBits.length
+      ? ["I've asked a counsellor to call you.", "I've passed along what you've told me so you won't have to repeat yourself.", 'They usually call within one working day.']
+      : ["I've asked a counsellor to call you.", 'They usually call within one working day.'],
+    suggestions: defaultSuggestions(!!user.targetExam),
   };
 }
 
@@ -555,7 +611,7 @@ export async function sendChatMessage(
   const resolveNext = (profile: IntakeProfile & StrategyProfile, enrolled: boolean): string | null =>
     flow === 'course' ? nextIntakeQuestion(profile, !enrolled) : nextStrategyQuestion(profile);
   const resolveFinish = async (profile: IntakeProfile & StrategyProfile): Promise<ReplyWithSuggestions> =>
-    flow === 'course' ? buildCourseRecommendation(profile.targetExam) : finishStrategyIntake(user.id, profile);
+    flow === 'course' ? buildCourseIntro(profile.targetExam) : finishStrategyIntake(user.id, profile);
 
   // What the assistant asked last — used to tell whether this new message is the answer
   // to the exam-name/exam-date onboarding question, regardless of what it also matches below.
@@ -636,14 +692,14 @@ export async function sendChatMessage(
       reply = [next];
       suggestions = suggestionsForPrompt(next);
     } else {
-      const result = await buildCourseRecommendation(user.targetExam);
+      const result = await buildCourseIntro(user.targetExam);
       reply = result.messages;
       suggestions = result.suggestions;
     }
   } else if (lastAssistant?.content === MARKS_PROMPT) {
     const marksPercentage = trimmed.slice(0, 60);
     await prisma.user.update({ where: { id: user.id }, data: { marksPercentage } });
-    const result = await buildCourseRecommendation(user.targetExam);
+    const result = await buildCourseIntro(user.targetExam);
     reply = result.messages;
     suggestions = result.suggestions;
   } else if (lastAssistant?.content === BEGINNER_CHECK_PROMPT) {
@@ -694,10 +750,25 @@ export async function sendChatMessage(
       reply = ['No problem — ask anytime you\'re ready, or say "talk to a counsellor" if you\'d rather speak to someone.'];
       suggestions = TALK_TO_COUNSELLOR_SUGGESTIONS;
     } else {
-      const result = await buildCourseRecommendation(user.targetExam);
+      const result = await buildCourseIntro(user.targetExam);
       reply = result.messages;
       suggestions = result.suggestions;
     }
+  } else if (lastAssistant?.content === COURSE_DETAILS_PROMPT) {
+    const declines = /^\s*(no|not right now|nah+|nope|skip|later|maybe later)\b/i.test(trimmed);
+    if (declines) {
+      reply = ['No problem — ask anytime, or say "talk to a counsellor" if you\'d rather speak to someone.'];
+      suggestions = TALK_TO_COUNSELLOR_SUGGESTIONS;
+    } else {
+      const result = await buildCourseDetails(user.targetExam);
+      reply = result.messages;
+      suggestions = result.suggestions;
+    }
+  } else if (lastAssistant?.content === COURSE_ACTION_PROMPT) {
+    const wantsCounsellor = /^\s*(talk|counsellor|counselor|call)\b/i.test(trimmed);
+    const result = wantsCounsellor ? await buildCounsellorReply(user, name, trimmed) : await buildEnrollReply(user.targetExam);
+    reply = result.messages;
+    suggestions = result.suggestions;
   } else if (lastAssistant?.content === CONFIRM_EXAM_PROMPT) {
     const saysDifferent = /^\s*(no|nah+|nope|nahi|different|change|wrong|galat)\b/i.test(trimmed);
     if (saysDifferent) {
@@ -749,7 +820,7 @@ export async function sendChatMessage(
         reply = [next];
         suggestions = suggestionsForPrompt(next);
       } else {
-        const result = await buildCourseRecommendation(user.targetExam);
+        const result = await buildCourseIntro(user.targetExam);
         reply = result.messages;
         suggestions = result.suggestions;
       }
@@ -776,32 +847,16 @@ export async function sendChatMessage(
       : ['No new test series right now — check Mock Tests on your dashboard, new ones are added often.'];
     suggestions = ['Give me a practice test', 'Browse Courses'];
   } else if (COUNSELLOR_PATTERN.test(trimmed)) {
-    const profileBits = [
-      user.targetExam ? `Target exam: ${user.targetExam}` : null,
-      user.examDate ? `Exam date: ${user.examDate}` : null,
-      user.qualification ? `Qualification: ${user.qualification}` : null,
-      user.marksPercentage ? `Marks: ${user.marksPercentage}` : null,
-    ].filter(Boolean);
-    const note = profileBits.length
-      ? `Requested a counsellor call via AI Mentor chat. Profile — ${profileBits.join(' | ')}. Message: "${trimmed}"`
-      : `Requested a counsellor call via AI Mentor chat: "${trimmed}"`;
-    await createCounsellorLead(name, user.phone, user.email, user.targetExam, note);
-    reply = profileBits.length
-      ? ["I've asked a counsellor to call you.", "I've passed along what you've told me so you won't have to repeat yourself.", 'They usually call within one working day.']
-      : ["I've asked a counsellor to call you.", 'They usually call within one working day.'];
-    suggestions = defaultSuggestions(!!user.targetExam);
+    const result = await buildCounsellorReply(user, name, trimmed);
+    reply = result.messages;
+    suggestions = result.suggestions;
   } else if (BROWSE_COURSES_PATTERN.test(trimmed)) {
     reply = ['Tap the "Courses" tab above — I\'ve listed everything there with pricing and details, so you don\'t have to leave this chat.'];
     suggestions = TALK_TO_COUNSELLOR_SUGGESTIONS;
   } else if (ENROLL_PATTERN.test(trimmed)) {
-    const course = await getSuggestedCourse(user.targetExam);
-    reply = course
-      ? [
-          `Great choice — let's get you into ${course.title}.`,
-          `Open the "My Plan" tab above and tap Enroll Now, or say "talk to a counsellor" and we'll call you to walk you through it instead.`,
-        ]
-      : ['Tap the "Courses" tab above to see everything we offer and enroll directly from there.'];
-    suggestions = TALK_TO_COUNSELLOR_SUGGESTIONS;
+    const result = await buildEnrollReply(user.targetExam);
+    reply = result.messages;
+    suggestions = result.suggestions;
   } else if (TEST_PATTERN.test(trimmed)) {
     const enrollments = await prisma.enrollment.findMany({ where: { userId: user.id, status: 'ACTIVE' }, select: { courseId: true } });
     const open = await findAnyOpenTest(user.id, enrollments.map((e) => e.courseId));
@@ -818,7 +873,7 @@ export async function sendChatMessage(
         reply = [`You're not enrolled in a course yet, so there's no daily plan to show you — but let's find the right one.`, next];
         suggestions = suggestionsForPrompt(next);
       } else {
-        const result = await buildCourseRecommendation(user.targetExam);
+        const result = await buildCourseIntro(user.targetExam);
         reply = result.messages;
         suggestions = result.suggestions;
       }
