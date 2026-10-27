@@ -8,5 +8,5 @@ export async function GET() {
 
   const firstName = (user.name || 'there').split(' ')[0];
   const overview = await getMentorOverview(user.id, firstName, user.targetExam);
-  return NextResponse.json(overview);
+  return NextResponse.json({ ...overview, dailyScheduleBlocks: user.dailyScheduleBlocks ?? null });
 }

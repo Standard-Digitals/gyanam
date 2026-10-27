@@ -18,6 +18,7 @@ export const STUDY_HOURS_PROMPT = 'How many hours can you realistically study ea
 export const WEAK_SUBJECT_PROMPT = 'Which subject do you find toughest right now?';
 export const SYLLABUS_PROGRESS_PROMPT = 'How much of the syllabus have you covered so far?';
 export const READY_FOR_SCHEDULE_PROMPT = 'Ready to see your personalized schedule?';
+export const DETAILED_PLAN_PROMPT = 'Want a more detailed breakdown with specific topics for each subject?';
 export const READY_FOR_DIAGNOSTIC_PROMPT = 'Want to start with a quick diagnostic quiz today?';
 
 // Course reveal is split into two turns — name/fit first, price/next-step only if the student

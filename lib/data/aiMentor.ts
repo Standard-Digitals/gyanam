@@ -16,6 +16,7 @@ import {
   WEAK_SUBJECT_PROMPT,
   SYLLABUS_PROGRESS_PROMPT,
   READY_FOR_SCHEDULE_PROMPT,
+  DETAILED_PLAN_PROMPT,
   READY_FOR_DIAGNOSTIC_PROMPT,
   COURSE_DETAILS_PROMPT,
   COURSE_ACTION_PROMPT,
@@ -209,7 +210,7 @@ export async function resetChatConversation(userId: string): Promise<void> {
 // ---- Intent patterns ----
 const COUNSELLOR_PATTERN = /\b(counsellor|counselor|call me|talk to (a )?(human|person|counsellor|counselor)|speak to someone)\b/i;
 const TEST_PATTERN = /\b(practice test|test on demand|give me a test|mock test|quiz (please|now)?)\b/i;
-const PLAN_PATTERN = /\b(plan|today|schedule|what should i (do|study))\b/i;
+const PLAN_PATTERN = /\b(plan|today|schedule|routine|what should i (do|study))\b/i;
 const PROGRESS_PATTERN = /\b(progress|how am i doing|report|rank|improv|percentile|compare)\b/i;
 const MISTAKES_PATTERN = /\b(mistake|wrong|weak|negative mark|where am i losing)\b/i;
 const REMIND_PATTERN = /\bremind me\b/i;
@@ -305,6 +306,7 @@ const WEAK_SUBJECT_SUGGESTIONS = ['Quantitative Aptitude', 'Reasoning', 'English
 const SYLLABUS_PROGRESS_SUGGESTIONS = ['Just starting', 'Less than 25%', '25-50%', '50-75%', 'Almost done'];
 const COURSE_DETAILS_SUGGESTIONS = ['Tell me more', 'Not right now'];
 const READY_FOR_SCHEDULE_SUGGESTIONS = ['Yes, show me', 'Not now'];
+const DETAILED_PLAN_SUGGESTIONS = ['Yes, add detail', 'No, this is enough'];
 const READY_FOR_DIAGNOSTIC_SUGGESTIONS = ["Yes, let's go", 'Maybe later'];
 
 /** Chips for a reply that ends by asking one of the fixed intake prompts — keeps every branch
@@ -336,6 +338,8 @@ function suggestionsForPrompt(prompt: string): string[] {
       return ENROLL_OR_COUNSELLOR_SUGGESTIONS;
     case READY_FOR_SCHEDULE_PROMPT:
       return READY_FOR_SCHEDULE_SUGGESTIONS;
+    case DETAILED_PLAN_PROMPT:
+      return DETAILED_PLAN_SUGGESTIONS;
     case READY_FOR_DIAGNOSTIC_PROMPT:
       return READY_FOR_DIAGNOSTIC_SUGGESTIONS;
     default:
@@ -485,30 +489,69 @@ async function buildPlanIntro(profile: StrategyProfile): Promise<ReplyWithSugges
   };
 }
 
-// One schedule per daily-hours bucket — a realistic starting point for that much time, not a
-// one-size-fits-all template. Falls back to the "1-2 hours" schedule for an unrecognized answer.
-const HOURS_SCHEDULE: Record<string, string> = {
-  'Less than 1 hour':
-    "Let's keep this realistic: 20-30 minutes daily — one short practice set (10-15 questions), then review every wrong answer carefully. Short but EVERY day beats one long session a week.",
-  '1-2 hours':
-    "Here's a routine that fits your time: 45-60 minutes daily — alternate between a focused practice set and revising your weak topics.",
-  '2-4 hours':
-    'With this much time: one practice test every other day (sectional or full-length), plus 45-60 minutes of revision on the days in between.',
-  '4+ hours':
-    "You've got strong time on your hands — a full-length or sectional test daily, plus dedicated revision of every wrong answer. At this pace, consistency will show results fast.",
+export interface ScheduleBlock {
+  subject: string;
+  minutes: number;
+}
+
+// Four core subjects most of our exams share, plus a dedicated revision block — a real subject-
+// by-subject breakdown instead of a vague "X minutes daily" sentence. The student's self-reported
+// weak subject gets a bigger share; the rest split what's left evenly.
+const CORE_SUBJECTS = ['Quantitative Aptitude', 'Reasoning', 'English', 'General Awareness'];
+const STUDY_MINUTES: Record<string, number> = {
+  'Less than 1 hour': 45,
+  '1-2 hours': 90,
+  '2-4 hours': 180,
+  '4+ hours': 240,
+};
+const roundTo5 = (n: number) => Math.max(5, Math.round(n / 5) * 5);
+
+function buildScheduleBlocks(studyHoursPerDay: string | null, weakSubject: string | null): ScheduleBlock[] {
+  const total = (studyHoursPerDay && STUDY_MINUTES[studyHoursPerDay]) || STUDY_MINUTES['1-2 hours'];
+  const revisionMinutes = roundTo5(total * 0.2);
+  const studyMinutes = total - revisionMinutes;
+  const weakIdx = CORE_SUBJECTS.indexOf(weakSubject ?? '');
+  const weight = (i: number) => (weakIdx === -1 ? 1 / CORE_SUBJECTS.length : i === weakIdx ? 0.4 : 0.6 / (CORE_SUBJECTS.length - 1));
+  const blocks = CORE_SUBJECTS.map((subject, i) => ({ subject, minutes: roundTo5(studyMinutes * weight(i)) }));
+  blocks.push({ subject: 'Revision & timed practice', minutes: revisionMinutes });
+  return blocks;
+}
+
+function formatScheduleMessage(blocks: ScheduleBlock[]): string {
+  return blocks.map((b) => `${b.minutes} min — ${b.subject}`).join('\n');
+}
+
+const SUBJECT_TOPICS: Record<string, string[]> = {
+  'Quantitative Aptitude': ['Percentage', 'Ratio & Proportion'],
+  Reasoning: ['Puzzles', 'Seating Arrangement'],
+  English: ['Reading Comprehension', 'Error Spotting'],
+  'General Awareness': ['Current Affairs', 'Static GK'],
+  'Revision & timed practice': ['Review mistakes from recent quizzes', 'One timed mini-test'],
 };
 
-/** Turn 2 — the actual schedule, matched to their daily hours and weak subject, then asks before
- * nudging toward a diagnostic. */
-async function buildSchedule(profile: StrategyProfile): Promise<ReplyWithSuggestions> {
+function formatDetailedScheduleMessage(blocks: ScheduleBlock[]): string {
+  return blocks
+    .map((b) => {
+      const topics = SUBJECT_TOPICS[b.subject];
+      return topics ? `${b.minutes} min — ${b.subject}\n   → Focus: ${topics.join(', ')}` : `${b.minutes} min — ${b.subject}`;
+    })
+    .join('\n');
+}
+
+/** Turn 2 — the structured schedule chart (real subjects and minutes — saved so "My Plan" and a
+ * later "what's my routine" question show the same one), then asks before offering per-subject
+ * detail. */
+async function buildSchedule(userId: string, profile: StrategyProfile): Promise<ReplyWithSuggestions> {
+  const blocks = buildScheduleBlocks(profile.studyHoursPerDay, profile.weakSubject);
+  await prisma.user.update({ where: { id: userId }, data: { dailyScheduleBlocks: blocks as unknown as object[] } });
   const isBeginner = profile.examStage === 'Just starting out';
-  const hasWeakSubject = profile.weakSubject && profile.weakSubject !== 'Not sure yet';
-  const base = (profile.studyHoursPerDay && HOURS_SCHEDULE[profile.studyHoursPerDay]) || HOURS_SCHEDULE['1-2 hours'];
-  const schedule = isBeginner ? `${base} We'll ease into full-length tests once the basics feel solid.` : base;
-  const tip = hasWeakSubject
-    ? `Start every day's revision with ${profile.weakSubject} — that's where the biggest gains are right now.`
-    : 'Take a quiz or two this week so I can tell you exactly where to focus revision.';
-  return { messages: [`${schedule} ${tip}`, READY_FOR_DIAGNOSTIC_PROMPT], suggestions: READY_FOR_DIAGNOSTIC_SUGGESTIONS };
+  const intro = isBeginner
+    ? "Let's begin with a structured routine — we'll ease into full-length tests once the basics feel solid."
+    : "Here's a structured routine based on what you've told me.";
+  return {
+    messages: [`${intro}\n\n${formatScheduleMessage(blocks)}`, DETAILED_PLAN_PROMPT],
+    suggestions: DETAILED_PLAN_SUGGESTIONS,
+  };
 }
 
 /** Turn 3 — nudges to the diagnostic quiz, then a course pitch for students who aren't enrolled
@@ -614,6 +657,7 @@ export async function sendChatMessage(
     weakSubject: string | null;
     syllabusProgress: string | null;
     pendingIntakeFlow: string | null;
+    dailyScheduleBlocks: ScheduleBlock[] | null;
     chatResetAt: Date | null;
     pendingExamDateSuggestion: string | null;
   },
@@ -773,9 +817,20 @@ export async function sendChatMessage(
       reply = ['No problem — ask me "what\'s my plan today" whenever you\'re ready to see it.'];
       suggestions = defaultSuggestions(!!user.targetExam);
     } else {
-      const result = await buildSchedule(user);
+      const result = await buildSchedule(user.id, user);
       reply = result.messages;
       suggestions = result.suggestions;
+    }
+  } else if (lastAssistant?.content === DETAILED_PLAN_PROMPT) {
+    const declines = /^\s*(no|not now|nah+|nope|skip|that's enough|thats enough)\b/i.test(trimmed);
+    if (declines) {
+      reply = [READY_FOR_DIAGNOSTIC_PROMPT];
+      suggestions = READY_FOR_DIAGNOSTIC_SUGGESTIONS;
+    } else {
+      reply = user.dailyScheduleBlocks
+        ? [formatDetailedScheduleMessage(user.dailyScheduleBlocks), READY_FOR_DIAGNOSTIC_PROMPT]
+        : [READY_FOR_DIAGNOSTIC_PROMPT];
+      suggestions = READY_FOR_DIAGNOSTIC_SUGGESTIONS;
     }
   } else if (lastAssistant?.content === READY_FOR_DIAGNOSTIC_PROMPT) {
     const declines = /^\s*(no|not now|maybe later|later|nah+|nope|skip)\b/i.test(trimmed);
@@ -929,6 +984,11 @@ export async function sendChatMessage(
     reply = open
       ? [`"${open.title}" is open right now — tap the "Test" tab above to take it right here.`]
       : ["You've attempted everything that's open right now — check back soon, new ones are added often."];
+    suggestions = defaultSuggestions(!!user.targetExam);
+  } else if (PLAN_PATTERN.test(trimmed) && user.dailyScheduleBlocks) {
+    // Already built a personalized routine earlier — show the same saved chart instead of the
+    // generic plan/counsellor logic below, or regenerating it.
+    reply = ["Here's your daily study routine:", formatScheduleMessage(user.dailyScheduleBlocks)];
     suggestions = defaultSuggestions(!!user.targetExam);
   } else if (PLAN_PATTERN.test(trimmed)) {
     const overview = await getMentorOverview(user.id, name, user.targetExam);
