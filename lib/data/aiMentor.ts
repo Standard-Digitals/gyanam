@@ -527,6 +527,21 @@ export interface WeeklySchedule {
 
 const SUNDAY_PLAN = "Full-length mock test, then rest and light revision of the week's mistakes.";
 
+/** Reads back whatever is actually stored in the Json column — including the flat ScheduleBlock[]
+ * shape saved before this day-wise version existed — and always hands back a valid WeeklySchedule
+ * or null, instead of letting an old shape's missing `.weekdayBlocks` crash the page/chat. */
+export function normalizeWeeklySchedule(raw: unknown): WeeklySchedule | null {
+  if (!raw) return null;
+  if (Array.isArray(raw)) {
+    return { weekdayBlocks: raw as ScheduleBlock[], sundayPlan: SUNDAY_PLAN };
+  }
+  const obj = raw as { weekdayBlocks?: unknown; sundayPlan?: unknown };
+  if (Array.isArray(obj.weekdayBlocks) && typeof obj.sundayPlan === 'string') {
+    return obj as WeeklySchedule;
+  }
+  return null;
+}
+
 function buildWeeklySchedule(studyHoursPerDay: string | null, weakSubject: string | null): WeeklySchedule {
   return { weekdayBlocks: buildScheduleBlocks(studyHoursPerDay, weakSubject), sundayPlan: SUNDAY_PLAN };
 }

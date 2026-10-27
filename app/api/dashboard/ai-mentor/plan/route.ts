@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUserProfile } from '@/lib/currentUser';
-import { getMentorOverview } from '@/lib/data/aiMentor';
+import { getMentorOverview, normalizeWeeklySchedule } from '@/lib/data/aiMentor';
 
 export async function GET() {
   const user = await getCurrentUserProfile();
@@ -8,5 +8,5 @@ export async function GET() {
 
   const firstName = (user.name || 'there').split(' ')[0];
   const overview = await getMentorOverview(user.id, firstName, user.targetExam);
-  return NextResponse.json({ ...overview, dailyScheduleBlocks: user.dailyScheduleBlocks ?? null });
+  return NextResponse.json({ ...overview, dailyScheduleBlocks: normalizeWeeklySchedule(user.dailyScheduleBlocks) });
 }

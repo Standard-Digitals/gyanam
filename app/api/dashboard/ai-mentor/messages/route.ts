@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCurrentUserProfile } from '@/lib/currentUser';
-import { getChatMessages, sendChatMessage, type WeeklySchedule } from '@/lib/data/aiMentor';
+import { getChatMessages, sendChatMessage, normalizeWeeklySchedule } from '@/lib/data/aiMentor';
 
 export async function GET() {
   const user = await getCurrentUserProfile();
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       weakSubject: user.weakSubject,
       syllabusProgress: user.syllabusProgress,
       pendingIntakeFlow: user.pendingIntakeFlow,
-      dailyScheduleBlocks: (user.dailyScheduleBlocks as unknown as WeeklySchedule | null) ?? null,
+      dailyScheduleBlocks: normalizeWeeklySchedule(user.dailyScheduleBlocks),
       chatResetAt: user.chatResetAt,
       pendingExamDateSuggestion: user.pendingExamDateSuggestion,
     },
