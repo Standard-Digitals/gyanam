@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { getCourseProgress } from '@/lib/data/courseProgress';
 import { getSubjectStrength } from '@/lib/data/performance';
 import { getMyProgress, getBasicProgress } from '@/lib/data/myProgress';
+import { EXAM_NAME_PROMPT, EXAM_DATE_PROMPT, QUALIFICATION_PROMPT, MARKS_PROMPT } from '@/lib/aiMentorPrompts';
 
 /**
  * "AI Mentor" (Gyanmitra-style) — in-app only, no OpenAI/WhatsApp/email. Doubts the rules below
@@ -197,11 +198,9 @@ const COURSE_GUIDANCE_PATTERN =
 // course recommendation are specific to them instead of generic. Exact text is also used to
 // detect "this message is the answer to the question I just asked" across turns. targetExam/
 // examDate are asked of everyone; qualification/marksPercentage only matter for a course
-// recommendation, so they're skipped for students who are already enrolled.
-const EXAM_NAME_PROMPT = "Happy to guide you! Which exam are you preparing for?";
-const EXAM_DATE_PROMPT = "Got it. Roughly when is it (month and year is fine)? I'll tailor the advice to that.";
-const QUALIFICATION_PROMPT = "What's your highest qualification right now — for example, 12th pass, graduate, or post-graduate?";
-const MARKS_PROMPT = 'Roughly what percentage or marks did you score in that?';
+// recommendation, so they're skipped for students who are already enrolled. Prompt text lives in
+// a separate module so ChatWidget can import it too (to decide which quick-reply chips to show)
+// without pulling this server-only file into the client bundle.
 
 interface IntakeProfile {
   targetExam: string | null;
@@ -486,9 +485,7 @@ export async function sendChatMessage(
   } else if (REMIND_PATTERN.test(trimmed)) {
     reply = ["I can't send reminders outside the app yet, but anything overdue will show up at the top of your Overview page — check back there."];
   } else if (GREETING_PATTERN.test(trimmed)) {
-    reply = lastAssistant
-      ? [`Welcome back, ${name}!`, 'How can I help you today?']
-      : [`Hi ${name}!`, 'How can I help you today? Ask about your plan, your progress, how to crack your exam, our batches and faculty, or say "talk to a counsellor".'];
+    reply = lastAssistant ? [`Welcome back, ${name}!`, 'How can I help you today?'] : [`Hi ${name}!`, 'How can I help you today?'];
   } else {
     const ticketNumber = await createDoubtTicket(user.id, name, user.phone, user.email, trimmed);
     reply = ['Got it, let me get that in front of your faculty.', `Forwarded as ticket ${ticketNumber} — they'll get back to you soon.`];

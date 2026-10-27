@@ -6,6 +6,7 @@ import { MistakesTab } from './MistakesTab';
 import { ProgressTab } from './ProgressTab';
 import { CoursesTab } from './CoursesTab';
 import { OnboardingFlow } from './OnboardingFlow';
+import { EXAM_NAME_PROMPT, EXAM_DATE_PROMPT, QUALIFICATION_PROMPT, MARKS_PROMPT } from '@/lib/aiMentorPrompts';
 
 interface ChatMessage {
   id: string;
@@ -16,6 +17,11 @@ interface ChatMessage {
 
 const PREP_SUGGESTIONS = ["What's my plan today?", 'How is my progress?', 'What is the right approach to crack my exam?', 'Give me a practice test'];
 const GENERAL_SUGGESTIONS = ['When does a new batch start?', 'Who are the faculty?', 'Where are your centers?', 'When do new test series start?'];
+const QUALIFICATION_SUGGESTIONS = ['12th Pass', 'Graduate', 'Post-graduate', 'Diploma'];
+const MARKS_SUGGESTIONS = ['Below 50%', '50-70%', '70-90%', 'Above 90%'];
+// Prompts that expect a specific free-text answer (an exam name, a month/year) — no quick-reply
+// chips make sense there, so they're excluded from the generic "assistant just spoke" fallback.
+const FREE_TEXT_PROMPTS = new Set([EXAM_NAME_PROMPT, EXAM_DATE_PROMPT]);
 const TABS = [
   { key: 'chat', label: 'Chat' },
   { key: 'plan', label: 'My Plan' },
@@ -108,6 +114,27 @@ export function ChatWidget() {
 
   const handleBrowseCourses = () => setTab('courses');
 
+  // Quick-reply chips so the student can tap instead of typing wherever the answer is really a
+  // pick from a short list — which prompt the assistant just asked decides which set (if any).
+  const lastMessage = messages[messages.length - 1];
+  const lastBotContent = lastMessage?.role === 'assistant' ? lastMessage.content : undefined;
+  const quickReplies: string[] | null =
+    messages.length === 0
+      ? isGeneralVisitor
+        ? GENERAL_SUGGESTIONS
+        : PREP_SUGGESTIONS
+      : lastBotContent === QUALIFICATION_PROMPT
+        ? QUALIFICATION_SUGGESTIONS
+        : lastBotContent === MARKS_PROMPT
+          ? MARKS_SUGGESTIONS
+          : lastBotContent && FREE_TEXT_PROMPTS.has(lastBotContent)
+            ? null
+            : lastMessage?.role === 'assistant'
+              ? isGeneralVisitor
+                ? GENERAL_SUGGESTIONS
+                : PREP_SUGGESTIONS
+              : null;
+
   return (
     <>
       <button
@@ -189,9 +216,9 @@ export function ChatWidget() {
                   )}
                 </div>
 
-                {messages.length === 0 && loaded && (
+                {loaded && !sending && quickReplies && quickReplies.length > 0 && (
                   <div className="px-4 sm:px-6 pb-2 flex flex-wrap gap-1.5 shrink-0">
-                    {(isGeneralVisitor ? GENERAL_SUGGESTIONS : PREP_SUGGESTIONS).map((s) => (
+                    {quickReplies.map((s) => (
                       <button
                         key={s}
                         onClick={() => send(s)}
