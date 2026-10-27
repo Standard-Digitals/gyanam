@@ -6,7 +6,7 @@ import { getChatMessages, sendChatMessage } from '@/lib/data/aiMentor';
 export async function GET() {
   const user = await getCurrentUserProfile();
   if (!user) return NextResponse.json({ error: 'Login required' }, { status: 401 });
-  const messages = await getChatMessages(user.id);
+  const messages = await getChatMessages(user.id, user.chatResetAt);
   // Server truth, not a client-only flag that resets on reopen — drives the persistent
   // "Set up my exam preparation" button and which suggestion chips to show.
   return NextResponse.json({ messages, needsExamSetup: !user.targetExam });
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
       examDate: user.examDate,
       qualification: user.qualification,
       marksPercentage: user.marksPercentage,
+      chatResetAt: user.chatResetAt,
     },
     parsed.data.text
   );

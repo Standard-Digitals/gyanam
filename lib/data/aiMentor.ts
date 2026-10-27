@@ -163,13 +163,21 @@ export interface MentorChatMessage {
   createdAt: string;
 }
 
-export async function getChatMessages(userId: string, limit = 50): Promise<MentorChatMessage[]> {
+/** `after` is the student's `chatResetAt` (if they've tapped "New Conversation") — messages from
+ * before that point stay in the database but are hidden from the chat view. */
+export async function getChatMessages(userId: string, after: Date | null, limit = 50): Promise<MentorChatMessage[]> {
   const rows = await prisma.aiMentorMessage.findMany({
-    where: { userId },
+    where: after ? { userId, createdAt: { gt: after } } : { userId },
     orderBy: { createdAt: 'desc' },
     take: limit,
   });
   return rows.reverse().map((r) => ({ id: r.id, role: r.role as 'user' | 'assistant', content: r.content, createdAt: r.createdAt.toISOString() }));
+}
+
+/** Hides the chat thread so far without deleting it — stamps `chatResetAt`, which every read in
+ * this file treats as the start of the visible/resumable conversation from then on. */
+export async function resetChatConversation(userId: string): Promise<void> {
+  await prisma.user.update({ where: { id: userId }, data: { chatResetAt: new Date() } });
 }
 
 // ---- Intent patterns ----
@@ -350,6 +358,7 @@ export async function sendChatMessage(
     examDate: string | null;
     qualification: string | null;
     marksPercentage: string | null;
+    chatResetAt: Date | null;
   },
   text: string
 ): Promise<string[]> {
@@ -363,8 +372,10 @@ export async function sendChatMessage(
 
   // What the assistant asked last — used to tell whether this new message is the answer
   // to the exam-name/exam-date onboarding question, regardless of what it also matches below.
+  // Scoped to after the student's last "New Conversation" reset, if any, so a reset student never
+  // resumes a question that was actually asked in a conversation they've since cleared.
   const lastAssistant = await prisma.aiMentorMessage.findFirst({
-    where: { userId: user.id, role: 'assistant' },
+    where: { userId: user.id, role: 'assistant', ...(user.chatResetAt ? { createdAt: { gt: user.chatResetAt } } : {}) },
     orderBy: { createdAt: 'desc' },
   });
 

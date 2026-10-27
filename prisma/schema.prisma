@@ -20,6 +20,7 @@ model User {
   examDate        String? // free text, e.g. "March 2026" — collected by AI Mentor chat when asked for exam strategy advice
   qualification   String? // free text, e.g. "12th pass", "Graduate" — collected by AI Mentor chat before recommending a course
   marksPercentage String? // free text, e.g. "78%" — collected alongside qualification for the same reason
+  chatResetAt     DateTime? // set when the student taps "New Conversation" in AI Mentor chat — messages before this are hidden from the chat view, but stay in the database
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

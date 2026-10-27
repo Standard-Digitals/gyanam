@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { Sparkles, X, Send, Target } from 'lucide-react';
+import { Sparkles, X, Send, Target, RotateCcw } from 'lucide-react';
 import { PlanTab } from './PlanTab';
 import { MistakesTab } from './MistakesTab';
 import { ProgressTab } from './ProgressTab';
@@ -114,6 +114,21 @@ export function ChatWidget() {
 
   const handleBrowseCourses = () => setTab('courses');
 
+  // Clears the visible thread without losing it — the server stamps chatResetAt and every reply
+  // after that only looks at messages newer than it, so old answers never get picked back up.
+  const handleNewConversation = async () => {
+    if (!confirm('Start a new conversation? Your previous chat stays saved, but this screen will start fresh.')) return;
+    try {
+      await fetch('/api/dashboard/ai-mentor/reset', { method: 'POST' });
+    } catch {
+      // Best-effort — worst case the old thread is still visible next time, not a data loss risk.
+    }
+    setMessages([]);
+    setError(null);
+    setShowPrepForm(false);
+    setTab('chat');
+  };
+
   // Quick-reply chips so the student can tap instead of typing wherever the answer is really a
   // pick from a short list — which prompt the assistant just asked decides which set (if any).
   const lastMessage = messages[messages.length - 1];
@@ -157,9 +172,20 @@ export function ChatWidget() {
                 <p className="text-[10px] text-white/70 leading-tight">Your AI mentor</p>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/15 cursor-pointer">
-              <X className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              {messages.length > 0 && (
+                <button
+                  onClick={handleNewConversation}
+                  title="Start a new conversation"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/15 cursor-pointer"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+              )}
+              <button onClick={() => setOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/15 cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-1 px-4 sm:px-6 border-b border-[#F3DCDD] shrink-0 overflow-x-auto no-scrollbar">
