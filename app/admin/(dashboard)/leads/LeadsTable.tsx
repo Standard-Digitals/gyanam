@@ -13,6 +13,7 @@ interface Lead {
   email: string | null;
   targetExam: string | null;
   mode: string | null;
+  message: string | null;
   source: string;
   status: string;
   createdAt: string;
@@ -73,8 +74,8 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
   const handleExport = () => {
     downloadCsv(
       'leads.csv',
-      ['Name', 'Phone', 'Email', 'Exam', 'Source', 'Status', 'Date'],
-      filteredLeads.map((l) => [l.fullName, l.phone, l.email ?? '', l.targetExam ?? '', l.source, l.status, new Date(l.createdAt).toLocaleDateString()])
+      ['Name', 'Phone', 'Email', 'Exam', 'Notes', 'Source', 'Status', 'Date'],
+      filteredLeads.map((l) => [l.fullName, l.phone, l.email ?? '', l.targetExam ?? '', l.message ?? '', l.source, l.status, new Date(l.createdAt).toLocaleDateString()])
     );
   };
 
@@ -128,6 +129,7 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Phone</th>
               <th className="px-4 py-3">Exam</th>
+              <th className="px-4 py-3">Notes</th>
               <th className="px-4 py-3">Source</th>
               <th className="px-4 py-3">Date</th>
               <th className="px-4 py-3">Status</th>
@@ -139,6 +141,7 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
                 <td className="px-4 py-3 font-semibold text-[#1F1A1C]">{lead.fullName}</td>
                 <td className="px-4 py-3 text-[#555555]">{lead.phone}</td>
                 <td className="px-4 py-3 text-[#555555]">{lead.targetExam || '—'}</td>
+                <td className="px-4 py-3 text-[#555555] text-xs max-w-[220px] truncate" title={lead.message || ''}>{lead.message || '—'}</td>
                 <td className="px-4 py-3 text-[#555555] text-xs">{lead.source.replace(/_/g, ' ')}</td>
                 <td className="px-4 py-3 text-[#888888] text-xs">{new Date(lead.createdAt).toLocaleDateString()}</td>
                 <td className="px-4 py-3">
@@ -161,7 +164,7 @@ export default function LeadsTable({ leads: initialLeads }: { leads: Lead[] }) {
             ))}
             {filteredLeads.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-[#888888] text-sm">
+                <td colSpan={7} className="px-4 py-8 text-center text-[#888888] text-sm">
                   {activeCount > 0 ? 'No leads match these filters.' : 'No leads yet.'}
                 </td>
               </tr>

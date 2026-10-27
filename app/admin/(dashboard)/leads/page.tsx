@@ -16,6 +16,7 @@ export default async function AdminLeadsPage() {
           email: l.email,
           targetExam: l.targetExam,
           mode: l.mode,
+          message: l.message,
           source: l.source,
           status: l.status,
           createdAt: l.createdAt.toISOString(),
