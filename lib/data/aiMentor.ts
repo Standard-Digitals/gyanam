@@ -545,7 +545,9 @@ export async function completeOnboardingForm(userId: string, targetExam: string,
   return { messages, suggestions };
 }
 
-async function findAnyOpenTest(userId: string, courseIds: string[]): Promise<{ kind: 'quiz' | 'mock'; title: string } | null> {
+/** Exported so the "Test" chat tab can look up the same open test and fetch its full questions,
+ * without duplicating this attempted-vs-catalog comparison. */
+export async function findAnyOpenTest(userId: string, courseIds: string[]): Promise<{ kind: 'quiz' | 'mock'; id: string; title: string } | null> {
   const [quizzes, mockTests, quizAttempts, mockAttempts] = await Promise.all([
     prisma.quiz.findMany({ where: { OR: [{ courseId: { in: courseIds } }, { courseId: null }] }, orderBy: { createdAt: 'desc' }, select: { id: true, title: true } }),
     prisma.mockTest.findMany({ where: { status: 'ACTIVE' }, orderBy: { createdAt: 'desc' }, select: { id: true, title: true } }),
@@ -555,9 +557,9 @@ async function findAnyOpenTest(userId: string, courseIds: string[]): Promise<{ k
   const attemptedQuizIds = new Set(quizAttempts.map((a) => a.quizId));
   const attemptedMockIds = new Set(mockAttempts.map((a) => a.mockTestId));
   const openQuiz = quizzes.find((q) => !attemptedQuizIds.has(q.id));
-  if (openQuiz) return { kind: 'quiz', title: openQuiz.title };
+  if (openQuiz) return { kind: 'quiz', id: openQuiz.id, title: openQuiz.title };
   const openMock = mockTests.find((m) => !attemptedMockIds.has(m.id));
-  if (openMock) return { kind: 'mock', title: openMock.title };
+  if (openMock) return { kind: 'mock', id: openMock.id, title: openMock.title };
   return null;
 }
 
@@ -925,7 +927,7 @@ export async function sendChatMessage(
     const enrollments = await prisma.enrollment.findMany({ where: { userId: user.id, status: 'ACTIVE' }, select: { courseId: true } });
     const open = await findAnyOpenTest(user.id, enrollments.map((e) => e.courseId));
     reply = open
-      ? [`"${open.title}" is open right now — you'll find it under ${open.kind === 'quiz' ? 'Daily Quiz' : 'Mock Tests'} on your dashboard.`]
+      ? [`"${open.title}" is open right now — tap the "Test" tab above to take it right here.`]
       : ["You've attempted everything that's open right now — check back soon, new ones are added often."];
     suggestions = defaultSuggestions(!!user.targetExam);
   } else if (PLAN_PATTERN.test(trimmed)) {

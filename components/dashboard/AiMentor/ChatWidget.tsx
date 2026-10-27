@@ -5,6 +5,7 @@ import { PlanTab } from './PlanTab';
 import { MistakesTab } from './MistakesTab';
 import { ProgressTab } from './ProgressTab';
 import { CoursesTab } from './CoursesTab';
+import { QuizTab } from './QuizTab';
 import { OnboardingFlow } from './OnboardingFlow';
 import { PREP_SUGGESTIONS, GENERAL_SUGGESTIONS } from '@/lib/aiMentorPrompts';
 
@@ -19,6 +20,7 @@ interface ChatMessage {
 const TABS = [
   { key: 'chat', label: 'Chat' },
   { key: 'plan', label: 'My Plan' },
+  { key: 'test', label: 'Test' },
   { key: 'mistakes', label: 'My Mistakes' },
   { key: 'progress', label: 'My Progress' },
   { key: 'courses', label: 'Courses' },
@@ -292,6 +294,7 @@ export function ChatWidget() {
             ) : (
               <div className="flex-1 overflow-y-auto bg-[#FFF5F5]">
                 {tab === 'plan' && <PlanTab onTalkToCounsellor={handleTalkToCounsellor} onBrowseCourses={handleBrowseCourses} />}
+                {tab === 'test' && <QuizTab />}
                 {tab === 'mistakes' && <MistakesTab />}
                 {tab === 'progress' && <ProgressTab onBrowseCourses={handleBrowseCourses} />}
                 {tab === 'courses' && <CoursesTab />}
