@@ -10,6 +10,7 @@ import {
   MARKS_PROMPT,
   CONFIRM_EXAM_PROMPT,
   EXAM_DATE_CONFIRM_PROMPT,
+  OFFER_COURSE_PROMPT,
 } from '@/lib/aiMentorPrompts';
 
 /**
@@ -286,7 +287,10 @@ async function finishIntake(userId: string, targetExam: string, examDate: string
   const strategy = await buildStrategyAdvice(userId, targetExam, examDate);
   const enrolled = await isUserEnrolled(userId);
   if (enrolled) return strategy;
-  return [...strategy, ...(await buildCourseRecommendation(targetExam))];
+  // Don't dump the course pitch right after the advice — ask first. A wall of 8 messages in one
+  // go reads like a lecture, not a conversation; asking turns it back into a two-way exchange and
+  // means the pitch only shows up for someone who actually wants it.
+  return [...strategy, OFFER_COURSE_PROMPT];
 }
 
 /**
@@ -437,6 +441,11 @@ export async function sendChatMessage(
     const marksPercentage = trimmed.slice(0, 60);
     await prisma.user.update({ where: { id: user.id }, data: { marksPercentage } });
     reply = await finishIntake(user.id, user.targetExam || 'your exam', user.examDate || '');
+  } else if (lastAssistant?.content === OFFER_COURSE_PROMPT) {
+    const declines = /^\s*(no|not now|nah+|nope|skip|later|maybe later)\b/i.test(trimmed);
+    reply = declines
+      ? ['No problem — ask anytime you\'re ready, or say "talk to a counsellor" if you\'d rather speak to someone.']
+      : await buildCourseRecommendation(user.targetExam);
   } else if (lastAssistant?.content === CONFIRM_EXAM_PROMPT) {
     const saysDifferent = /^\s*(no|nah+|nope|nahi|different|change|wrong|galat)\b/i.test(trimmed);
     if (saysDifferent) {

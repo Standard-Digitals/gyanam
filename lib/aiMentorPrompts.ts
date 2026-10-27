@@ -8,3 +8,4 @@ export const QUALIFICATION_PROMPT = "What's your highest qualification right now
 export const MARKS_PROMPT = 'Roughly what percentage or marks did you score in that?';
 export const CONFIRM_EXAM_PROMPT = 'Is that still the plan, or has it changed?';
 export const EXAM_DATE_CONFIRM_PROMPT = 'Is that roughly right, or do you already have the official date?';
+export const OFFER_COURSE_PROMPT = 'Want me to suggest a course that fits this plan?';

@@ -13,6 +13,7 @@ import {
   MARKS_PROMPT,
   CONFIRM_EXAM_PROMPT,
   EXAM_DATE_CONFIRM_PROMPT,
+  OFFER_COURSE_PROMPT,
 } from '@/lib/aiMentorPrompts';
 
 interface ChatMessage {
@@ -28,6 +29,7 @@ const QUALIFICATION_SUGGESTIONS = ['12th Pass', 'Graduate', 'Post-graduate', 'Di
 const MARKS_SUGGESTIONS = ['Below 50%', '50-70%', '70-90%', 'Above 90%'];
 const CONFIRM_EXAM_SUGGESTIONS = ['Yes, same exam', "No, it's changed"];
 const EXAM_DATE_CONFIRM_SUGGESTIONS = ["Yes, that's about right", 'I have the exact date'];
+const OFFER_COURSE_SUGGESTIONS = ['Yes, show me', 'Not now'];
 // Prompts that expect a specific free-text answer (an exam name, a month/year) — no quick-reply
 // chips make sense there, so they're excluded from the generic "assistant just spoke" fallback.
 const FREE_TEXT_PROMPTS = new Set([EXAM_NAME_PROMPT, EXAM_DATE_PROMPT]);
@@ -145,6 +147,7 @@ export function ChatWidget() {
     [MARKS_PROMPT]: MARKS_SUGGESTIONS,
     [CONFIRM_EXAM_PROMPT]: CONFIRM_EXAM_SUGGESTIONS,
     [EXAM_DATE_CONFIRM_PROMPT]: EXAM_DATE_CONFIRM_SUGGESTIONS,
+    [OFFER_COURSE_PROMPT]: OFFER_COURSE_SUGGESTIONS,
   };
   const lastMessage = messages[messages.length - 1];
   const lastBotContent = lastMessage?.role === 'assistant' ? lastMessage.content : undefined;
