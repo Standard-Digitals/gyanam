@@ -17,6 +17,8 @@ export const BEGINNER_CHECK_PROMPT = 'Have you started preparing already, or are
 export const STUDY_HOURS_PROMPT = 'How many hours can you realistically study each day?';
 export const WEAK_SUBJECT_PROMPT = 'Which subject do you find toughest right now?';
 export const SYLLABUS_PROGRESS_PROMPT = 'How much of the syllabus have you covered so far?';
+export const READY_FOR_SCHEDULE_PROMPT = 'Ready to see your personalized schedule?';
+export const READY_FOR_DIAGNOSTIC_PROMPT = 'Want to start with a quick diagnostic quiz today?';
 
 // Course reveal is split into two turns — name/fit first, price/next-step only if the student
 // asks for it — instead of dumping both at once.

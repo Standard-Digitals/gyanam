@@ -15,6 +15,8 @@ import {
   STUDY_HOURS_PROMPT,
   WEAK_SUBJECT_PROMPT,
   SYLLABUS_PROGRESS_PROMPT,
+  READY_FOR_SCHEDULE_PROMPT,
+  READY_FOR_DIAGNOSTIC_PROMPT,
   COURSE_DETAILS_PROMPT,
   COURSE_ACTION_PROMPT,
   PREP_SUGGESTIONS,
@@ -302,6 +304,8 @@ const STUDY_HOURS_SUGGESTIONS = ['Less than 1 hour', '1-2 hours', '2-4 hours', '
 const WEAK_SUBJECT_SUGGESTIONS = ['Quantitative Aptitude', 'Reasoning', 'English', 'General Awareness', 'Not sure yet'];
 const SYLLABUS_PROGRESS_SUGGESTIONS = ['Just starting', 'Less than 25%', '25-50%', '50-75%', 'Almost done'];
 const COURSE_DETAILS_SUGGESTIONS = ['Tell me more', 'Not right now'];
+const READY_FOR_SCHEDULE_SUGGESTIONS = ['Yes, show me', 'Not now'];
+const READY_FOR_DIAGNOSTIC_SUGGESTIONS = ["Yes, let's go", 'Maybe later'];
 
 /** Chips for a reply that ends by asking one of the fixed intake prompts — keeps every branch
  * that hands off to `nextIntakeQuestion`/`nextStrategyQuestion` from having to know each
@@ -330,6 +334,10 @@ function suggestionsForPrompt(prompt: string): string[] {
       return COURSE_DETAILS_SUGGESTIONS;
     case COURSE_ACTION_PROMPT:
       return ENROLL_OR_COUNSELLOR_SUGGESTIONS;
+    case READY_FOR_SCHEDULE_PROMPT:
+      return READY_FOR_SCHEDULE_SUGGESTIONS;
+    case READY_FOR_DIAGNOSTIC_PROMPT:
+      return READY_FOR_DIAGNOSTIC_SUGGESTIONS;
     default:
       return []; // EXAM_NAME_PROMPT, EXAM_DATE_PROMPT — free text, no chips make sense
   }
@@ -455,6 +463,28 @@ async function finishIntake(userId: string, targetExam: string, examDate: string
   return { messages: [...strategy, OFFER_COURSE_PROMPT], suggestions: OFFER_COURSE_SUGGESTIONS };
 }
 
+/**
+ * The personalized plan is revealed across three short turns — summary, then schedule, then a
+ * diagnostic nudge plus a course pitch — each ending in a question, instead of landing as one
+ * block of 4-5 messages. Mirrors the two-turn course reveal below: a statement or two, then a
+ * stop point that needs a tap before the next piece shows up.
+ */
+
+/** Turn 1 — names what the plan will be built around, then asks before showing it. */
+async function buildPlanIntro(profile: StrategyProfile): Promise<ReplyWithSuggestions> {
+  const isBeginner = profile.examStage === 'Just starting out';
+  const hasWeakSubject = profile.weakSubject && profile.weakSubject !== 'Not sure yet';
+  return {
+    messages: [
+      `Got it — ${isBeginner ? "since you're just starting out, " : ''}we'll build this around ${
+        hasWeakSubject ? profile.weakSubject : 'your weak areas'
+      } and the ${profile.studyHoursPerDay ?? 'time'} you have daily.`,
+      READY_FOR_SCHEDULE_PROMPT,
+    ],
+    suggestions: READY_FOR_SCHEDULE_SUGGESTIONS,
+  };
+}
+
 // One schedule per daily-hours bucket — a realistic starting point for that much time, not a
 // one-size-fits-all template. Falls back to the "1-2 hours" schedule for an unrecognized answer.
 const HOURS_SCHEDULE: Record<string, string> = {
@@ -468,43 +498,34 @@ const HOURS_SCHEDULE: Record<string, string> = {
     "You've got strong time on your hands — a full-length or sectional test daily, plus dedicated revision of every wrong answer. At this pace, consistency will show results fast.",
 };
 
-/**
- * Builds the plan from what the student actually told us (beginner or not, daily hours, weak
- * subject, syllabus coverage) instead of a generic template — a short summary that names those
- * specifics, the hours-matched schedule, then a nudge to a diagnostic quiz, each its own message.
- */
-async function buildPersonalizedPlan(profile: StrategyProfile): Promise<string[]> {
+/** Turn 2 — the actual schedule, matched to their daily hours and weak subject, then asks before
+ * nudging toward a diagnostic. */
+async function buildSchedule(profile: StrategyProfile): Promise<ReplyWithSuggestions> {
   const isBeginner = profile.examStage === 'Just starting out';
   const hasWeakSubject = profile.weakSubject && profile.weakSubject !== 'Not sure yet';
-
-  const msgs: string[] = [];
-  msgs.push(
-    `Got it — ${isBeginner ? "since you're just starting out, " : ''}we'll build this around ${
-      hasWeakSubject ? profile.weakSubject : 'your weak areas'
-    } and the ${profile.studyHoursPerDay ?? 'time'} you have daily.`
-  );
-
-  const schedule = (profile.studyHoursPerDay && HOURS_SCHEDULE[profile.studyHoursPerDay]) || HOURS_SCHEDULE['1-2 hours'];
-  msgs.push(isBeginner ? `${schedule} We'll ease into full-length tests once the basics feel solid.` : schedule);
-
-  msgs.push(
-    hasWeakSubject
-      ? `Start every day's revision with ${profile.weakSubject} — that's where the biggest gains are right now.`
-      : "Take a quiz or two this week so I can tell you exactly where to focus revision."
-  );
-
-  msgs.push('Let\'s start with a quick diagnostic — take today\'s Daily Quiz so I can see exactly where you stand. Ask me "what\'s my plan today" anytime after that.');
-  return msgs;
+  const base = (profile.studyHoursPerDay && HOURS_SCHEDULE[profile.studyHoursPerDay]) || HOURS_SCHEDULE['1-2 hours'];
+  const schedule = isBeginner ? `${base} We'll ease into full-length tests once the basics feel solid.` : base;
+  const tip = hasWeakSubject
+    ? `Start every day's revision with ${profile.weakSubject} — that's where the biggest gains are right now.`
+    : 'Take a quiz or two this week so I can tell you exactly where to focus revision.';
+  return { messages: [`${schedule} ${tip}`, READY_FOR_DIAGNOSTIC_PROMPT], suggestions: READY_FOR_DIAGNOSTIC_SUGGESTIONS };
 }
 
-/** Terminal step of the strategy intake — the personalized plan above, plus a course pitch for
- * students who aren't enrolled yet, asked first rather than dumped alongside it. */
-async function finishStrategyIntake(userId: string, profile: StrategyProfile): Promise<ReplyWithSuggestions> {
-  const plan = await buildPersonalizedPlan(profile);
-  const enrolled = await isUserEnrolled(userId);
+/** Turn 3 — nudges to the diagnostic quiz, then a course pitch for students who aren't enrolled
+ * yet, asked first rather than dumped alongside it. */
+async function buildDiagnosticNudge(userId: string): Promise<ReplyWithSuggestions> {
   await prisma.user.update({ where: { id: userId }, data: { pendingIntakeFlow: null } });
-  if (enrolled) return { messages: plan, suggestions: defaultSuggestions(true) };
-  return { messages: [...plan, OFFER_COURSE_PROMPT], suggestions: OFFER_COURSE_SUGGESTIONS };
+  const enrolled = await isUserEnrolled(userId);
+  const nudge = 'Great — take today\'s Daily Quiz to get started, and ask me "what\'s my plan today" anytime after that.';
+  if (enrolled) return { messages: [nudge], suggestions: defaultSuggestions(true) };
+  return { messages: [nudge, OFFER_COURSE_PROMPT], suggestions: OFFER_COURSE_SUGGESTIONS };
+}
+
+/** Entry point into the strategy reveal — called once the intake (exam, date, stage, hours, weak
+ * subject, syllabus) is fully answered. Just the first turn; the rest follow as the student taps
+ * through READY_FOR_SCHEDULE_PROMPT and READY_FOR_DIAGNOSTIC_PROMPT. */
+async function finishStrategyIntake(userId: string, profile: StrategyProfile): Promise<ReplyWithSuggestions> {
+  return buildPlanIntro(profile);
 }
 
 /**
@@ -744,6 +765,33 @@ export async function sendChatMessage(
     const result = await finishStrategyIntake(user.id, { ...user, syllabusProgress });
     reply = result.messages;
     suggestions = result.suggestions;
+  } else if (lastAssistant?.content === READY_FOR_SCHEDULE_PROMPT) {
+    const declines = /^\s*(no|not now|nah+|nope|skip|later|maybe later)\b/i.test(trimmed);
+    if (declines) {
+      reply = ['No problem — ask me "what\'s my plan today" whenever you\'re ready to see it.'];
+      suggestions = defaultSuggestions(!!user.targetExam);
+    } else {
+      const result = await buildSchedule(user);
+      reply = result.messages;
+      suggestions = result.suggestions;
+    }
+  } else if (lastAssistant?.content === READY_FOR_DIAGNOSTIC_PROMPT) {
+    const declines = /^\s*(no|not now|maybe later|later|nah+|nope|skip)\b/i.test(trimmed);
+    if (declines) {
+      const enrolled = await isUserEnrolled(user.id);
+      await prisma.user.update({ where: { id: user.id }, data: { pendingIntakeFlow: null } });
+      if (enrolled) {
+        reply = ['No worries — the plan\'s saved. Ask me "what\'s my plan today" whenever you\'re ready.'];
+        suggestions = defaultSuggestions(true);
+      } else {
+        reply = ["No worries — the plan's saved.", OFFER_COURSE_PROMPT];
+        suggestions = OFFER_COURSE_SUGGESTIONS;
+      }
+    } else {
+      const result = await buildDiagnosticNudge(user.id);
+      reply = result.messages;
+      suggestions = result.suggestions;
+    }
   } else if (lastAssistant?.content === OFFER_COURSE_PROMPT) {
     const declines = /^\s*(no|not now|nah+|nope|skip|later|maybe later)\b/i.test(trimmed);
     if (declines) {
