@@ -2,22 +2,23 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Sparkles, ChevronRight, GraduationCap, CheckCircle2, ClipboardList } from 'lucide-react';
-import type { MentorOverview, ScheduleBlock } from '@/lib/data/aiMentor';
+import type { MentorOverview, WeeklySchedule } from '@/lib/data/aiMentor';
 
 interface PlanData extends MentorOverview {
-  dailyScheduleBlocks: ScheduleBlock[] | null;
+  dailyScheduleBlocks: WeeklySchedule | null;
 }
 
-function ScheduleChart({ blocks }: { blocks: ScheduleBlock[] }) {
-  const maxMinutes = Math.max(...blocks.map((b) => b.minutes));
+function ScheduleChart({ schedule }: { schedule: WeeklySchedule }) {
+  const maxMinutes = Math.max(...schedule.weekdayBlocks.map((b) => b.minutes));
   return (
     <div className="bg-white p-4 rounded-2xl border border-[#F3DCDD] space-y-3">
       <div className="flex items-center gap-2">
         <ClipboardList className="w-4 h-4 text-[#C12223]" />
-        <p className="text-[10px] font-black text-[#C12223] uppercase tracking-wide">Your Daily Study Routine</p>
+        <p className="text-[10px] font-black text-[#C12223] uppercase tracking-wide">Your Weekly Study Routine</p>
       </div>
+      <p className="text-[10px] font-bold text-[#888888] uppercase tracking-wide">Monday – Saturday, daily</p>
       <div className="space-y-2.5">
-        {blocks.map((b, i) => (
+        {schedule.weekdayBlocks.map((b, i) => (
           <div key={i}>
             <div className="flex items-center justify-between text-xs mb-1">
               <span className="font-bold text-[#1F1A1C]">{b.subject}</span>
@@ -28,6 +29,10 @@ function ScheduleChart({ blocks }: { blocks: ScheduleBlock[] }) {
             </div>
           </div>
         ))}
+      </div>
+      <div className="pt-2 border-t border-[#F3DCDD]">
+        <p className="text-[10px] font-black text-[#888888] uppercase tracking-wide mb-1">Sunday</p>
+        <p className="text-xs text-[#555555]">{schedule.sundayPlan}</p>
       </div>
     </div>
   );
@@ -50,7 +55,7 @@ export function PlanTab({ onTalkToCounsellor, onBrowseCourses }: { onTalkToCouns
   if (data.mode === 'counsellor') {
     return (
       <div className="p-4 space-y-4">
-        {data.dailyScheduleBlocks && <ScheduleChart blocks={data.dailyScheduleBlocks} />}
+        {data.dailyScheduleBlocks && <ScheduleChart schedule={data.dailyScheduleBlocks} />}
         {data.courseSuggestion ? (
           <div className="bg-white p-4 rounded-2xl border border-[#F3DCDD]">
             <div className="flex items-center gap-2 mb-1">
@@ -102,7 +107,7 @@ export function PlanTab({ onTalkToCounsellor, onBrowseCourses }: { onTalkToCouns
 
   return (
     <div className="p-4 space-y-3">
-      {data.dailyScheduleBlocks && <ScheduleChart blocks={data.dailyScheduleBlocks} />}
+      {data.dailyScheduleBlocks && <ScheduleChart schedule={data.dailyScheduleBlocks} />}
       {data.banner && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
           <p className="text-[10px] font-black text-amber-700 uppercase tracking-wide">Waiting for you</p>

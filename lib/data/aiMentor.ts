@@ -517,8 +517,23 @@ function buildScheduleBlocks(studyHoursPerDay: string | null, weakSubject: strin
   return blocks;
 }
 
-function formatScheduleMessage(blocks: ScheduleBlock[]): string {
-  return blocks.map((b) => `${b.minutes} min — ${b.subject}`).join('\n');
+// Weekday blocks repeat Monday-Saturday (same subjects, same minutes, every one of those days —
+// writing them out 6 times over would just be noise); Sunday is a fixed mock-test-plus-rest day
+// so the week has a day-wise shape instead of reading like "do this amount every day forever".
+export interface WeeklySchedule {
+  weekdayBlocks: ScheduleBlock[];
+  sundayPlan: string;
+}
+
+const SUNDAY_PLAN = "Full-length mock test, then rest and light revision of the week's mistakes.";
+
+function buildWeeklySchedule(studyHoursPerDay: string | null, weakSubject: string | null): WeeklySchedule {
+  return { weekdayBlocks: buildScheduleBlocks(studyHoursPerDay, weakSubject), sundayPlan: SUNDAY_PLAN };
+}
+
+function formatScheduleMessage(schedule: WeeklySchedule): string {
+  const weekday = schedule.weekdayBlocks.map((b) => `${b.minutes} min — ${b.subject}`).join('\n');
+  return `Monday – Saturday (daily):\n${weekday}\n\nSunday:\n${schedule.sundayPlan}`;
 }
 
 const SUBJECT_TOPICS: Record<string, string[]> = {
@@ -529,27 +544,28 @@ const SUBJECT_TOPICS: Record<string, string[]> = {
   'Revision & timed practice': ['Review mistakes from recent quizzes', 'One timed mini-test'],
 };
 
-function formatDetailedScheduleMessage(blocks: ScheduleBlock[]): string {
-  return blocks
+function formatDetailedScheduleMessage(schedule: WeeklySchedule): string {
+  const weekday = schedule.weekdayBlocks
     .map((b) => {
       const topics = SUBJECT_TOPICS[b.subject];
       return topics ? `${b.minutes} min — ${b.subject}\n   → Focus: ${topics.join(', ')}` : `${b.minutes} min — ${b.subject}`;
     })
     .join('\n');
+  return `Monday – Saturday (daily):\n${weekday}\n\nSunday:\n${schedule.sundayPlan}`;
 }
 
-/** Turn 2 — the structured schedule chart (real subjects and minutes — saved so "My Plan" and a
- * later "what's my routine" question show the same one), then asks before offering per-subject
- * detail. */
+/** Turn 2 — the structured weekly schedule (real subjects and minutes, Mon-Sat vs. a Sunday
+ * mock-test day — saved so "My Plan" and a later "what's my routine" question show the same one),
+ * then asks before offering per-subject detail. */
 async function buildSchedule(userId: string, profile: StrategyProfile): Promise<ReplyWithSuggestions> {
-  const blocks = buildScheduleBlocks(profile.studyHoursPerDay, profile.weakSubject);
-  await prisma.user.update({ where: { id: userId }, data: { dailyScheduleBlocks: blocks as unknown as object[] } });
+  const schedule = buildWeeklySchedule(profile.studyHoursPerDay, profile.weakSubject);
+  await prisma.user.update({ where: { id: userId }, data: { dailyScheduleBlocks: schedule as unknown as object } });
   const isBeginner = profile.examStage === 'Just starting out';
   const intro = isBeginner
     ? "Let's begin with a structured routine — we'll ease into full-length tests once the basics feel solid."
     : "Here's a structured routine based on what you've told me.";
   return {
-    messages: [`${intro}\n\n${formatScheduleMessage(blocks)}`, DETAILED_PLAN_PROMPT],
+    messages: [`${intro}\n\n${formatScheduleMessage(schedule)}`, DETAILED_PLAN_PROMPT],
     suggestions: DETAILED_PLAN_SUGGESTIONS,
   };
 }
@@ -657,7 +673,7 @@ export async function sendChatMessage(
     weakSubject: string | null;
     syllabusProgress: string | null;
     pendingIntakeFlow: string | null;
-    dailyScheduleBlocks: ScheduleBlock[] | null;
+    dailyScheduleBlocks: WeeklySchedule | null;
     chatResetAt: Date | null;
     pendingExamDateSuggestion: string | null;
   },

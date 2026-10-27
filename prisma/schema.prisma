@@ -25,7 +25,7 @@ model User {
   weakSubject               String? // self-reported toughest subject, or "Not sure yet"
   syllabusProgress          String? // e.g. "25-50%" — self-reported syllabus coverage
   pendingIntakeFlow         String? // "strategy" | "course" — which intake sequence is mid-flight, so answering the shared exam-name/exam-date questions resumes into the right one
-  dailyScheduleBlocks       Json? // ScheduleBlock[] ({ subject, minutes }) — the structured daily routine chart built from examStage/studyHoursPerDay/weakSubject, shown in chat and the "My Plan" tab
+  dailyScheduleBlocks       Json? // WeeklySchedule ({ weekdayBlocks: { subject, minutes }[], sundayPlan }) — the structured weekly routine chart built from examStage/studyHoursPerDay/weakSubject, shown in chat and the "My Plan" tab
   chatResetAt               DateTime? // set when the student taps "New Conversation" in AI Mentor chat — messages before this are hidden from the chat view, but stay in the database
   pendingExamDateSuggestion String? // scratch field: an OpenAI-suggested exam period awaiting the student's yes/no confirmation; cleared once answered
   createdAt                 DateTime  @default(now())
