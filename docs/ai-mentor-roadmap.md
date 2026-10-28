@@ -189,6 +189,23 @@ findings.
       relying on the student to self-report. `autoCompletedIndicesFor()` in `lib/data/aiMentor.ts`;
       `getWeeklyChecklist()` is now async (takes `userId`) to compute this at read time, same
       not-persisted pattern as `attachTodaysTopics`. No schema change.
+- [x] **AI-generated practice quiz when nothing's left to attempt.** CEO feedback: "agar test
+      available nahi hai to khud bana ke de, AI test ke naam se save karega dashboard pe." When
+      `findAnyOpenTest` finds no admin-created quiz/mock test left (same function behind both the
+      Test tab and chat's "give me a practice test"), it now generates one via OpenAI as a last
+      resort instead of showing "nothing open." Scoped deliberately to
+      `AI_QUIZ_SAFE_SUBJECTS` — Quantitative Aptitude, Reasoning, English only; **never** General
+      Awareness/current affairs/static/banking GK, where a hallucinated or outdated "fact" in a
+      *scored* quiz would actually mislead a student, not just read oddly in chat. Every generated
+      question is strictly shape-validated (4 options, valid answer index, non-empty explanation)
+      before anything is saved — a single malformed question rejects the whole batch. Saved as a
+      normal `Quiz` row titled "AI Practice Quiz — `<subject>`" (`courseId: null`, so it's
+      available to every student, not just one), which is why it automatically shows up in
+      `/admin/quizzes` (no filter there) — satisfying "save on dashboard" for free. Reuses an
+      already-generated, not-yet-attempted one from today instead of generating a fresh one on
+      every check, so OpenAI calls and quiz-bank growth stay bounded. `generateAiPracticeQuiz()`
+      in `lib/data/chatIntent.ts`, `buildAiPracticeQuiz()` in `lib/data/aiMentor.ts`. Best-effort —
+      unavailable/failed generation keeps the exact pre-existing "nothing open" result.
 
 ## Next (not started)
 

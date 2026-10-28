@@ -3,7 +3,8 @@ import { getCourseProgress } from '@/lib/data/courseProgress';
 import { getSubjectStrength } from '@/lib/data/performance';
 import { getMyProgress, getBasicProgress } from '@/lib/data/myProgress';
 import { suggestExamPeriod } from '@/lib/data/examDateSuggestion';
-import { classifyUnmatchedMessage, looksLikeAnswerTo, draftDoubtReply, type KnownIntentId } from '@/lib/data/chatIntent';
+import { classifyUnmatchedMessage, looksLikeAnswerTo, draftDoubtReply, generateAiPracticeQuiz, AI_QUIZ_SAFE_SUBJECTS } from '@/lib/data/chatIntent';
+import type { KnownIntentId } from '@/lib/data/chatIntent';
 import {
   EXAM_NAME_PROMPT,
   EXAM_DATE_PROMPT,
@@ -1176,7 +1177,66 @@ export async function findAnyOpenTest(
   const openMock = matchedMock ?? openMocks[0];
   if (openMock) return { kind: 'mock', id: openMock.id, title: openMock.title };
 
+  // Nothing admin-created left to attempt — generate a short AI practice quiz as a last resort
+  // instead of leaving the student with nothing (CEO feedback: "agar test available nahi hai to
+  // khud bana ke de"). Best-effort: unavailable/failed generation just keeps the pre-existing
+  // "nothing open" result, exactly as before this existed.
+  const generated = await buildAiPracticeQuiz(userId, targetExam);
+  if (generated) return { kind: 'quiz', id: generated.id, title: generated.title };
+
   return null;
+}
+
+const AI_QUIZ_TITLE_PREFIX = 'AI Practice Quiz';
+
+/** Reuses an already-generated, not-yet-attempted-by-this-student AI quiz from today instead of
+ * generating a fresh one on every "nothing open" check — once created it's a normal courseId:null
+ * Quiz row, so it's found by the regular query above for every other student too until each of
+ * them attempts it, keeping OpenAI calls and quiz-bank growth naturally bounded. */
+async function buildAiPracticeQuiz(userId: string, targetExam: string | null): Promise<{ id: string; title: string } | null> {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const recent = await prisma.quiz.findMany({
+    where: { title: { startsWith: AI_QUIZ_TITLE_PREFIX }, courseId: null, createdAt: { gte: todayStart } },
+    orderBy: { createdAt: 'desc' },
+    select: { id: true, title: true },
+  });
+  if (recent.length > 0) {
+    const attempted = await prisma.quizAttempt.findMany({ where: { userId, quizId: { in: recent.map((q) => q.id) } }, select: { quizId: true } });
+    const attemptedIds = new Set(attempted.map((a) => a.quizId));
+    const unattempted = recent.find((q) => !attemptedIds.has(q.id));
+    if (unattempted) return unattempted;
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { weakSubject: true } });
+  const safeSubjects: readonly string[] = AI_QUIZ_SAFE_SUBJECTS;
+  const subject = user?.weakSubject && safeSubjects.includes(user.weakSubject) ? user.weakSubject : AI_QUIZ_SAFE_SUBJECTS[dayIndex() % AI_QUIZ_SAFE_SUBJECTS.length];
+
+  const generated = await generateAiPracticeQuiz(subject, targetExam);
+  if (!generated) return null;
+
+  const quiz = await prisma.quiz.create({
+    data: {
+      title: `${AI_QUIZ_TITLE_PREFIX} — ${subject}`,
+      subject,
+      examCategory: [],
+      date: new Date().toISOString().slice(0, 10),
+      totalQuestions: generated.length,
+      timeLimitMinutes: Math.max(5, generated.length * 2),
+      totalMarks: generated.length,
+      difficulty: 'Medium',
+      questions: generated.map((q, i) => ({
+        id: i + 1,
+        type: 'mcq',
+        question: q.question,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+      })) as unknown as object,
+    },
+    select: { id: true, title: true },
+  });
+  return quiz;
 }
 
 async function createDoubtTicket(name: string, phone: string, email: string | null, text: string): Promise<string> {

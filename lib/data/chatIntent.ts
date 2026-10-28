@@ -14,12 +14,12 @@ export interface ChatTurn {
 /** `history`, when given, is inserted between the system prompt and the final user turn — real
  * prior turns, not summarized into text, so the model can follow an actual back-and-forth (e.g. a
  * "why that subject?" follow-up) instead of judging each message in total isolation. */
-async function callOpenAI(systemPrompt: string, userContent: string, maxTokens: number, temperature = 0, history: ChatTurn[] = []): Promise<string | null> {
+async function callOpenAI(systemPrompt: string, userContent: string, maxTokens: number, temperature = 0, history: ChatTurn[] = [], timeoutMs = 8000): Promise<string | null> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return null;
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -169,4 +169,61 @@ export async function draftDoubtReply(message: string, targetExam: string | null
   const draft = await callOpenAI(system, message, 120, 0.4, history);
   if (draft && PRICE_LIKE_PATTERN.test(draft)) return null;
   return draft;
+}
+
+export interface GeneratedQuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+}
+
+/** Subjects where a question's correctness doesn't hinge on current or easily-outdated facts —
+ * deliberately excludes General Awareness/current affairs/static GK/banking awareness, where an
+ * AI-hallucinated or stale "fact" in a *scored* practice quiz would actually mislead a student
+ * studying for a real exam, not just read oddly in a chat reply. */
+export const AI_QUIZ_SAFE_SUBJECTS = ['Quantitative Aptitude', 'Reasoning', 'English'] as const;
+
+function isValidGeneratedQuestion(q: unknown): q is GeneratedQuizQuestion {
+  if (!q || typeof q !== 'object') return false;
+  const o = q as Record<string, unknown>;
+  return (
+    typeof o.question === 'string' &&
+    o.question.trim().length > 0 &&
+    Array.isArray(o.options) &&
+    o.options.length === 4 &&
+    o.options.every((opt) => typeof opt === 'string' && opt.trim().length > 0) &&
+    typeof o.correctAnswer === 'number' &&
+    Number.isInteger(o.correctAnswer) &&
+    o.correctAnswer >= 0 &&
+    o.correctAnswer <= 3 &&
+    typeof o.explanation === 'string' &&
+    o.explanation.trim().length > 0
+  );
+}
+
+/** Generates a short set of practice MCQs for one of AI_QUIZ_SAFE_SUBJECTS, used as a last-resort
+ * fallback (lib/data/aiMentor.ts, findAnyOpenTest) when no admin-created quiz/mock test is left
+ * for a student to attempt, instead of leaving them with nothing. Strictly validates every
+ * question's shape before returning anything — a single malformed question rejects the whole
+ * batch, since this feeds directly into a scored quiz a student takes seriously. Returns null
+ * (caller falls back to the pre-existing "nothing open" result) if OPENAI_API_KEY isn't set, the
+ * call fails, times out, or the response doesn't parse as a fully valid question array. */
+export async function generateAiPracticeQuiz(subject: string, targetExam: string | null, count = 5): Promise<GeneratedQuizQuestion[] | null> {
+  const system =
+    `Generate exactly ${count} multiple-choice practice questions for the subject "${subject}", at the level of ` +
+    `Indian government competitive-exam aspirants${targetExam ? ` preparing for ${targetExam}` : ''}. Use only ` +
+    'well-established, timeless knowledge and skills for this subject — never current events, recent news, prices, ' +
+    "or anything that could go out of date. Reply with ONLY a JSON array, no prose, no markdown code fences, where " +
+    'each item is exactly: {"question": string, "options": [exactly 4 short strings], "correctAnswer": integer 0-3 ' +
+    '(index into options), "explanation": a short string explaining why that answer is correct}.';
+  const raw = await callOpenAI(system, `Subject: ${subject}`, 1800, 0.3, [], 15000);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    if (!Array.isArray(parsed) || parsed.length === 0 || !parsed.every(isValidGeneratedQuestion)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
 }
