@@ -3,7 +3,7 @@ import { getCourseProgress } from '@/lib/data/courseProgress';
 import { getSubjectStrength } from '@/lib/data/performance';
 import { getMyProgress, getBasicProgress } from '@/lib/data/myProgress';
 import { suggestExamPeriod } from '@/lib/data/examDateSuggestion';
-import { classifyUnmatchedMessage, looksLikeAnswerTo, type KnownIntentId } from '@/lib/data/chatIntent';
+import { classifyUnmatchedMessage, looksLikeAnswerTo, draftDoubtReply, type KnownIntentId } from '@/lib/data/chatIntent';
 import {
   EXAM_NAME_PROMPT,
   EXAM_DATE_PROMPT,
@@ -1049,11 +1049,12 @@ async function createCounsellorLead(name: string, phone: string, email: string |
  * pulls the student's real data (course, pending tests, progress, subject accuracy) so answers
  * are specific to them, not generic. A narrow, best-effort OpenAI backstop (chatIntent.ts) only
  * kicks in where the regex layer is known to be fragile: validating a free-text intake answer
- * actually answers the pending question, and recovering a recognizable intent (or just small talk)
- * from a message that matched no pattern, before it's escalated as a support ticket. OpenAI being
- * unavailable degrades every one of those checks back to the pre-existing regex-only behavior.
- * Returns a short sequence of messages, having already saved all of them (the user's and every
- * reply chunk) to history.
+ * actually answers the pending question, recovering a recognizable intent (or just small talk)
+ * from a message that matched no pattern, and — for a genuine doubt that still ends up ticketed —
+ * drafting an immediate, encouraging first reply (never a source of facts; the ticket is always
+ * still created too). OpenAI being unavailable degrades every one of those checks back to the
+ * pre-existing regex-only behavior. Returns a short sequence of messages, having already saved
+ * all of them (the user's and every reply chunk) to history.
  */
 export async function sendChatMessage(
   user: {
@@ -1506,8 +1507,18 @@ export async function sendChatMessage(
       reply = [`Looks like you're asking about ${label} — tap below and I'll pull that up.`];
       suggestions = [chip];
     } else {
-      const ticketNumber = await createDoubtTicket(name, user.phone, user.email, trimmed);
-      reply = ['Got it, let me get that in front of your faculty.', `Forwarded as ticket ${ticketNumber} — they'll get back to you soon.`];
+      // Ticket creation stays unconditional — a human safety net regardless of whether the draft
+      // reply below comes back. The draft only adds an immediate, encouraging first response
+      // instead of leaving the student with nothing until faculty follows up; it's never allowed
+      // to state specific facts (see draftDoubtReply's prompt), so it can't substitute for the
+      // ticket, only soften the wait.
+      const [ticketNumber, drafted] = await Promise.all([
+        createDoubtTicket(name, user.phone, user.email, trimmed),
+        draftDoubtReply(trimmed, user.targetExam),
+      ]);
+      reply = drafted
+        ? [drafted, `I've also flagged this for your faculty (ticket ${ticketNumber}) in case you need more specific detail.`]
+        : ['Got it, let me get that in front of your faculty.', `Forwarded as ticket ${ticketNumber} — they'll get back to you soon.`];
       suggestions = defaultSuggestions(!!user.targetExam);
     }
   }

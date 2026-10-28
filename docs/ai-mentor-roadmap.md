@@ -107,12 +107,20 @@ deterministic code) — keeps cost low and avoids hallucinated course/pricing in
       pre-audit regex-only behavior. (The exam-date-suggestion feature already reads this same env
       var — if that's ever shown a real suggestion in production, the key is already set.)
 
+- [x] **Genuine-doubt drafted reply** (2026-10-28): a message that reaches the support-ticket
+      fallback (not small talk, not a recognizable known intent) now also gets an immediate,
+      short, encouraging reply from OpenAI before the "forwarded to faculty" line — instead of
+      leaving the student with nothing but a ticket number until a human replies. The ticket is
+      still always created regardless (unconditional safety net); the prompt explicitly forbids
+      stating any fact it isn't certain of (current affairs, dates, pricing, policy, syllabus
+      specifics) — it can only give general study-skill/encouragement, never substitute for
+      faculty on anything factual. `draftDoubtReply()` in `lib/data/chatIntent.ts`.
+
 ## Next (not started)
 
-- [ ] **Real NLU beyond the narrow backstop above** — today's fix only patches the two riskiest
-      specific spots (intake-answer validation, unmatched-message fallback). The regex layer is
-      still the primary path for everything else, so paraphrased/multi-part/typo'd messages that
-      DO match some pattern, or a different pattern than intended, aren't covered by this round.
+- [ ] **Real NLU beyond the narrow backstop above** — the regex layer is still the primary path
+      for everything else, so paraphrased/multi-part messages that DO match some pattern (just the
+      wrong one, or only half of a two-part question) aren't covered by this round.
 - [ ] **State-machine refactor of `sendChatMessage`** — it's now a 30+ branch if/else chain that
       infers "current state" via literal string-equality against the last assistant message's
       text, rather than an explicit stored state. Works, but every new flow added is another

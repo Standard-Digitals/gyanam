@@ -6,7 +6,7 @@
  * breaking. Same fetch/timeout shape as examDateSuggestion.ts.
  */
 
-async function callOpenAI(systemPrompt: string, userContent: string, maxTokens: number): Promise<string | null> {
+async function callOpenAI(systemPrompt: string, userContent: string, maxTokens: number, temperature = 0): Promise<string | null> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return null;
 
@@ -20,7 +20,7 @@ async function callOpenAI(systemPrompt: string, userContent: string, maxTokens: 
       signal: controller.signal,
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        temperature: 0,
+        temperature,
         max_tokens: maxTokens,
         messages: [
           { role: 'system', content: systemPrompt },
@@ -93,4 +93,25 @@ export async function looksLikeAnswerTo(question: string, reply: string): Promis
   const result = await callOpenAI(system, reply, 5);
   if (!result) return true; // unavailable — don't block, keep pre-existing behavior
   return /^\s*yes/i.test(result);
+}
+
+/** Only called for a genuine doubt that reaches the support-ticket fallback (classifyUnmatchedMessage
+ * returned "genuine_doubt", or no regex pattern + no AI classification matched anything else) — a
+ * short, immediate, encouraging reply instead of leaving the student with nothing until faculty
+ * follows up. Deliberately NEVER a source of facts: the prompt forbids stating anything specific
+ * (current affairs, dates, pricing, syllabus/policy details) it isn't certain of, and the caller
+ * always still creates the support ticket regardless of this — a human safety net stays in place
+ * whether or not this draft comes back. Returns null (caller falls back to the old ticket-only
+ * reply) if OPENAI_API_KEY isn't set, the call fails, or the response is empty. */
+export async function draftDoubtReply(message: string, targetExam: string | null): Promise<string | null> {
+  const system =
+    'You are a warm, encouraging study mentor for Indian government-exam aspirants (SSC/Banking/Railway/UPSC/etc.), ' +
+    `replying inside a chat app${targetExam ? ` to a student preparing for ${targetExam}` : ''}. ` +
+    "Reply to the student's message below in 1-3 short sentences, in the same language/mix they used " +
+    '(English, Hindi, or Hinglish). You may give general study-skill advice, encouragement, or exam-strategy tips. ' +
+    'You must NEVER state specific facts you are not certain are correct — no current affairs, exact dates, ' +
+    'syllabus specifics, prices, policies, or anything about this institute\'s courses/schedule (those come from ' +
+    "elsewhere in the app). If the question needs any such fact, say only that you're not 100% sure and a faculty " +
+    "member will confirm it — never guess. Do not mention that you're an AI or that this is a draft.";
+  return callOpenAI(system, message, 120, 0.4);
 }
