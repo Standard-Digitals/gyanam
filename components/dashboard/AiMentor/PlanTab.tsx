@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Sparkles, ChevronRight, GraduationCap, CheckCircle2, ClipboardList } from 'lucide-react';
-import type { MentorOverview, WeeklySchedule } from '@/lib/data/aiMentor';
+import { Sparkles, ChevronRight, ChevronDown, GraduationCap, CheckCircle2, ClipboardList, Map as MapIcon } from 'lucide-react';
+import type { MentorOverview, WeeklySchedule, RoadmapPhase } from '@/lib/data/aiMentor';
 
 interface PlanData extends MentorOverview {
   dailyScheduleBlocks: WeeklySchedule | null;
+  roadmap: RoadmapPhase[] | null;
 }
 
 function ScheduleChart({ schedule }: { schedule: WeeklySchedule }) {
@@ -39,6 +40,45 @@ function ScheduleChart({ schedule }: { schedule: WeeklySchedule }) {
   );
 }
 
+function RoadmapView({ phases }: { phases: RoadmapPhase[] }) {
+  const [openIndex, setOpenIndex] = useState(0);
+  return (
+    <div className="bg-white p-4 rounded-2xl border border-[#F3DCDD] space-y-3">
+      <div className="flex items-center gap-2">
+        <MapIcon className="w-4 h-4 text-[#C12223]" />
+        <p className="text-[10px] font-black text-[#C12223] uppercase tracking-wide">Your Roadmap to Exam Day</p>
+      </div>
+      <div className="space-y-2">
+        {phases.map((phase, i) => {
+          const open = openIndex === i;
+          return (
+            <div key={i} className="border border-[#F3DCDD] rounded-xl overflow-hidden">
+              <button onClick={() => setOpenIndex(open ? -1 : i)} className="w-full flex items-center justify-between gap-2 p-3 text-left cursor-pointer">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-[#1F1A1C]">{phase.label}</p>
+                  <p className="text-[10px] text-[#888888] mt-0.5">{phase.dateRangeLabel}</p>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-[#C12223] shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+              </button>
+              {open && (
+                <div className="px-3 pb-3 space-y-2.5">
+                  <p className="text-[11px] text-[#555555]">{phase.targetNote}</p>
+                  {phase.subjects.map((s, j) => (
+                    <div key={j}>
+                      <p className="text-[11px] font-bold text-[#1F1A1C]">{s.subject}</p>
+                      <p className="text-[11px] text-[#888888]">{s.topics.length ? s.topics.join(', ') : 'Revision & practice'}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function PlanTab({ onTalkToCounsellor, onBrowseCourses }: { onTalkToCounsellor?: () => void; onBrowseCourses?: () => void }) {
   const [data, setData] = useState<PlanData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,6 +97,7 @@ export function PlanTab({ onTalkToCounsellor, onBrowseCourses }: { onTalkToCouns
     return (
       <div className="p-4 space-y-4">
         {data.dailyScheduleBlocks && <ScheduleChart schedule={data.dailyScheduleBlocks} />}
+        {data.roadmap && data.roadmap.length > 0 && <RoadmapView phases={data.roadmap} />}
         {data.courseSuggestion ? (
           <div className="bg-white p-4 rounded-2xl border border-[#F3DCDD]">
             <div className="flex items-center gap-2 mb-1">
@@ -109,6 +150,7 @@ export function PlanTab({ onTalkToCounsellor, onBrowseCourses }: { onTalkToCouns
   return (
     <div className="p-4 space-y-3">
       {data.dailyScheduleBlocks && <ScheduleChart schedule={data.dailyScheduleBlocks} />}
+      {data.roadmap && data.roadmap.length > 0 && <RoadmapView phases={data.roadmap} />}
       {data.banner && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
           <p className="text-[10px] font-black text-amber-700 uppercase tracking-wide">Waiting for you</p>

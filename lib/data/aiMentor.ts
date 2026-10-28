@@ -556,10 +556,26 @@ function formatScheduleMessage(schedule: WeeklySchedule): string {
 // Fallback when no enrolled/matching course has subject-tagged chapters yet — rotates by day so
 // it isn't the same two topics forever, but is still a generic placeholder, not real syllabus data.
 const SUBJECT_TOPICS: Record<string, string[]> = {
-  'Quantitative Aptitude': ['Percentage', 'Ratio & Proportion', 'Profit & Loss', 'Time & Work', 'Simplification'],
-  Reasoning: ['Puzzles', 'Seating Arrangement', 'Blood Relations', 'Coding-Decoding', 'Syllogism'],
-  English: ['Reading Comprehension', 'Error Spotting', 'Para Jumbles', 'Cloze Test', 'Vocabulary'],
-  'General Awareness': ['Current Affairs', 'Static GK', 'Banking Awareness', 'Science GK', 'History & Polity'],
+  'Quantitative Aptitude': [
+    'Number System', 'Simplification', 'Percentage', 'Ratio & Proportion', 'Profit & Loss',
+    'Simple & Compound Interest', 'Time & Work', 'Time, Speed & Distance', 'Average',
+    'Mixture & Alligation', 'Mensuration', 'Algebra', 'Geometry', 'Trigonometry', 'Data Interpretation',
+  ],
+  Reasoning: [
+    'Coding-Decoding', 'Blood Relations', 'Direction Sense', 'Seating Arrangement (Linear)',
+    'Seating Arrangement (Circular)', 'Puzzles', 'Syllogism', 'Number Series', 'Alphabet Series',
+    'Analogy', 'Classification', 'Ranking & Order', 'Inequality', 'Statement & Conclusion', 'Non-Verbal Reasoning',
+  ],
+  English: [
+    'Reading Comprehension', 'Error Spotting', 'Para Jumbles', 'Cloze Test', 'Fill in the Blanks',
+    'Vocabulary', 'Synonyms & Antonyms', 'One Word Substitution', 'Idioms & Phrases',
+    'Active-Passive Voice', 'Direct-Indirect Speech', 'Sentence Improvement', 'Phrase Replacement', 'Spelling Correction',
+  ],
+  'General Awareness': [
+    'Current Affairs', 'Static GK', 'Banking Awareness', 'Science GK', 'History & Polity',
+    'Geography', 'Economy', 'Important Days', 'Sports GK', 'Awards & Honours', 'Books & Authors',
+    'Government Schemes', 'Committees & Commissions', 'Computer Awareness',
+  ],
   'Revision & timed practice': ['Review mistakes from recent quizzes', 'One timed mini-test'],
 };
 
@@ -583,10 +599,9 @@ function matchChapterSubject(chapterTitle: string): string | null {
   return null;
 }
 
-/** One subject-tagged chapter per subject (first match, in chapter order) — then, for a real
- * student, the next topic they haven't completed yet (so it advances with their own progress);
- * for a course being previewed without enrollment, a day-rotated topic from that chapter instead. */
-async function topicsFromCourse(courseId: string, userId: string | null): Promise<Map<string, string>> {
+/** One subject-tagged chapter per subject (first match, in chapter order), with its topics in
+ * curriculum order — the shared building block behind both "today's topic" and the full roadmap. */
+async function chapterTopicsBySubject(courseId: string): Promise<Map<string, { id: string; title: string }[]>> {
   const chapters = await prisma.chapter.findMany({ where: { courseId }, orderBy: { order: 'asc' }, select: { id: true, title: true } });
   const chapterIdBySubject = new Map<string, string>();
   for (const ch of chapters) {
@@ -604,21 +619,134 @@ async function topicsFromCourse(courseId: string, userId: string | null): Promis
     topicsByChapter.set(t.chapterId, list);
   }
 
+  const result = new Map<string, { id: string; title: string }[]>();
+  for (const [subject, chapterId] of chapterIdBySubject) {
+    result.set(subject, topicsByChapter.get(chapterId) ?? []);
+  }
+  return result;
+}
+
+/** For a real student, the next topic in that subject they haven't completed yet (so it advances
+ * with their own progress); for a course being previewed without enrollment, a day-rotated topic
+ * from that chapter instead. */
+async function topicsFromCourse(courseId: string, userId: string | null): Promise<Map<string, string>> {
+  const bySubject = await chapterTopicsBySubject(courseId);
+  if (bySubject.size === 0) return new Map();
+
+  const allTopicIds = [...bySubject.values()].flatMap((list) => list.map((t) => t.id));
   let completedIds = new Set<string>();
-  if (userId && topics.length > 0) {
-    const progress = await prisma.topicProgress.findMany({ where: { userId, topicId: { in: topics.map((t) => t.id) } }, select: { topicId: true } });
+  if (userId && allTopicIds.length > 0) {
+    const progress = await prisma.topicProgress.findMany({ where: { userId, topicId: { in: allTopicIds } }, select: { topicId: true } });
     completedIds = new Set(progress.map((p) => p.topicId));
   }
 
   const result = new Map<string, string>();
-  for (const [subject, chapterId] of chapterIdBySubject) {
-    const list = topicsByChapter.get(chapterId) ?? [];
+  for (const [subject, list] of bySubject) {
     if (list.length === 0) continue;
     const next = userId ? list.find((t) => !completedIds.has(t.id)) : undefined;
     const pick = next ?? list[dayIndex() % list.length];
     result.set(subject, pick.title);
   }
   return result;
+}
+
+/** Full ordered topic list per core subject — the real course curriculum where it has
+ * subject-tagged chapters, the generic list otherwise. Used to lay out the multi-phase roadmap
+ * (as opposed to `topicsFromCourse`, which only needs a single "today" pick). */
+async function fullTopicSequence(courseId: string | null): Promise<Map<string, string[]>> {
+  const bySubject = new Map<string, string[]>();
+  if (courseId) {
+    const chapterTopics = await chapterTopicsBySubject(courseId);
+    for (const [subject, list] of chapterTopics) {
+      if (list.length > 0) bySubject.set(subject, list.map((t) => t.title));
+    }
+  }
+  for (const subject of CORE_SUBJECTS) {
+    if (!bySubject.has(subject)) bySubject.set(subject, SUBJECT_TOPICS[subject] ?? []);
+  }
+  return bySubject;
+}
+
+/** The student's self-reported `examDate` is free text ("March 2026", "soon", a specific date) —
+ * not reliably parseable, so this takes a best-effort stab and otherwise falls back to a generic
+ * 90-day window rather than guessing at a specific day. */
+function resolveExamWindow(examDate: string | null): { totalDays: number } {
+  const DEFAULT_DAYS = 90;
+  const MIN_DAYS = 21;
+  const MAX_DAYS = 365;
+  if (examDate) {
+    const parsed = new Date(examDate);
+    const now = Date.now();
+    if (!isNaN(parsed.getTime()) && parsed.getTime() > now) {
+      const days = Math.round((parsed.getTime() - now) / DAY);
+      return { totalDays: Math.max(MIN_DAYS, Math.min(MAX_DAYS, days)) };
+    }
+  }
+  return { totalDays: DEFAULT_DAYS };
+}
+
+export interface RoadmapPhase {
+  label: string;
+  dateRangeLabel: string;
+  targetNote: string;
+  subjects: { subject: string; topics: string[] }[];
+}
+
+const fmtRoadmapDate = (d: Date) => d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+const addDays = (d: Date, n: number) => new Date(d.getTime() + n * DAY);
+
+/** The exam-prep equivalent of a 3-month ChatGPT-style plan, scaled to however long the student
+ * actually has: build the basics, finish the syllabus, then mocks and revision — each phase
+ * listing which topics (from the student's real course curriculum when available) fall in it. */
+export async function buildRoadmap(userId: string, examDate: string | null, targetExam: string | null): Promise<RoadmapPhase[]> {
+  const enrollment = await prisma.enrollment.findFirst({ where: { userId, status: 'ACTIVE' }, orderBy: { enrolledAt: 'desc' }, select: { courseId: true } });
+  let courseId = enrollment?.courseId ?? null;
+  if (!courseId) {
+    const category = matchExamCategory(targetExam);
+    if (category) {
+      const course = await prisma.course.findFirst({ where: { category: { has: category } }, orderBy: { studentsEnrolled: 'desc' }, select: { id: true } });
+      courseId = course?.id ?? null;
+    }
+  }
+
+  const sequence = await fullTopicSequence(courseId);
+  const { totalDays } = resolveExamWindow(examDate);
+  const foundationDays = Math.max(7, Math.round(totalDays * 0.4));
+  const syllabusDays = Math.max(7, Math.round(totalDays * 0.4));
+  const revisionDays = Math.max(7, totalDays - foundationDays - syllabusDays);
+
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const phase1End = addDays(start, foundationDays);
+  const phase2End = addDays(phase1End, syllabusDays);
+  const phase3End = addDays(phase2End, revisionDays);
+
+  const splitHalf = (subject: string, half: 'first' | 'second') => {
+    const list = sequence.get(subject) ?? [];
+    const mid = Math.ceil(list.length / 2);
+    return half === 'first' ? list.slice(0, mid) : list.slice(mid);
+  };
+
+  return [
+    {
+      label: 'Phase 1 — Build your foundation',
+      dateRangeLabel: `${fmtRoadmapDate(start)} – ${fmtRoadmapDate(phase1End)}`,
+      targetNote: 'Cover the basics, build calculation speed, start timed sectional practice.',
+      subjects: CORE_SUBJECTS.map((subject) => ({ subject, topics: splitHalf(subject, 'first') })),
+    },
+    {
+      label: 'Phase 2 — Complete the syllabus',
+      dateRangeLabel: `${fmtRoadmapDate(phase1End)} – ${fmtRoadmapDate(phase2End)}`,
+      targetNote: 'Finish every topic at least once, keep taking sectional tests.',
+      subjects: CORE_SUBJECTS.map((subject) => ({ subject, topics: splitHalf(subject, 'second') })),
+    },
+    {
+      label: 'Phase 3 — Mock tests & final revision',
+      dateRangeLabel: `${fmtRoadmapDate(phase2End)} – ${fmtRoadmapDate(phase3End)}`,
+      targetNote: 'Full-length mocks, revise mistakes, sharpen speed and accuracy.',
+      subjects: CORE_SUBJECTS.map((subject) => ({ subject, topics: ['Full-length mock tests', 'Revise mistakes from Phase 1 & 2', 'Speed and accuracy drills'] })),
+    },
+  ];
 }
 
 /** Today's focus topic per schedule subject — from the student's enrolled course's real
