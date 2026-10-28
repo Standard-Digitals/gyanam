@@ -293,7 +293,14 @@ export function ChatWidget() {
               </>
             ) : (
               <div className="flex-1 overflow-y-auto bg-[#FFF5F5]">
-                {tab === 'plan' && <PlanTab onTalkToCounsellor={handleTalkToCounsellor} onBrowseCourses={handleBrowseCourses} />}
+                {tab === 'plan' && (
+                  <PlanTab
+                    onTalkToCounsellor={handleTalkToCounsellor}
+                    onBrowseCourses={handleBrowseCourses}
+                    onGoToTest={() => setTab('test')}
+                    onGoToMistakes={() => setTab('mistakes')}
+                  />
+                )}
                 {tab === 'test' && <QuizTab />}
                 {tab === 'mistakes' && <MistakesTab />}
                 {tab === 'progress' && <ProgressTab onBrowseCourses={handleBrowseCourses} />}

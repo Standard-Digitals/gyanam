@@ -914,19 +914,26 @@ export async function buildRoadmap(userId: string, examDate: string | null, targ
   ];
 }
 
-const WEEKLY_CHECKLIST_ITEMS = [
-  "Practice topic-wise questions for this week's weak subject",
-  'Revise static GK and current affairs',
-  'Solve previous year question papers',
-  'Take at least one mock test',
-  'Review your wrong and skipped questions',
-  "Revise this week's formulas and notes",
+// `goTo`, when set, is a tab the "My Plan" UI can jump the student straight into for that item —
+// CEO feedback: a checklist of plain text with manual tick-boxes reads as a to-do list, not
+// something that actually moves the student into doing it. `auto`-flagged items (0 and 3) are also
+// ticked automatically from real attempt data (see autoCompletedIndicesFor) instead of relying on
+// the student to self-report — those two are the only ones this app can actually verify happened.
+const WEEKLY_CHECKLIST_ITEMS: { label: string; goTo: 'test' | 'mistakes' | null; auto: boolean }[] = [
+  { label: "Practice topic-wise questions for this week's weak subject", goTo: 'test', auto: true },
+  { label: 'Revise static GK and current affairs', goTo: 'test', auto: false },
+  { label: 'Solve previous year question papers', goTo: 'test', auto: false },
+  { label: 'Take at least one mock test', goTo: 'test', auto: true },
+  { label: 'Review your wrong and skipped questions', goTo: 'mistakes', auto: false },
+  { label: "Revise this week's formulas and notes", goTo: null, auto: false },
 ];
 
 export interface WeeklyChecklistItem {
   index: number;
   label: string;
   checked: boolean;
+  goTo: 'test' | 'mistakes' | null;
+  auto: boolean;
 }
 
 export interface WeeklyChecklistState {
@@ -945,6 +952,23 @@ function currentWeekStartKey(): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** Real attempt data for the two checklist items this app can actually verify — a quiz attempt
+ * this week for "practice topic-wise questions" (index 0), a mock-test attempt this week for
+ * "take at least one mock test" (index 3). Computed fresh at read time, not persisted, same as
+ * `attachTodaysTopics` — so it can never go stale or need its own reset logic across week
+ * boundaries. */
+async function autoCompletedIndicesFor(userId: string, weekStartKey: string): Promise<Set<number>> {
+  const weekStart = new Date(`${weekStartKey}T00:00:00.000Z`);
+  const [quizCount, mockCount] = await Promise.all([
+    prisma.quizAttempt.count({ where: { userId, submittedAt: { gte: weekStart } } }),
+    prisma.mockTestAttempt.count({ where: { userId, submittedAt: { gte: weekStart } } }),
+  ]);
+  const result = new Set<number>();
+  if (quizCount > 0) result.add(0);
+  if (mockCount > 0) result.add(3);
+  return result;
+}
+
 function checkedIndicesFor(raw: unknown, weekStart: string): Set<number> {
   if (raw && typeof raw === 'object' && 'weekStart' in raw && 'checkedIndices' in raw) {
     const stored = raw as { weekStart: unknown; checkedIndices: unknown };
@@ -958,13 +982,15 @@ function checkedIndicesFor(raw: unknown, weekStart: string): Set<number> {
 function toChecklistState(checkedIndices: Set<number>, weekStart: string): WeeklyChecklistState {
   return {
     weekStart,
-    items: WEEKLY_CHECKLIST_ITEMS.map((label, index) => ({ index, label, checked: checkedIndices.has(index) })),
+    items: WEEKLY_CHECKLIST_ITEMS.map((item, index) => ({ index, label: item.label, goTo: item.goTo, auto: item.auto, checked: checkedIndices.has(index) })),
   };
 }
 
-export function getWeeklyChecklist(raw: unknown): WeeklyChecklistState {
+export async function getWeeklyChecklist(userId: string, raw: unknown): Promise<WeeklyChecklistState> {
   const weekStart = currentWeekStartKey();
-  return toChecklistState(checkedIndicesFor(raw, weekStart), weekStart);
+  const checked = checkedIndicesFor(raw, weekStart);
+  for (const i of await autoCompletedIndicesFor(userId, weekStart)) checked.add(i);
+  return toChecklistState(checked, weekStart);
 }
 
 export async function toggleWeeklyChecklistItem(userId: string, raw: unknown, index: number): Promise<WeeklyChecklistState> {
@@ -974,6 +1000,7 @@ export async function toggleWeeklyChecklistItem(userId: string, raw: unknown, in
   if (checkedIndices.has(index)) checkedIndices.delete(index);
   else checkedIndices.add(index);
   await prisma.user.update({ where: { id: userId }, data: { weeklyChecklist: { weekStart, checkedIndices: [...checkedIndices] } } });
+  for (const i of await autoCompletedIndicesFor(userId, weekStart)) checkedIndices.add(i);
   return toChecklistState(checkedIndices, weekStart);
 }
 

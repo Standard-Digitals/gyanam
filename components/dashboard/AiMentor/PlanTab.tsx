@@ -19,12 +19,13 @@ import {
 import type { MentorOverview, WeeklySchedule, RoadmapPhase, WeeklyChecklistState } from '@/lib/data/aiMentor';
 
 const DAILY_HABITS = [
-  { icon: Calculator, title: 'Calculation practice — 10-15 min', body: 'Squares, cubes, fractions, tables — speed here saves time in every section.' },
-  { icon: Newspaper, title: 'Current affairs reading — 20-30 min', body: 'A little every day beats cramming it all before the exam.' },
-  { icon: NotebookPen, title: 'Error review — 10-15 min', body: "Go back over today's mistakes before moving on to new topics." },
+  { icon: Calculator, title: 'Calculation practice — 10-15 min', body: 'Squares, cubes, fractions, tables — speed here saves time in every section.', goTo: 'test' as const },
+  { icon: Newspaper, title: 'Current affairs reading — 20-30 min', body: 'A little every day beats cramming it all before the exam.', goTo: 'test' as const },
+  { icon: NotebookPen, title: 'Error review — 10-15 min', body: "Go back over today's mistakes before moving on to new topics.", goTo: 'mistakes' as const },
 ];
 
-function DailyHabits() {
+function DailyHabits({ onGoToTest, onGoToMistakes }: { onGoToTest?: () => void; onGoToMistakes?: () => void }) {
+  const goHandlers: Record<'test' | 'mistakes', (() => void) | undefined> = { test: onGoToTest, mistakes: onGoToMistakes };
   return (
     <div className="bg-white p-4 rounded-2xl border border-[#F3DCDD] space-y-3">
       <div className="flex items-center gap-2">
@@ -32,15 +33,23 @@ function DailyHabits() {
         <p className="text-[10px] font-black text-[#C12223] uppercase tracking-wide">Daily Habits That Add Up</p>
       </div>
       <div className="space-y-3">
-        {DAILY_HABITS.map((h, i) => (
-          <div key={i} className="flex items-start gap-2.5">
-            <h.icon className="w-4 h-4 text-[#C12223] shrink-0 mt-0.5" />
-            <div>
-              <p className="text-xs font-bold text-[#1F1A1C]">{h.title}</p>
-              <p className="text-[11px] text-[#888888] mt-0.5">{h.body}</p>
+        {DAILY_HABITS.map((h, i) => {
+          const go = goHandlers[h.goTo];
+          return (
+            <div key={i} className="flex items-start gap-2.5">
+              <h.icon className="w-4 h-4 text-[#C12223] shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-[#1F1A1C]">{h.title}</p>
+                <p className="text-[11px] text-[#888888] mt-0.5">{h.body}</p>
+              </div>
+              {go && (
+                <button onClick={go} className="shrink-0 text-[10px] font-bold text-[#C12223] bg-[#FDEAE9] px-2.5 py-1.5 rounded-lg cursor-pointer whitespace-nowrap">
+                  Do it now
+                </button>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -51,9 +60,10 @@ interface PlanData extends MentorOverview {
   roadmap: RoadmapPhase[] | null;
 }
 
-function WeeklyChecklist() {
+function WeeklyChecklist({ onGoToTest, onGoToMistakes }: { onGoToTest?: () => void; onGoToMistakes?: () => void }) {
   const [state, setState] = useState<WeeklyChecklistState | null>(null);
   const [pending, setPending] = useState<number | null>(null);
+  const goHandlers: Record<'test' | 'mistakes', (() => void) | undefined> = { test: onGoToTest, mistakes: onGoToMistakes };
 
   useEffect(() => {
     fetch('/api/dashboard/ai-mentor/checklist')
@@ -92,21 +102,29 @@ function WeeklyChecklist() {
         </span>
       </div>
       <div className="space-y-2">
-        {state.items.map((item) => (
-          <button
-            key={item.index}
-            onClick={() => toggle(item.index)}
-            disabled={pending === item.index}
-            className="w-full flex items-start gap-2.5 text-left cursor-pointer disabled:opacity-60"
-          >
-            {item.checked ? (
-              <CheckCircle2 className="w-4 h-4 text-[#C12223] shrink-0 mt-0.5" />
-            ) : (
-              <Circle className="w-4 h-4 text-[#D9B4B5] shrink-0 mt-0.5" />
-            )}
-            <span className={`text-xs ${item.checked ? 'text-[#888888] line-through' : 'text-[#1F1A1C]'}`}>{item.label}</span>
-          </button>
-        ))}
+        {state.items.map((item) => {
+          const go = item.goTo ? goHandlers[item.goTo] : undefined;
+          return (
+            <div key={item.index} className="flex items-start gap-2.5">
+              <button onClick={() => toggle(item.index)} disabled={pending === item.index} className="flex items-start gap-2.5 text-left cursor-pointer disabled:opacity-60 flex-1 min-w-0">
+                {item.checked ? (
+                  <CheckCircle2 className="w-4 h-4 text-[#C12223] shrink-0 mt-0.5" />
+                ) : (
+                  <Circle className="w-4 h-4 text-[#D9B4B5] shrink-0 mt-0.5" />
+                )}
+                <span className="min-w-0">
+                  <span className={`text-xs ${item.checked ? 'text-[#888888] line-through' : 'text-[#1F1A1C]'}`}>{item.label}</span>
+                  {item.auto && <span className="block text-[10px] text-[#888888] mt-0.5">{item.checked ? 'Auto-detected from your attempts' : "Ticks itself once you've done this"}</span>}
+                </span>
+              </button>
+              {go && !item.checked && (
+                <button onClick={go} className="shrink-0 text-[10px] font-bold text-[#C12223] bg-[#FDEAE9] px-2.5 py-1.5 rounded-lg cursor-pointer whitespace-nowrap">
+                  Go
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -182,7 +200,17 @@ function RoadmapView({ phases }: { phases: RoadmapPhase[] }) {
   );
 }
 
-export function PlanTab({ onTalkToCounsellor, onBrowseCourses }: { onTalkToCounsellor?: () => void; onBrowseCourses?: () => void }) {
+export function PlanTab({
+  onTalkToCounsellor,
+  onBrowseCourses,
+  onGoToTest,
+  onGoToMistakes,
+}: {
+  onTalkToCounsellor?: () => void;
+  onBrowseCourses?: () => void;
+  onGoToTest?: () => void;
+  onGoToMistakes?: () => void;
+}) {
   const [data, setData] = useState<PlanData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -201,8 +229,8 @@ export function PlanTab({ onTalkToCounsellor, onBrowseCourses }: { onTalkToCouns
       <div className="p-4 space-y-4">
         {data.dailyScheduleBlocks && <ScheduleChart schedule={data.dailyScheduleBlocks} />}
         {data.roadmap && data.roadmap.length > 0 && <RoadmapView phases={data.roadmap} />}
-        {data.dailyScheduleBlocks && <WeeklyChecklist />}
-        {data.dailyScheduleBlocks && <DailyHabits />}
+        {data.dailyScheduleBlocks && <WeeklyChecklist onGoToTest={onGoToTest} onGoToMistakes={onGoToMistakes} />}
+        {data.dailyScheduleBlocks && <DailyHabits onGoToTest={onGoToTest} onGoToMistakes={onGoToMistakes} />}
         {data.courseSuggestion ? (
           <div className="bg-white p-4 rounded-2xl border border-[#F3DCDD]">
             <div className="flex items-center gap-2 mb-1">
@@ -256,8 +284,8 @@ export function PlanTab({ onTalkToCounsellor, onBrowseCourses }: { onTalkToCouns
     <div className="p-4 space-y-3">
       {data.dailyScheduleBlocks && <ScheduleChart schedule={data.dailyScheduleBlocks} />}
       {data.roadmap && data.roadmap.length > 0 && <RoadmapView phases={data.roadmap} />}
-      {data.dailyScheduleBlocks && <WeeklyChecklist />}
-      {data.dailyScheduleBlocks && <DailyHabits />}
+      {data.dailyScheduleBlocks && <WeeklyChecklist onGoToTest={onGoToTest} onGoToMistakes={onGoToMistakes} />}
+      {data.dailyScheduleBlocks && <DailyHabits onGoToTest={onGoToTest} onGoToMistakes={onGoToMistakes} />}
       {data.banner && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
           <p className="text-[10px] font-black text-amber-700 uppercase tracking-wide">Waiting for you</p>

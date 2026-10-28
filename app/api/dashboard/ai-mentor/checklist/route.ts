@@ -5,7 +5,7 @@ import { getWeeklyChecklist, toggleWeeklyChecklistItem } from '@/lib/data/aiMent
 export async function GET() {
   const user = await getCurrentUserProfile();
   if (!user) return NextResponse.json({ error: 'Login required' }, { status: 401 });
-  return NextResponse.json(getWeeklyChecklist(user.weeklyChecklist));
+  return NextResponse.json(await getWeeklyChecklist(user.id, user.weeklyChecklist));
 }
 
 export async function POST(req: Request) {

@@ -174,6 +174,22 @@ findings.
       state-machine work below first, since the regex dispatcher has no equivalent multi-match
       concept today.
 
+## CEO review round (2026-10-28)
+
+- [x] Added a tappable "What's my plan today?" chip wherever the bot's own message tells the
+      student to type that phrase but only offered course-related chips (`finishIntake`,
+      `buildDiagnosticNudge`, unenrolled branch) — see commit `38d8a6b`.
+- [x] **Weekly checklist and daily habits are now actionable, not just informational text.**
+      Feedback: "this is fine, but how does it turn into action?" Each checklist item that maps to
+      a real part of the app (practice questions / solve PYQs / take a mock → Test tab; review
+      wrong answers → My Mistakes tab) now has a "Go" button that jumps straight there; same for
+      Daily Habits ("Do it now"). More importantly, the two checklist items this app can actually
+      verify — "practice topic-wise questions" and "take at least one mock test" — now tick
+      themselves automatically from real `QuizAttempt`/`MockTestAttempt` data this week, instead of
+      relying on the student to self-report. `autoCompletedIndicesFor()` in `lib/data/aiMentor.ts`;
+      `getWeeklyChecklist()` is now async (takes `userId`) to compute this at read time, same
+      not-persisted pattern as `attachTodaysTopics`. No schema change.
+
 ## Next (not started)
 
 These two touch the core message-routing logic that every single chat message goes through, so
