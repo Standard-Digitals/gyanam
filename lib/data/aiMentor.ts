@@ -1659,8 +1659,13 @@ export async function sendChatMessage(
       if (classification.intents.length > 0) {
         const entries = classification.intents.map((id) => KNOWN_INTENT_CHIP[id]);
         const labels = entries.map((e) => e.label);
-        const labelText = labels.length === 2 ? `${labels[0]} and ${labels[1]}` : `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
-        replyParts.push(`Looks like you're asking about ${labelText} — tap below and I'll pull those up.`);
+        const labelText =
+          labels.length === 1
+            ? labels[0]
+            : labels.length === 2
+              ? `${labels[0]} and ${labels[1]}`
+              : `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
+        replyParts.push(`Looks like you're asking about ${labelText} — tap below and I'll pull ${labels.length === 1 ? 'that' : 'those'} up.`);
         chips = entries.map((e) => e.chip);
       }
 
