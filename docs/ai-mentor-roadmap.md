@@ -47,11 +47,15 @@ chat history remembering it. Tick a box and commit whenever a phase ships.
       whether it's persisted anywhere beyond the aggregate score), then a view of "this question,
       your answer, the correct answer, why" grouped by subject/topic, matching ChatGPT's "error
       notebook" daily habit.
-- [ ] **Phase 4 — weekly checklist.** A short, fixed set of weekly actions (practice topic-wise
-      questions, revise static GK, solve PYQs, take a mock, review wrong answers, revise
-      formulas/notes) the student can tick off, reset each week — matches the ChatGPT plan's
-      "8. Weekly checklist (0/9)". Likely a small new component in "My Plan" backed by a couple of
-      new User/weekly-state columns or a lightweight new table.
+- [x] **Phase 4 — weekly checklist** (2026-10-28): "My Plan" now shows a 6-item weekly checklist
+      (practice topic-wise questions, revise static GK, solve PYQs, take a mock, review wrong
+      answers, revise formulas/notes) the student can tick off — matches the ChatGPT plan's
+      "8. Weekly checklist". Backed by one new `User.weeklyChecklist` Json column
+      (`{ weekStart, checkedIndices }`); a stored week older than the current Monday is read back
+      as fresh/unchecked instead of being cleared, so it auto-resets weekly with no cron job.
+      `getWeeklyChecklist()` / `toggleWeeklyChecklistItem()` in `lib/data/aiMentor.ts`,
+      `/api/dashboard/ai-mentor/checklist` (GET/POST), `WeeklyChecklist` in `PlanTab.tsx`.
+      **Needs `npx prisma db push` on deploy** (new column).
 - [ ] **Phase 5 — daily micro-habit nudges.** Short standing reminders (e.g. "15 min calculation
       practice", "30–45 min GA reading") surfaced somewhere low-friction — chat suggestion chip or
       a line in "My Plan" — not a huge build, mostly copy + placement once Phase 2/4 land.

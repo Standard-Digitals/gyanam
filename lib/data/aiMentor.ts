@@ -749,6 +749,69 @@ export async function buildRoadmap(userId: string, examDate: string | null, targ
   ];
 }
 
+const WEEKLY_CHECKLIST_ITEMS = [
+  "Practice topic-wise questions for this week's weak subject",
+  'Revise static GK and current affairs',
+  'Solve previous year question papers',
+  'Take at least one mock test',
+  'Review your wrong and skipped questions',
+  "Revise this week's formulas and notes",
+];
+
+export interface WeeklyChecklistItem {
+  index: number;
+  label: string;
+  checked: boolean;
+}
+
+export interface WeeklyChecklistState {
+  weekStart: string;
+  items: WeeklyChecklistItem[];
+}
+
+/** Monday of the current week, as a date-only key — a checklist saved against a past week is
+ * treated as a fresh/unchecked one instead of carrying stale ticks into the new week. */
+function currentWeekStartKey(): string {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  const day = d.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diffToMonday);
+  return d.toISOString().slice(0, 10);
+}
+
+function checkedIndicesFor(raw: unknown, weekStart: string): Set<number> {
+  if (raw && typeof raw === 'object' && 'weekStart' in raw && 'checkedIndices' in raw) {
+    const stored = raw as { weekStart: unknown; checkedIndices: unknown };
+    if (stored.weekStart === weekStart && Array.isArray(stored.checkedIndices)) {
+      return new Set(stored.checkedIndices.filter((n): n is number => typeof n === 'number'));
+    }
+  }
+  return new Set();
+}
+
+function toChecklistState(checkedIndices: Set<number>, weekStart: string): WeeklyChecklistState {
+  return {
+    weekStart,
+    items: WEEKLY_CHECKLIST_ITEMS.map((label, index) => ({ index, label, checked: checkedIndices.has(index) })),
+  };
+}
+
+export function getWeeklyChecklist(raw: unknown): WeeklyChecklistState {
+  const weekStart = currentWeekStartKey();
+  return toChecklistState(checkedIndicesFor(raw, weekStart), weekStart);
+}
+
+export async function toggleWeeklyChecklistItem(userId: string, raw: unknown, index: number): Promise<WeeklyChecklistState> {
+  if (index < 0 || index >= WEEKLY_CHECKLIST_ITEMS.length) throw new Error('Invalid checklist index');
+  const weekStart = currentWeekStartKey();
+  const checkedIndices = checkedIndicesFor(raw, weekStart);
+  if (checkedIndices.has(index)) checkedIndices.delete(index);
+  else checkedIndices.add(index);
+  await prisma.user.update({ where: { id: userId }, data: { weeklyChecklist: { weekStart, checkedIndices: [...checkedIndices] } } });
+  return toChecklistState(checkedIndices, weekStart);
+}
+
 /** Today's focus topic per schedule subject — from the student's enrolled course's real
  * curriculum when it has subject-tagged chapters, a matching course's curriculum as a preview
  * when they aren't enrolled yet, or the generic rotating fallback otherwise. */

@@ -1,12 +1,73 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Sparkles, ChevronRight, ChevronDown, GraduationCap, CheckCircle2, ClipboardList, Map as MapIcon } from 'lucide-react';
-import type { MentorOverview, WeeklySchedule, RoadmapPhase } from '@/lib/data/aiMentor';
+import { Sparkles, ChevronRight, ChevronDown, GraduationCap, CheckCircle2, Circle, ClipboardList, Map as MapIcon, ListChecks } from 'lucide-react';
+import type { MentorOverview, WeeklySchedule, RoadmapPhase, WeeklyChecklistState } from '@/lib/data/aiMentor';
 
 interface PlanData extends MentorOverview {
   dailyScheduleBlocks: WeeklySchedule | null;
   roadmap: RoadmapPhase[] | null;
+}
+
+function WeeklyChecklist() {
+  const [state, setState] = useState<WeeklyChecklistState | null>(null);
+  const [pending, setPending] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch('/api/dashboard/ai-mentor/checklist')
+      .then((res) => (res.ok ? res.json() : null))
+      .then(setState)
+      .catch(() => setState(null));
+  }, []);
+
+  if (!state) return null;
+
+  const toggle = async (index: number) => {
+    setPending(index);
+    try {
+      const res = await fetch('/api/dashboard/ai-mentor/checklist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index }),
+      });
+      if (res.ok) setState(await res.json());
+    } finally {
+      setPending(null);
+    }
+  };
+
+  const doneCount = state.items.filter((i) => i.checked).length;
+
+  return (
+    <div className="bg-white p-4 rounded-2xl border border-[#F3DCDD] space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <ListChecks className="w-4 h-4 text-[#C12223]" />
+          <p className="text-[10px] font-black text-[#C12223] uppercase tracking-wide">This Week's Checklist</p>
+        </div>
+        <span className="font-plexmono font-bold text-xs text-[#888888]">
+          {doneCount}/{state.items.length}
+        </span>
+      </div>
+      <div className="space-y-2">
+        {state.items.map((item) => (
+          <button
+            key={item.index}
+            onClick={() => toggle(item.index)}
+            disabled={pending === item.index}
+            className="w-full flex items-start gap-2.5 text-left cursor-pointer disabled:opacity-60"
+          >
+            {item.checked ? (
+              <CheckCircle2 className="w-4 h-4 text-[#C12223] shrink-0 mt-0.5" />
+            ) : (
+              <Circle className="w-4 h-4 text-[#D9B4B5] shrink-0 mt-0.5" />
+            )}
+            <span className={`text-xs ${item.checked ? 'text-[#888888] line-through' : 'text-[#1F1A1C]'}`}>{item.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function ScheduleChart({ schedule }: { schedule: WeeklySchedule }) {
@@ -98,6 +159,7 @@ export function PlanTab({ onTalkToCounsellor, onBrowseCourses }: { onTalkToCouns
       <div className="p-4 space-y-4">
         {data.dailyScheduleBlocks && <ScheduleChart schedule={data.dailyScheduleBlocks} />}
         {data.roadmap && data.roadmap.length > 0 && <RoadmapView phases={data.roadmap} />}
+        {data.dailyScheduleBlocks && <WeeklyChecklist />}
         {data.courseSuggestion ? (
           <div className="bg-white p-4 rounded-2xl border border-[#F3DCDD]">
             <div className="flex items-center gap-2 mb-1">
@@ -151,6 +213,7 @@ export function PlanTab({ onTalkToCounsellor, onBrowseCourses }: { onTalkToCouns
     <div className="p-4 space-y-3">
       {data.dailyScheduleBlocks && <ScheduleChart schedule={data.dailyScheduleBlocks} />}
       {data.roadmap && data.roadmap.length > 0 && <RoadmapView phases={data.roadmap} />}
+      {data.dailyScheduleBlocks && <WeeklyChecklist />}
       {data.banner && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
           <p className="text-[10px] font-black text-amber-700 uppercase tracking-wide">Waiting for you</p>
