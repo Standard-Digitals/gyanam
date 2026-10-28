@@ -1117,23 +1117,16 @@ export async function sendChatMessage(
   const interruptsIntake = PLAN_PATTERN.test(trimmed) || TEST_PATTERN.test(trimmed) || COUNSELLOR_PATTERN.test(trimmed);
   let pendingAnswer = interruptsIntake ? null : lastAssistant?.content;
 
-  // Free-text intake slots (as opposed to the yes/no-style prompts below, which already guard
-  // their own branches with a decline-pattern check) get saved as whatever the student typed, no
-  // validation — so a message that's actually unrelated (misses every pattern above, e.g. a
-  // differently-phrased question, a typo, or Hindi/Hinglish) used to silently overwrite a profile
-  // field like `qualification` or `weakSubject` with garbage. Best-effort OpenAI sanity check:
-  // unavailable or inconclusive just keeps the pre-existing save-whatever-was-typed behavior.
-  const FREE_TEXT_PROMPTS = new Set([
-    EXAM_NAME_PROMPT,
-    EXAM_DATE_PROMPT,
-    QUALIFICATION_PROMPT,
-    MARKS_PROMPT,
-    BEGINNER_CHECK_PROMPT,
-    STUDY_HOURS_PROMPT,
-    WEAK_SUBJECT_PROMPT,
-    SYLLABUS_PROGRESS_PROMPT,
-  ]);
-  if (pendingAnswer && FREE_TEXT_PROMPTS.has(pendingAnswer)) {
+  // Every pending-prompt branch below — free-text intake slots AND the yes/no-style ones (which
+  // only guard against an explicit "no"/"skip"/etc. and otherwise assume yes) — used to accept
+  // whatever the student typed with no check that it was actually a response to that prompt.
+  // Confirmed live: "Reasoning ke puzzles solve karne ka best tarika kya hai?", sent while
+  // COURSE_DETAILS_PROMPT ("Want to know the price and what's included?") was pending, didn't
+  // match the decline pattern, so it fell into the "yes" branch and got shown real course pricing
+  // in reply to an unrelated study question. Best-effort OpenAI sanity check: unavailable or
+  // inconclusive just keeps the pre-existing behavior for that prompt (save-as-typed, or
+  // assume-yes) exactly as before this existed.
+  if (pendingAnswer) {
     const looksValid = await looksLikeAnswerTo(pendingAnswer, trimmed);
     if (!looksValid) pendingAnswer = null;
   }

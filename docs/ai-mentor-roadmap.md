@@ -83,15 +83,23 @@ deterministic code) — keeps cost low and avoids hallucinated course/pricing in
 - [x] **OpenAI backstop, new `lib/data/chatIntent.ts`** (same safe-fallback shape as
       `examDateSuggestion.ts` — no key/failed call/timeout all degrade to the old regex-only
       behavior, never breaks the chat):
-      - `looksLikeAnswerTo()` — before saving a free-text intake answer (qualification, weak
-        subject, study hours, etc.), sanity-checks it's actually attempting to answer the pending
-        question. Deliberately NOT done by extending the regex interrupt-list instead, since
-        several intent patterns share ordinary words with plausible answers (e.g. MISTAKES_PATTERN's
-        "weak" vs. a genuine "I'm weak in reasoning" answer) — meaning-based beats keyword-based here.
+      - `looksLikeAnswerTo()` — before accepting *any* pending-prompt reply (free-text intake slots
+        AND the yes/no-style prompts like "want to know the price?", which only checked for an
+        explicit decline and otherwise assumed yes), sanity-checks it's actually a response to that
+        prompt. Deliberately NOT done by extending the regex interrupt-list instead, since several
+        intent patterns share ordinary words with plausible answers (e.g. MISTAKES_PATTERN's "weak"
+        vs. a genuine "I'm weak in reasoning" answer) — meaning-based beats keyword-based here. Caught
+        live post-deploy: a genuine study question sent while COURSE_DETAILS_PROMPT was pending
+        didn't match the decline pattern, so it fell into "yes" and got shown real course pricing
+        in reply to an unrelated doubt.
       - `classifyUnmatchedMessage()` — only runs when no regex pattern matched anything (previously:
         always a support ticket). Recovers small talk (no ticket) and typo'd/differently-phrased/
         Hindi-Hinglish versions of known intents (shown as a tappable chip, which re-enters the
         normal deterministic dispatch — never auto-executes a different code path).
+      - `draftDoubtReply()` — for a message that reaches the support-ticket fallback, drafts a
+        short, immediate, encouraging reply (general study-skill advice only, never a stated fact
+        it isn't certain of) instead of leaving the student with only a ticket number. The ticket
+        is still always created regardless, as the unconditional human safety net.
 - [x] Unified the two onboarding paths: the quick-form "Set up my exam preparation" flow
       (`completeOnboardingForm`) never built a schedule, so its own closing line — "ask me what's
       my plan today and I'll turn this into a checklist" — was false for anyone who used it. Now
@@ -106,15 +114,6 @@ deterministic code) — keeps cost low and avoids hallucinated course/pricing in
       to actually activate — until then every one of these checks safely no-ops back to the
       pre-audit regex-only behavior. (The exam-date-suggestion feature already reads this same env
       var — if that's ever shown a real suggestion in production, the key is already set.)
-
-- [x] **Genuine-doubt drafted reply** (2026-10-28): a message that reaches the support-ticket
-      fallback (not small talk, not a recognizable known intent) now also gets an immediate,
-      short, encouraging reply from OpenAI before the "forwarded to faculty" line — instead of
-      leaving the student with nothing but a ticket number until a human replies. The ticket is
-      still always created regardless (unconditional safety net); the prompt explicitly forbids
-      stating any fact it isn't certain of (current affairs, dates, pricing, policy, syllabus
-      specifics) — it can only give general study-skill/encouragement, never substitute for
-      faculty on anything factual. `draftDoubtReply()` in `lib/data/chatIntent.ts`.
 
 ## Next (not started)
 
