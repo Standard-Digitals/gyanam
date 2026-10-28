@@ -40,7 +40,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ qui
       subject: quiz.subject,
       questionId: q.id,
       questionText: q.question,
-      options: q.options,
+      options: q.options ?? [],
       correctAnswer: q.type === 'fill_blank' ? null : q.correctAnswer,
       correctAnswerText: q.correctAnswerText ?? null,
       selectedAnswer,

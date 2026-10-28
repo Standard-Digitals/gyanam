@@ -110,8 +110,9 @@ export async function getSubjectStrength(userId: string): Promise<SubjectStrengt
 
   for (const attempt of mockAttempts) {
     const stats = attempt.sectionStats as Record<string, { correct: number; incorrect: number }> | null;
-    if (!stats) continue;
+    if (!stats || typeof stats !== 'object') continue;
     for (const [subject, s] of Object.entries(stats)) {
+      if (typeof s?.correct !== 'number' || typeof s?.incorrect !== 'number') continue; // malformed/legacy shape — skip rather than produce NaN
       const total = s.correct + s.incorrect;
       if (total === 0) continue;
       const list = bySubject.get(subject) ?? [];

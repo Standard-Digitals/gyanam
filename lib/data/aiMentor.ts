@@ -1137,7 +1137,20 @@ async function createCounsellorLead(name: string, phone: string, email: string |
   const recent = await prisma.lead.findFirst({
     where: { phone, source: 'AI_MENTOR_CHAT', createdAt: { gt: new Date(Date.now() - COUNSELLOR_LEAD_DEDUPE_WINDOW_MS) } },
   });
-  if (recent) return;
+  if (recent) {
+    // The caller always tells the student "I've passed along what you've told me" regardless of
+    // what happens here — so a second, genuinely different request within the window must still
+    // reach admin (appended to the existing lead) instead of being silently dropped. Only an
+    // exact repeat of the same request (e.g. the student re-tapping the same chip) is skipped,
+    // to avoid the lead record growing with true duplicates.
+    if (recent.message?.trim() !== note.trim()) {
+      await prisma.lead.update({
+        where: { id: recent.id },
+        data: { message: `${recent.message ?? ''}\n\n[Follow-up] ${note}`.trim() },
+      });
+    }
+    return;
+  }
 
   await prisma.lead.create({
     data: {

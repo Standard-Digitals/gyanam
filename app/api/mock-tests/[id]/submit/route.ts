@@ -48,7 +48,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       subject: q.section ?? mockTest.examCategory,
       questionId: q.id,
       questionText: q.question,
-      options: q.options,
+      options: q.options ?? [],
       correctAnswer: q.type === 'fill_blank' ? null : q.correctAnswer,
       correctAnswerText: q.correctAnswerText ?? null,
       selectedAnswer,
