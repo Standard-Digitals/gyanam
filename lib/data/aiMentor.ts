@@ -25,6 +25,34 @@ import {
   GENERAL_SUGGESTIONS,
 } from '@/lib/aiMentorPrompts';
 
+// First step of the state-machine refactor tracked in docs/ai-mentor-roadmap.md — every one of
+// these 16 prompts is a fixed constant (verified: every branch below that sends one as its final
+// message does so as the literal constant, never built dynamically), so a pending question can be
+// identified by a stable id instead of by re-matching the *text* of the last assistant message,
+// which breaks resumption for anyone mid-flow if that wording is ever edited. `User.pendingQuestion`
+// stores the id directly; PENDING_QUESTION_TEXT maps it back to the exact prompt constant so every
+// existing `pendingAnswer === X_PROMPT` branch below keeps working completely unchanged — only how
+// `pendingAnswer`'s value gets computed changes, not any dispatch/branch logic.
+const PENDING_QUESTION_TEXT: Record<string, string> = {
+  EXAM_NAME: EXAM_NAME_PROMPT,
+  EXAM_DATE: EXAM_DATE_PROMPT,
+  QUALIFICATION: QUALIFICATION_PROMPT,
+  MARKS: MARKS_PROMPT,
+  CONFIRM_EXAM: CONFIRM_EXAM_PROMPT,
+  EXAM_DATE_CONFIRM: EXAM_DATE_CONFIRM_PROMPT,
+  OFFER_COURSE: OFFER_COURSE_PROMPT,
+  BEGINNER_CHECK: BEGINNER_CHECK_PROMPT,
+  STUDY_HOURS: STUDY_HOURS_PROMPT,
+  WEAK_SUBJECT: WEAK_SUBJECT_PROMPT,
+  SYLLABUS_PROGRESS: SYLLABUS_PROGRESS_PROMPT,
+  READY_FOR_SCHEDULE: READY_FOR_SCHEDULE_PROMPT,
+  DETAILED_PLAN: DETAILED_PLAN_PROMPT,
+  READY_FOR_DIAGNOSTIC: READY_FOR_DIAGNOSTIC_PROMPT,
+  COURSE_DETAILS: COURSE_DETAILS_PROMPT,
+  COURSE_ACTION: COURSE_ACTION_PROMPT,
+};
+const QUESTION_TEXT_TO_ID = new Map(Object.entries(PENDING_QUESTION_TEXT).map(([id, text]) => [text, id]));
+
 /**
  * "AI Mentor" (Gyanmitra-style) — in-app only, no OpenAI/WhatsApp/email. Doubts the rules below
  * can't answer are routed to faculty as a SupportTicket; "talk to a counsellor" creates a Lead —
@@ -205,7 +233,11 @@ export async function getChatMessages(userId: string, after: Date | null, limit 
 /** Hides the chat thread so far without deleting it — stamps `chatResetAt`, which every read in
  * this file treats as the start of the visible/resumable conversation from then on. */
 export async function resetChatConversation(userId: string): Promise<void> {
-  await prisma.user.update({ where: { id: userId }, data: { chatResetAt: new Date() } });
+  // pendingQuestion is cleared alongside chatResetAt — unlike the legacy last-assistant-message
+  // text match (which is naturally scoped by chatResetAt via the query that reads it), this is a
+  // separate column with no such built-in scoping, so a reset has to clear it explicitly or a
+  // stale pending question would survive into the "new" conversation.
+  await prisma.user.update({ where: { id: userId }, data: { chatResetAt: new Date(), pendingQuestion: null } });
 }
 
 // ---- Intent patterns ----
@@ -1045,6 +1077,11 @@ export async function completeOnboardingForm(userId: string, targetExam: string,
       data: { userId, role: 'assistant', content: messages[i], suggestions: i === messages.length - 1 ? suggestions : [] },
     });
   }
+  // This is a separate entry point from sendChatMessage's own centralized write of the same field
+  // (this quick-form button, not the chat), so it has to keep pendingQuestion in sync itself —
+  // otherwise a value set on a previous chat turn would wrongly survive and point to the wrong
+  // question on the student's next chat message, even though this flow has moved things along.
+  await prisma.user.update({ where: { id: userId }, data: { pendingQuestion: QUESTION_TEXT_TO_ID.get(messages[messages.length - 1]) ?? null } });
   return { messages, suggestions };
 }
 
@@ -1194,6 +1231,7 @@ export async function sendChatMessage(
     dailyScheduleBlocks: WeeklySchedule | null;
     chatResetAt: Date | null;
     pendingExamDateSuggestion: string | null;
+    pendingQuestion: string | null;
   },
   text: string
 ): Promise<ReplyWithSuggestions> {
@@ -1241,7 +1279,12 @@ export async function sendChatMessage(
   // to WEAK_SUBJECT_PROMPT), so a regex-based interrupt there risks losing a real answer. The
   // OpenAI check just below covers that case instead, since it reasons about meaning, not keywords.
   const interruptsIntake = PLAN_PATTERN.test(trimmed) || TEST_PATTERN.test(trimmed) || COUNSELLOR_PATTERN.test(trimmed);
-  let pendingAnswer = interruptsIntake ? null : lastAssistant?.content;
+  // Prefer the stable `pendingQuestion` id (resolved back to its canonical prompt text) over the
+  // last assistant message's literal text — reliable even if that wording changes later. Falls
+  // back to the old text match for anyone whose pendingQuestion is still null (asked before this
+  // existed, or an older still-unresolved id), so no one gets stuck mid-flow across this rollout.
+  const pendingFromId = user.pendingQuestion ? PENDING_QUESTION_TEXT[user.pendingQuestion] : undefined;
+  let pendingAnswer = interruptsIntake ? null : pendingFromId ?? lastAssistant?.content;
 
   // Every pending-prompt branch below — free-text intake slots AND the yes/no-style ones (which
   // only guard against an explicit "no"/"skip"/etc. and otherwise assume yes) — used to accept
@@ -1683,6 +1726,15 @@ export async function sendChatMessage(
       reply = replyParts.length > 0 ? replyParts : [`Happy to help, ${name}! Let me know if you need your plan, a test, or anything else.`];
       suggestions = chips.length > 0 ? chips : defaultSuggestions(!!user.targetExam);
     }
+  }
+
+  // Stamps the pending-question id for next turn's read above, derived from whatever the final
+  // message of this reply actually is — covers every branch above uniformly without needing each
+  // one to set it individually. Not one of the 16 tracked prompts (a terminal message, a ticket
+  // confirmation, etc.) → correctly clears it.
+  const newPendingId = QUESTION_TEXT_TO_ID.get(reply[reply.length - 1]) ?? null;
+  if (newPendingId !== user.pendingQuestion) {
+    await prisma.user.update({ where: { id: user.id }, data: { pendingQuestion: newPendingId } });
   }
 
   for (let i = 0; i < reply.length; i++) {

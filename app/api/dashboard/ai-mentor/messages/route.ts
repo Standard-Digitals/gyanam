@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
       dailyScheduleBlocks: normalizeWeeklySchedule(user.dailyScheduleBlocks),
       chatResetAt: user.chatResetAt,
       pendingExamDateSuggestion: user.pendingExamDateSuggestion,
+      pendingQuestion: user.pendingQuestion,
     },
     parsed.data.text
   );

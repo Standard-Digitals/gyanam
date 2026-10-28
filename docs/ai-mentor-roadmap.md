@@ -176,16 +176,27 @@ findings.
 
 ## Next (not started)
 
-These two are deliberately not attempted in the same rushed pass as everything else above — both
-touch the core message-routing logic that every single chat message goes through, so getting them
-wrong risks breaking live chat outright. Worth a dedicated, carefully-tested pass rather than being
-squeezed into an already-long session.
+These two touch the core message-routing logic that every single chat message goes through, so
+getting them wrong risks breaking live chat outright — being done as a dedicated, carefully-tested,
+incremental pass rather than one rushed rewrite.
 
-- [ ] **State-machine refactor of `sendChatMessage`** — it's now a 30+ branch if/else chain that
-      infers "current state" via literal string-equality against the last assistant message's
-      text, rather than an explicit stored state. Works, but every new flow added is another
-      branch, and a prompt-text edit anywhere silently breaks resumption for anyone paused
-      mid-flow at deploy time. (Today found two real bugs rooted in exactly this fragility.)
+- [x] **State-machine refactor, step 1 — a real `pendingQuestion` id** (2026-10-28): new
+      `User.pendingQuestion: String?` column, set/read centrally in `sendChatMessage`
+      (`lib/data/aiMentor.ts`) and in `completeOnboardingForm`'s separate message-saving path.
+      Every one of the 16 `if (pendingAnswer === X_PROMPT)` dispatch branches is **completely
+      unchanged** — this only changes how `pendingAnswer`'s value gets computed: prefer the stable
+      id (resolved back to its canonical prompt text via `PENDING_QUESTION_TEXT`), fall back to the
+      old last-assistant-message text match when the id is null (covers anyone mid-flow from before
+      this deployed, and any entry point not yet wired up). `resetChatConversation` now also clears
+      `pendingQuestion` (a separate column, not scoped by `chatResetAt` the way the old text-match
+      read was), so "New Conversation" can't leave a stale pending question behind.
+      **Needs `npx prisma db push` + `npx prisma generate` on deploy** (new column).
+- [ ] **State-machine refactor, step 2** — the dispatch branches themselves could eventually switch
+      from comparing `pendingAnswer === X_PROMPT` (prompt text, resolved via the id as of step 1)
+      to comparing `user.pendingQuestion === 'X'` directly, dropping `PENDING_QUESTION_TEXT`'s
+      reverse-mapping layer entirely. Not required — step 1 already removes the actual fragility
+      (prompt-text edits no longer break resumption) — this would just be further simplification,
+      lower priority than other items below.
 - [ ] Proactive nudges (inactivity reminders, overdue-test pings) — currently fully reactive; needs
       a cron/notification channel decision (email/SMS/push) that doesn't exist yet in this app.
 - [ ] Extending Phase 3's mistake log and the new mock-test `sectionStats` retroactively — not

@@ -29,6 +29,7 @@ model User {
   chatResetAt               DateTime? // set when the student taps "New Conversation" in AI Mentor chat — messages before this are hidden from the chat view, but stay in the database
   pendingExamDateSuggestion String? // scratch field: an OpenAI-suggested exam period awaiting the student's yes/no confirmation; cleared once answered
   weeklyChecklist           Json? // { weekStart: "YYYY-MM-DD" (Monday), checkedIndices: number[] } — the "My Plan" weekly checklist; a stored weekStart older than the current week is treated as unchecked (fresh week) rather than cleared
+  pendingQuestion           String? // stable id (e.g. "EXAM_NAME", "COURSE_DETAILS") for whichever chat prompt the student was last asked and hasn't answered yet — set/read in sendChatMessage (lib/data/aiMentor.ts). Preferred over matching the last assistant message's literal text, which breaks if that wording is ever edited; still falls back to the text match when this is null; see docs/ai-mentor-roadmap.md ("state-machine refactor")
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
 }
