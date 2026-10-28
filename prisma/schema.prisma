@@ -295,6 +295,30 @@ model MockTestAttempt {
   @@index([submittedAt])
 }
 
+// A self-contained copy of every question a student got wrong or skipped — self-contained
+// because the source Quiz/MockTest it came from can be edited or deleted later, and the "My
+// Mistakes" review should still show exactly what was asked. Written best-effort from the
+// submit routes (wrapped in try/catch there) — never allowed to block a score being saved.
+model QuestionMistake {
+  id                String   @id @default(cuid())
+  userId            String
+  source            String // "quiz" | "mock"
+  sourceId          String // Quiz.id or MockTest.id
+  subject           String
+  questionId        Int
+  questionText      String
+  options           String[]
+  correctAnswer     Int?
+  correctAnswerText String?
+  selectedAnswer    String?
+  wasSkipped        Boolean
+  explanation       String
+  createdAt         DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, subject])
+}
+
 model SiteSettings {
   id            String   @id @default("default")
   academyName   String   @default("GYANAM Academy")

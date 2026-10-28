@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/currentUser';
 import { getMockTestById } from '@/lib/data/mockTests';
@@ -30,20 +31,42 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let correctCount = 0;
   let incorrectCount = 0;
   let unattemptedCount = 0;
+  const mistakes: Prisma.QuestionMistakeCreateManyInput[] = [];
+  const logMistake = (q: (typeof mockTest.questions)[number], selectedAnswer: string | null, wasSkipped: boolean) => {
+    mistakes.push({
+      userId: user.userId,
+      source: 'mock',
+      sourceId: mockTest.id,
+      subject: q.section ?? mockTest.examCategory,
+      questionId: q.id,
+      questionText: q.question,
+      options: q.options,
+      correctAnswer: q.type === 'fill_blank' ? null : q.correctAnswer,
+      correctAnswerText: q.correctAnswerText ?? null,
+      selectedAnswer,
+      wasSkipped,
+      explanation: q.explanation,
+    });
+  };
 
   for (const q of mockTest.questions) {
     const selected = answers[String(q.id)];
     const answered = typeof selected === 'string' ? selected.trim().length > 0 : selected !== undefined;
     if (!answered) {
       unattemptedCount++;
+      logMistake(q, null, true);
     } else if (q.type === 'fill_blank') {
       const isCorrect = typeof selected === 'string' && selected.trim().toLowerCase() === (q.correctAnswerText ?? '').trim().toLowerCase();
       if (isCorrect) correctCount++;
-      else incorrectCount++;
+      else {
+        incorrectCount++;
+        logMistake(q, String(selected), false);
+      }
     } else if (selected === q.correctAnswer) {
       correctCount++;
     } else {
       incorrectCount++;
+      logMistake(q, String(selected), false);
     }
   }
 
@@ -62,6 +85,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       timeTakenSec,
     },
   });
+
+  // Best-effort — the score above is already saved, so a failure here must never surface as a
+  // failed submission.
+  if (mistakes.length > 0) {
+    try {
+      await prisma.questionMistake.createMany({ data: mistakes });
+    } catch (err) {
+      console.error('Failed to log question mistakes for mock test attempt', attempt.id, err);
+    }
+  }
 
   return NextResponse.json({
     success: true,

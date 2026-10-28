@@ -1,5 +1,38 @@
 import { prisma } from '@/lib/prisma';
 
+export interface RecentMistake {
+  id: string;
+  subject: string;
+  questionText: string;
+  options: string[];
+  correctAnswer: number | null;
+  correctAnswerText: string | null;
+  selectedAnswer: string | null;
+  wasSkipped: boolean;
+  explanation: string;
+  createdAt: Date;
+}
+
+export async function getRecentMistakes(userId: string, limit = 20): Promise<RecentMistake[]> {
+  return prisma.questionMistake.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+    select: {
+      id: true,
+      subject: true,
+      questionText: true,
+      options: true,
+      correctAnswer: true,
+      correctAnswerText: true,
+      selectedAnswer: true,
+      wasSkipped: true,
+      explanation: true,
+      createdAt: true,
+    },
+  });
+}
+
 export interface RankInfo {
   rank: number | null;
   totalTestTakers: number;

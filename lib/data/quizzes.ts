@@ -47,6 +47,7 @@ export const getAllQuizzes = cache(async (): Promise<QuizWithQuestions[]> => {
 
 export interface QuizForSubmit {
   id: string;
+  subject: string;
   totalQuestions: number;
   questions: QuizQuestion[];
 }
@@ -54,7 +55,7 @@ export interface QuizForSubmit {
 export async function getQuizById(id: string): Promise<QuizForSubmit | null> {
   const quiz = await prisma.quiz.findUnique({ where: { id } });
   if (!quiz) return null;
-  return { id: quiz.id, totalQuestions: quiz.totalQuestions, questions: quiz.questions as unknown as QuizQuestion[] };
+  return { id: quiz.id, subject: quiz.subject, totalQuestions: quiz.totalQuestions, questions: quiz.questions as unknown as QuizQuestion[] };
 }
 
 export async function getQuizzesBySubject(subject: string): Promise<QuizWithQuestions[]> {

@@ -39,14 +39,16 @@ chat history remembering it. Tick a box and commit whenever a phase ships.
       once. Not a literal day-by-day table like the ChatGPT reference — scoped down to phase-level
       topic lists to fit the chat widget instead of a full calendar grid. `buildRoadmap()` in
       `lib/data/aiMentor.ts`, rendered by `RoadmapView` in `PlanTab.tsx`.
-
-## Next
-- [ ] **Phase 3 — question-level mistake notebook.** "My Mistakes" tab already says out loud that
-      it's subject-accuracy only, not question-by-question. Needs: storing which specific
-      questions were gotten wrong (quiz/mock submission already knows this per-question — check
-      whether it's persisted anywhere beyond the aggregate score), then a view of "this question,
-      your answer, the correct answer, why" grouped by subject/topic, matching ChatGPT's "error
-      notebook" daily habit.
+- [x] **Phase 3 — question-level mistake notebook** (2026-10-28): "My Mistakes" now also lists
+      recent wrong/skipped questions (question, your answer, correct answer, explanation), not
+      just subject-level accuracy. New `QuestionMistake` table, written best-effort (wrapped in
+      try/catch, never blocks score saving) from inside `app/api/quiz/[quizId]/submit/route.ts`
+      and `app/api/mock-tests/[id]/submit/route.ts` — the existing scoring/response logic in both
+      routes is untouched, this only adds a side-effect write after the attempt is already saved.
+      `getRecentMistakes()` in `lib/data/performance.ts`, rendered by `RecentMistakesList` in
+      `MistakesTab.tsx`. **Needs `npx prisma db push` + `npx prisma generate` on deploy** (new
+      table) — only logs mistakes from attempts made *after* this deploy; past attempts have no
+      retroactive question-level data.
 - [x] **Phase 4 — weekly checklist** (2026-10-28): "My Plan" now shows a 6-item weekly checklist
       (practice topic-wise questions, revise static GK, solve PYQs, take a mock, review wrong
       answers, revise formulas/notes) the student can tick off — matches the ChatGPT plan's
@@ -59,6 +61,13 @@ chat history remembering it. Tick a box and commit whenever a phase ships.
 - [x] **Phase 5 — daily micro-habit nudges** (2026-10-28): "My Plan" shows a static "Daily Habits
       That Add Up" card (calculation practice, current affairs reading, error review) below the
       checklist. Pure UI, no backend/schema — `DailyHabits` in `PlanTab.tsx`.
+
+## Next
+
+All 5 phases from the ChatGPT reference are shipped. Nothing queued right now — add items here
+when new gaps come up (e.g. extending Phase 3's mistake log retroactively, exam-category-specific
+topic lists instead of generic ones, the `My Mistakes` tab's subject-accuracy still being
+quiz-only and not counting mock-test attempts).
 
 ## Notes for whoever picks this up
 

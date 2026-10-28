@@ -31,6 +31,7 @@ export const getActiveMockTests = cache(async (): Promise<MockTestWithQuestions[
 
 export interface MockTestForSubmit {
   id: string;
+  examCategory: string;
   totalQuestions: number;
   questions: MockTestQuestion[];
 }
@@ -38,7 +39,7 @@ export interface MockTestForSubmit {
 export async function getMockTestById(id: string): Promise<MockTestForSubmit | null> {
   const test = await prisma.mockTest.findUnique({ where: { id } });
   if (!test || test.status !== 'ACTIVE') return null;
-  return { id: test.id, totalQuestions: test.totalQuestions, questions: test.questions as unknown as MockTestQuestion[] };
+  return { id: test.id, examCategory: test.examCategory, totalQuestions: test.totalQuestions, questions: test.questions as unknown as MockTestQuestion[] };
 }
 
 
