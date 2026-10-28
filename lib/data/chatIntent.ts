@@ -63,34 +63,58 @@ export const KNOWN_INTENTS = [
 
 export type KnownIntentId = (typeof KNOWN_INTENTS)[number]['id'];
 
+/** `intents` is deduped and ordered as found. A message can carry more than one of these at once
+ * (e.g. "thanks! also what's my plan today" → smallTalk + PLAN; "what's my plan and how do I
+ * enroll" → two intents) — the caller handles the common single-classification case exactly as
+ * before, and only adds extra handling when genuinely more than one thing was found. */
 export interface UnmatchedClassification {
-  kind: 'small_talk' | 'known_intent' | 'genuine_doubt';
-  intent?: KnownIntentId;
+  smallTalk: boolean;
+  intents: KnownIntentId[];
+  hasDoubt: boolean;
 }
 
 /** Only called once a message matched none of the regex intent patterns — tries to recover a
- * typo'd / Hindi-Hinglish-phrased / differently-worded version of something we already handle,
- * or at least avoid ticketing pure small talk ("ok", "thanks", "👍"). Anything else (or the LLM
- * being unavailable) keeps today's behavior: a genuine doubt, forwarded as a support ticket.
+ * typo'd / Hindi-Hinglish-phrased / differently-worded version of something we already handle, at
+ * least avoid ticketing pure small talk ("ok", "thanks", "👍"), and now also catch a message that
+ * is actually two or more separate asks run together. Anything unrecognizable, empty, or the LLM
+ * being unavailable keeps today's behavior: a genuine doubt, forwarded as a support ticket.
  * `history` (recent prior turns, current message excluded) helps disambiguate a short/ambiguous
  * message using what was just discussed — e.g. "which one" right after the bot named a subject. */
 export async function classifyUnmatchedMessage(message: string, history: ChatTurn[] = []): Promise<UnmatchedClassification> {
   const intentList = KNOWN_INTENTS.map((i) => `${i.id} = ${i.label}`).join('\n');
   const system =
-    'You classify one message from a student in an Indian government-exam-prep chatbot (English, Hindi, or Hinglish, possibly with typos). ' +
-    'Prior turns of the conversation, if any, are given before the message to classify — use them only to resolve ' +
-    'ambiguity in that message (e.g. what "it" or "that one" refers to), not to classify an earlier turn instead. ' +
-    'Reply with ONLY one of:\n' +
-    '- SMALL_TALK if it is a greeting, thanks, acknowledgement, or chit-chat that needs no real answer\n' +
-    `- one of these exact IDs if the message clearly means this, even if phrased very differently:\n${intentList}\n` +
-    '- DOUBT for a genuine study question or anything unclear\n' +
-    'Reply with ONLY that single word, nothing else, no punctuation.';
-  const result = await callOpenAI(system, message, 10, 0, history);
-  if (!result) return { kind: 'genuine_doubt' };
-  const cleaned = result.toUpperCase().replace(/[^A-Z_]/g, '');
-  if (cleaned === 'SMALL_TALK') return { kind: 'small_talk' };
-  const match = KNOWN_INTENTS.find((i) => i.id === cleaned);
-  return match ? { kind: 'known_intent', intent: match.id } : { kind: 'genuine_doubt' };
+    'You classify a message from a student in an Indian government-exam-prep chatbot (English, Hindi, or Hinglish, ' +
+    'possibly with typos). Prior turns of the conversation, if any, are given before the message to classify — use ' +
+    'them only to disambiguate that message (e.g. what "it" refers to), not to classify an earlier turn instead.\n' +
+    'The message may contain more than one separate question or request run together — e.g. "thanks! also what\'s ' +
+    'my plan today" or "what\'s my plan and how do I enroll". Identify every distinct part present. Reply with ONLY ' +
+    'a JSON array of tags, one per part found, each exactly one of:\n' +
+    '- "SMALL_TALK" — a greeting, thanks, acknowledgement, or chit-chat needing no real answer\n' +
+    `- one of these exact IDs, if that part clearly means this, even if phrased very differently:\n${intentList}\n` +
+    '- "DOUBT" — a genuine study question or anything unclear\n' +
+    'Examples of valid replies: ["PLAN"]  or  ["SMALL_TALK","PLAN"]  or  ["DOUBT"]  or  ["PLAN","ENROLL"]. ' +
+    'Reply with ONLY that JSON array, nothing else — no prose, no markdown code fences.';
+  const result = await callOpenAI(system, message, 40, 0, history);
+  if (!result) return { smallTalk: false, intents: [], hasDoubt: true }; // unavailable — same safe default as before (ticketed)
+
+  const knownIds = new Set<string>(KNOWN_INTENTS.map((i) => i.id));
+  let tags: string[] = [];
+  try {
+    const parsed = JSON.parse(result.replace(/```json|```/g, '').trim());
+    if (Array.isArray(parsed)) tags = parsed.map((t) => String(t).toUpperCase().replace(/[^A-Z_]/g, ''));
+  } catch {
+    // Malformed JSON — treat the whole response as one legacy single-tag reply rather than discarding it.
+    tags = [result.toUpperCase().replace(/[^A-Z_]/g, '')];
+  }
+
+  const smallTalk = tags.includes('SMALL_TALK');
+  const intents = [...new Set(tags.filter((t): t is KnownIntentId => knownIds.has(t)))];
+  const recognizedAnything = smallTalk || intents.length > 0 || tags.includes('DOUBT');
+  // Nothing recognizable came back at all (empty array, garbage tags) — keep the original safe
+  // default of treating it as a doubt rather than silently doing nothing.
+  const hasDoubt = tags.includes('DOUBT') || !recognizedAnything;
+
+  return { smallTalk, intents, hasDoubt };
 }
 
 /** Only called when a free-text intake question (e.g. "what's your qualification?") is still

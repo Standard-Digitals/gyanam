@@ -162,6 +162,18 @@ findings.
       now validates `sectionStats`' shape before using it instead of trusting the cast, so a future
       schema drift or direct DB edit produces a skipped subject instead of a silent `NaN%`.
 
+- [x] **Multi-part message support in the unmatched-message backstop** (2026-10-28):
+      `classifyUnmatchedMessage` now returns every distinct thing it finds in one message (via a
+      JSON-array prompt) instead of a single classification — so "thanks! also what's my plan
+      today" or "what's my plan and how do I enroll" get handled as two parts (small-talk + a
+      chip, or two chips) instead of only the first one winning. The single-classification case
+      (the common one) is handled by the exact same code path/wording as before, byte-for-byte —
+      new logic only runs when 2+ distinct parts are actually found. Still scoped to the AI
+      backstop only (unmatched messages) — a two-part message that matches a *regex* pattern
+      (the primary dispatch path) still only gets the first part answered; that needs the
+      state-machine work below first, since the regex dispatcher has no equivalent multi-match
+      concept today.
+
 ## Next (not started)
 
 These two are deliberately not attempted in the same rushed pass as everything else above — both
@@ -169,9 +181,6 @@ touch the core message-routing logic that every single chat message goes through
 wrong risks breaking live chat outright. Worth a dedicated, carefully-tested pass rather than being
 squeezed into an already-long session.
 
-- [ ] **Real NLU beyond the narrow backstop above** — the regex layer is still the primary path
-      for everything else, so paraphrased/multi-part messages that DO match some pattern (just the
-      wrong one, or only half of a two-part question) aren't covered by this round.
 - [ ] **State-machine refactor of `sendChatMessage`** — it's now a 30+ branch if/else chain that
       infers "current state" via literal string-equality against the last assistant message's
       text, rather than an explicit stored state. Works, but every new flow added is another

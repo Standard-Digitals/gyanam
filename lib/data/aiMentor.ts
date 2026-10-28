@@ -1615,30 +1615,68 @@ export async function sendChatMessage(
     suggestions = defaultSuggestions(!!user.targetExam);
   } else {
     // Best-effort OpenAI backstop before escalating to a human — recovers small talk and
-    // recognizable-but-differently-phrased intents without creating ticket noise; unavailable or
-    // genuinely unclear still falls through to the exact same ticket-creation as before this existed.
+    // recognizable-but-differently-phrased intents without creating ticket noise, and now also
+    // catches a message that's actually two or more asks run together (e.g. "thanks! what's my
+    // plan" or "what's my plan and how do I enroll"); unavailable or genuinely unclear still falls
+    // through to the exact same ticket-creation as before any of this existed.
     const classification = await classifyUnmatchedMessage(trimmed, recentForAi);
-    if (classification.kind === 'small_talk') {
-      reply = [`Happy to help, ${name}! Let me know if you need your plan, a test, or anything else.`];
-      suggestions = defaultSuggestions(!!user.targetExam);
-    } else if (classification.kind === 'known_intent' && classification.intent) {
-      const { label, chip } = KNOWN_INTENT_CHIP[classification.intent];
-      reply = [`Looks like you're asking about ${label} — tap below and I'll pull that up.`];
-      suggestions = [chip];
+    const partsFound = (classification.smallTalk ? 1 : 0) + classification.intents.length + (classification.hasDoubt ? 1 : 0);
+
+    if (partsFound <= 1) {
+      // The common case — exactly one thing detected — handled identically to before this file
+      // gained multi-part support, so this path's behavior/wording is unchanged.
+      if (classification.smallTalk) {
+        reply = [`Happy to help, ${name}! Let me know if you need your plan, a test, or anything else.`];
+        suggestions = defaultSuggestions(!!user.targetExam);
+      } else if (classification.intents[0]) {
+        const { label, chip } = KNOWN_INTENT_CHIP[classification.intents[0]];
+        reply = [`Looks like you're asking about ${label} — tap below and I'll pull that up.`];
+        suggestions = [chip];
+      } else {
+        // Ticket creation stays unconditional — a human safety net regardless of whether the draft
+        // reply below comes back. The draft only adds an immediate, encouraging first response
+        // instead of leaving the student with nothing until faculty follows up; it's never allowed
+        // to state specific facts (see draftDoubtReply's prompt), so it can't substitute for the
+        // ticket, only soften the wait.
+        const [ticketNumber, drafted] = await Promise.all([
+          createDoubtTicket(name, user.phone, user.email, trimmed),
+          draftDoubtReply(trimmed, user.targetExam, recentForAi),
+        ]);
+        reply = drafted
+          ? [drafted, `I've also flagged this for your faculty (ticket ${ticketNumber}) in case you need more specific detail.`]
+          : ['Got it, let me get that in front of your faculty.', `Forwarded as ticket ${ticketNumber} — they'll get back to you soon.`];
+        suggestions = defaultSuggestions(!!user.targetExam);
+      }
     } else {
-      // Ticket creation stays unconditional — a human safety net regardless of whether the draft
-      // reply below comes back. The draft only adds an immediate, encouraging first response
-      // instead of leaving the student with nothing until faculty follows up; it's never allowed
-      // to state specific facts (see draftDoubtReply's prompt), so it can't substitute for the
-      // ticket, only soften the wait.
-      const [ticketNumber, drafted] = await Promise.all([
-        createDoubtTicket(name, user.phone, user.email, trimmed),
-        draftDoubtReply(trimmed, user.targetExam, recentForAi),
-      ]);
-      reply = drafted
-        ? [drafted, `I've also flagged this for your faculty (ticket ${ticketNumber}) in case you need more specific detail.`]
-        : ['Got it, let me get that in front of your faculty.', `Forwarded as ticket ${ticketNumber} — they'll get back to you soon.`];
-      suggestions = defaultSuggestions(!!user.targetExam);
+      // Genuinely more than one thing in this message — address each: known-intent chips for
+      // every distinct intent found, plus a drafted doubt-reply (still on the full original
+      // message, not split per-part — the model handles "answer whatever's actually a question in
+      // here" fine on its own) if any part looked like a real doubt. Ticket still created
+      // unconditionally whenever a doubt part is present, same safety net as the single-part case.
+      const replyParts: string[] = [];
+      let chips: string[] = [];
+
+      if (classification.intents.length > 0) {
+        const entries = classification.intents.map((id) => KNOWN_INTENT_CHIP[id]);
+        const labels = entries.map((e) => e.label);
+        const labelText = labels.length === 2 ? `${labels[0]} and ${labels[1]}` : `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
+        replyParts.push(`Looks like you're asking about ${labelText} — tap below and I'll pull those up.`);
+        chips = entries.map((e) => e.chip);
+      }
+
+      if (classification.hasDoubt) {
+        const [ticketNumber, drafted] = await Promise.all([
+          createDoubtTicket(name, user.phone, user.email, trimmed),
+          draftDoubtReply(trimmed, user.targetExam, recentForAi),
+        ]);
+        if (drafted) replyParts.push(drafted);
+        replyParts.push(`I've also flagged this for your faculty (ticket ${ticketNumber}) in case you need more specific detail.`);
+      } else if (classification.smallTalk && replyParts.length === 0) {
+        replyParts.push(`Happy to help, ${name}!`);
+      }
+
+      reply = replyParts.length > 0 ? replyParts : [`Happy to help, ${name}! Let me know if you need your plan, a test, or anything else.`];
+      suggestions = chips.length > 0 ? chips : defaultSuggestions(!!user.targetExam);
     }
   }
 
