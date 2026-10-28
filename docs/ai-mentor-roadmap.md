@@ -56,9 +56,9 @@ chat history remembering it. Tick a box and commit whenever a phase ships.
       `getWeeklyChecklist()` / `toggleWeeklyChecklistItem()` in `lib/data/aiMentor.ts`,
       `/api/dashboard/ai-mentor/checklist` (GET/POST), `WeeklyChecklist` in `PlanTab.tsx`.
       **Needs `npx prisma db push` on deploy** (new column).
-- [ ] **Phase 5 — daily micro-habit nudges.** Short standing reminders (e.g. "15 min calculation
-      practice", "30–45 min GA reading") surfaced somewhere low-friction — chat suggestion chip or
-      a line in "My Plan" — not a huge build, mostly copy + placement once Phase 2/4 land.
+- [x] **Phase 5 — daily micro-habit nudges** (2026-10-28): "My Plan" shows a static "Daily Habits
+      That Add Up" card (calculation practice, current affairs reading, error review) below the
+      checklist. Pure UI, no backend/schema — `DailyHabits` in `PlanTab.tsx`.
 
 ## Notes for whoever picks this up
 

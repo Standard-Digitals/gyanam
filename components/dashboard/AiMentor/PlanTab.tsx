@@ -1,8 +1,50 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Sparkles, ChevronRight, ChevronDown, GraduationCap, CheckCircle2, Circle, ClipboardList, Map as MapIcon, ListChecks } from 'lucide-react';
+import {
+  Sparkles,
+  ChevronRight,
+  ChevronDown,
+  GraduationCap,
+  CheckCircle2,
+  Circle,
+  ClipboardList,
+  Map as MapIcon,
+  ListChecks,
+  Flame,
+  Calculator,
+  Newspaper,
+  NotebookPen,
+} from 'lucide-react';
 import type { MentorOverview, WeeklySchedule, RoadmapPhase, WeeklyChecklistState } from '@/lib/data/aiMentor';
+
+const DAILY_HABITS = [
+  { icon: Calculator, title: 'Calculation practice — 10-15 min', body: 'Squares, cubes, fractions, tables — speed here saves time in every section.' },
+  { icon: Newspaper, title: 'Current affairs reading — 20-30 min', body: 'A little every day beats cramming it all before the exam.' },
+  { icon: NotebookPen, title: 'Error review — 10-15 min', body: "Go back over today's mistakes before moving on to new topics." },
+];
+
+function DailyHabits() {
+  return (
+    <div className="bg-white p-4 rounded-2xl border border-[#F3DCDD] space-y-3">
+      <div className="flex items-center gap-2">
+        <Flame className="w-4 h-4 text-[#C12223]" />
+        <p className="text-[10px] font-black text-[#C12223] uppercase tracking-wide">Daily Habits That Add Up</p>
+      </div>
+      <div className="space-y-3">
+        {DAILY_HABITS.map((h, i) => (
+          <div key={i} className="flex items-start gap-2.5">
+            <h.icon className="w-4 h-4 text-[#C12223] shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-bold text-[#1F1A1C]">{h.title}</p>
+              <p className="text-[11px] text-[#888888] mt-0.5">{h.body}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 interface PlanData extends MentorOverview {
   dailyScheduleBlocks: WeeklySchedule | null;
@@ -160,6 +202,7 @@ export function PlanTab({ onTalkToCounsellor, onBrowseCourses }: { onTalkToCouns
         {data.dailyScheduleBlocks && <ScheduleChart schedule={data.dailyScheduleBlocks} />}
         {data.roadmap && data.roadmap.length > 0 && <RoadmapView phases={data.roadmap} />}
         {data.dailyScheduleBlocks && <WeeklyChecklist />}
+        {data.dailyScheduleBlocks && <DailyHabits />}
         {data.courseSuggestion ? (
           <div className="bg-white p-4 rounded-2xl border border-[#F3DCDD]">
             <div className="flex items-center gap-2 mb-1">
@@ -214,6 +257,7 @@ export function PlanTab({ onTalkToCounsellor, onBrowseCourses }: { onTalkToCouns
       {data.dailyScheduleBlocks && <ScheduleChart schedule={data.dailyScheduleBlocks} />}
       {data.roadmap && data.roadmap.length > 0 && <RoadmapView phases={data.roadmap} />}
       {data.dailyScheduleBlocks && <WeeklyChecklist />}
+      {data.dailyScheduleBlocks && <DailyHabits />}
       {data.banner && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
           <p className="text-[10px] font-black text-amber-700 uppercase tracking-wide">Waiting for you</p>
