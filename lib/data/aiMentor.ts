@@ -3,6 +3,7 @@ import { getCourseProgress } from '@/lib/data/courseProgress';
 import { getSubjectStrength } from '@/lib/data/performance';
 import { getMyProgress, getBasicProgress } from '@/lib/data/myProgress';
 import { suggestExamPeriod } from '@/lib/data/examDateSuggestion';
+import { classifyUnmatchedMessage, looksLikeAnswerTo, type KnownIntentId } from '@/lib/data/chatIntent';
 import {
   EXAM_NAME_PROMPT,
   EXAM_DATE_PROMPT,
@@ -210,13 +211,17 @@ export async function resetChatConversation(userId: string): Promise<void> {
 // ---- Intent patterns ----
 const COUNSELLOR_PATTERN = /\b(counsellor|counselor|call me|talk to (a )?(human|person|counsellor|counselor)|speak to someone)\b/i;
 const TEST_PATTERN = /\b(practice test|test on demand|give me a test|mock test|quiz (please|now)?)\b/i;
-const PLAN_PATTERN = /\b(plan|today|schedule|routine|what should i (do|study))\b/i;
+// Narrow phrase shapes, not bare "plan"/"today"/"schedule" words — those collide with unrelated
+// sentences like "my exam is today" or "who teaches the exam-prep faculty".
+const PLAN_PATTERN = /\b(my|today'?s|daily|weekly) (plan|schedule|routine)\b|\bwhat'?s my plan\b|\bwhat should i (do|study)( today)?\b|\bstudy (plan|routine)\b|\bdaily routine\b/i;
 const PROGRESS_PATTERN = /\b(progress|how am i doing|report|rank|improv|percentile|compare)\b/i;
 const MISTAKES_PATTERN = /\b(mistake|wrong|weak|negative mark|where am i losing)\b/i;
 const REMIND_PATTERN = /\bremind me\b/i;
 const GREETING_PATTERN = /^(hi|hello|hey|hola|namaste)\b/i;
+// Phrase shapes only — dropped the old bare "preparation|prepare|prep" alternative, which matched
+// that word anywhere (e.g. hijacked "who teaches the exam-prep faculty?" into this intake flow).
 const STRATEGY_PATTERN =
-  /\b(crack|clear|pass)\b.*\b(exam|test)\b|\bright approach\b|\bhow (should|do|can) i prepare\b|\bpreparation (tips|strategy)\b|\bhow to (crack|clear|pass|prepare)\b|\bstudy (tips|strategy|plan)\b|\bwinning strategy\b|\b(preparation|prepare|prep)\b/i;
+  /\b(crack|clear|pass)\b.*\b(exam|test)\b|\bright approach\b|\bhow (should|do|can) i prepare\b|\bpreparation (tips|strategy)\b|\bhow to (crack|clear|pass|prepare)\b|\bstudy (tips|strategy|plan)\b|\bwinning strategy\b/i;
 
 // General, institute-info questions — mainly for visitors who haven't set up exam prep.
 const NEW_BATCH_PATTERN = /\b(new|next|upcoming)\b.*\bbatch(es)?\b|\bbatch(es)?\b.*\b(start|begin|open)\b/i;
@@ -350,6 +355,24 @@ function suggestionsForPrompt(prompt: string): string[] {
 function defaultSuggestions(hasTargetExam: boolean): string[] {
   return hasTargetExam ? PREP_SUGGESTIONS : GENERAL_SUGGESTIONS;
 }
+
+// Human-readable label + the exact chip text that re-triggers each intent's real regex pattern —
+// used only when `classifyUnmatchedMessage` recovers a known intent from a message that missed
+// every regex pattern itself (a typo, different phrasing, or Hindi/Hinglish). Surfacing it as a
+// chip to tap, rather than auto-executing the matched branch, keeps every reply going through the
+// same deterministic dispatch path as normal — this never invents a new code path.
+const KNOWN_INTENT_CHIP: Record<KnownIntentId, { label: string; chip: string }> = {
+  PLAN: { label: "today's study plan", chip: "What's my plan today?" },
+  TEST: { label: 'a practice test', chip: 'Give me a practice test' },
+  PROGRESS: { label: 'your progress', chip: 'How is my progress?' },
+  MISTAKES: { label: 'your weak subjects', chip: 'Where am I losing marks?' },
+  COUNSELLOR: { label: 'talking to a counsellor', chip: 'Talk to a counsellor' },
+  FACULTY: { label: 'our faculty', chip: 'Who are the faculty?' },
+  NEW_BATCH: { label: 'the next batch', chip: 'When does a new batch start?' },
+  CENTER: { label: 'our centers', chip: 'Where are your centers?' },
+  ENROLL: { label: 'enrolling', chip: 'How do I enroll?' },
+  BROWSE_COURSES: { label: 'our courses', chip: 'Show all courses' },
+};
 
 interface ReplyWithSuggestions {
   messages: string[];
@@ -893,7 +916,21 @@ async function finishStrategyIntake(userId: string, profile: StrategyProfile): P
  * the profile and writes the exchange into chat history so it reads naturally in the Chat tab.
  */
 export async function completeOnboardingForm(userId: string, targetExam: string, examDate: string): Promise<ReplyWithSuggestions> {
-  await prisma.user.update({ where: { id: userId }, data: { targetExam, examDate } });
+  // This path's own closing line promises "ask me 'what's my plan today' and I'll turn this into
+  // a daily checklist" (buildStrategyAdvice, below) — that used to be false here, since only the
+  // chat-driven strategy intake ever called buildSchedule. Give this path the same default
+  // schedule (using sensible fallbacks, since this quick form never collects study hours/weak
+  // subject) so "My Plan" and that promise both actually hold — but only if nothing's saved yet,
+  // so re-running this quick form never clobbers a schedule already personalized via chat.
+  const existing = await prisma.user.findUnique({ where: { id: userId }, select: { dailyScheduleBlocks: true } });
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      targetExam,
+      examDate,
+      ...(existing?.dailyScheduleBlocks ? {} : { dailyScheduleBlocks: buildWeeklySchedule(null, null) as unknown as object }),
+    },
+  });
   await prisma.aiMentorMessage.create({ data: { userId, role: 'user', content: `I'm preparing for ${targetExam}, around ${examDate}.` } });
   const { messages, suggestions } = await finishIntake(userId, targetExam, examDate);
   for (let i = 0; i < messages.length; i++) {
@@ -967,7 +1004,7 @@ export async function findAnyOpenTest(
   return null;
 }
 
-async function createDoubtTicket(userId: string, name: string, phone: string, email: string | null, text: string): Promise<string> {
+async function createDoubtTicket(name: string, phone: string, email: string | null, text: string): Promise<string> {
   const ticketNumber = 'GY-TK-' + Math.floor(100000 + Math.random() * 900000);
   await prisma.supportTicket.create({
     data: {
@@ -975,7 +1012,6 @@ async function createDoubtTicket(userId: string, name: string, phone: string, em
       studentName: name,
       phone,
       email: email || undefined,
-      rollNoOrOrderId: userId,
       category: 'Doubt (AI Mentor)',
       urgency: 'Normal',
       description: text,
@@ -984,7 +1020,18 @@ async function createDoubtTicket(userId: string, name: string, phone: string, em
   return ticketNumber;
 }
 
+const COUNSELLOR_LEAD_DEDUPE_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+/** Skips creating a new Lead if this student already has one from the AI Mentor chat in the last
+ * 24h — "talk to a counsellor" can be tapped/typed repeatedly in one sitting, and without this a
+ * single frustrated or button-mashing student can flood the counsellor queue with duplicates of
+ * the same request instead of it reading as one clear signal. */
 async function createCounsellorLead(name: string, phone: string, email: string | null, targetExam: string | null, note: string): Promise<void> {
+  const recent = await prisma.lead.findFirst({
+    where: { phone, source: 'AI_MENTOR_CHAT', createdAt: { gt: new Date(Date.now() - COUNSELLOR_LEAD_DEDUPE_WINDOW_MS) } },
+  });
+  if (recent) return;
+
   await prisma.lead.create({
     data: {
       fullName: name,
@@ -998,10 +1045,15 @@ async function createCounsellorLead(name: string, phone: string, email: string |
 }
 
 /**
- * Rule-based reply — no OpenAI. Each branch pulls the student's real data (course, pending tests,
- * progress, subject accuracy) so answers are specific to them, not generic — the "background" the
- * chat needs to answer well. Returns a short sequence of messages, having already saved all of
- * them (the user's and every reply chunk) to history.
+ * Mostly rule-based dispatch (regex intent matching against fixed reply builders) — each branch
+ * pulls the student's real data (course, pending tests, progress, subject accuracy) so answers
+ * are specific to them, not generic. A narrow, best-effort OpenAI backstop (chatIntent.ts) only
+ * kicks in where the regex layer is known to be fragile: validating a free-text intake answer
+ * actually answers the pending question, and recovering a recognizable intent (or just small talk)
+ * from a message that matched no pattern, before it's escalated as a support ticket. OpenAI being
+ * unavailable degrades every one of those checks back to the pre-existing regex-only behavior.
+ * Returns a short sequence of messages, having already saved all of them (the user's and every
+ * reply chunk) to history.
  */
 export async function sendChatMessage(
   user: {
@@ -1056,9 +1108,34 @@ export async function sendChatMessage(
   // WEAK_SUBJECT_PROMPT was outstanding used to get saved as the weak-subject answer and the
   // student's actual question was never addressed, which read as the chat being stuck). The
   // pending question itself is left unanswered in the DB, so it's asked again next time the
-  // student triggers that intake flow.
+  // student triggers that intake flow. Deliberately NOT extended to every other intent pattern
+  // below (PROGRESS/MISTAKES/FACULTY/etc.) — several of those share ordinary words with plausible
+  // free-text answers (e.g. MISTAKES_PATTERN's "weak" vs. a genuine "I'm weak in reasoning" answer
+  // to WEAK_SUBJECT_PROMPT), so a regex-based interrupt there risks losing a real answer. The
+  // OpenAI check just below covers that case instead, since it reasons about meaning, not keywords.
   const interruptsIntake = PLAN_PATTERN.test(trimmed) || TEST_PATTERN.test(trimmed) || COUNSELLOR_PATTERN.test(trimmed);
-  const pendingAnswer = interruptsIntake ? null : lastAssistant?.content;
+  let pendingAnswer = interruptsIntake ? null : lastAssistant?.content;
+
+  // Free-text intake slots (as opposed to the yes/no-style prompts below, which already guard
+  // their own branches with a decline-pattern check) get saved as whatever the student typed, no
+  // validation — so a message that's actually unrelated (misses every pattern above, e.g. a
+  // differently-phrased question, a typo, or Hindi/Hinglish) used to silently overwrite a profile
+  // field like `qualification` or `weakSubject` with garbage. Best-effort OpenAI sanity check:
+  // unavailable or inconclusive just keeps the pre-existing save-whatever-was-typed behavior.
+  const FREE_TEXT_PROMPTS = new Set([
+    EXAM_NAME_PROMPT,
+    EXAM_DATE_PROMPT,
+    QUALIFICATION_PROMPT,
+    MARKS_PROMPT,
+    BEGINNER_CHECK_PROMPT,
+    STUDY_HOURS_PROMPT,
+    WEAK_SUBJECT_PROMPT,
+    SYLLABUS_PROGRESS_PROMPT,
+  ]);
+  if (pendingAnswer && FREE_TEXT_PROMPTS.has(pendingAnswer)) {
+    const looksValid = await looksLikeAnswerTo(pendingAnswer, trimmed);
+    if (!looksValid) pendingAnswer = null;
+  }
 
   if (pendingAnswer === EXAM_NAME_PROMPT) {
     const examName = trimmed.slice(0, 120);
@@ -1417,9 +1494,22 @@ export async function sendChatMessage(
     reply = lastAssistant ? [`Welcome back, ${name}!`, 'How can I help you today?'] : [`Hi ${name}!`, 'How can I help you today?'];
     suggestions = defaultSuggestions(!!user.targetExam);
   } else {
-    const ticketNumber = await createDoubtTicket(user.id, name, user.phone, user.email, trimmed);
-    reply = ['Got it, let me get that in front of your faculty.', `Forwarded as ticket ${ticketNumber} — they'll get back to you soon.`];
-    suggestions = defaultSuggestions(!!user.targetExam);
+    // Best-effort OpenAI backstop before escalating to a human — recovers small talk and
+    // recognizable-but-differently-phrased intents without creating ticket noise; unavailable or
+    // genuinely unclear still falls through to the exact same ticket-creation as before this existed.
+    const classification = await classifyUnmatchedMessage(trimmed);
+    if (classification.kind === 'small_talk') {
+      reply = [`Happy to help, ${name}! Let me know if you need your plan, a test, or anything else.`];
+      suggestions = defaultSuggestions(!!user.targetExam);
+    } else if (classification.kind === 'known_intent' && classification.intent) {
+      const { label, chip } = KNOWN_INTENT_CHIP[classification.intent];
+      reply = [`Looks like you're asking about ${label} — tap below and I'll pull that up.`];
+      suggestions = [chip];
+    } else {
+      const ticketNumber = await createDoubtTicket(name, user.phone, user.email, trimmed);
+      reply = ['Got it, let me get that in front of your faculty.', `Forwarded as ticket ${ticketNumber} — they'll get back to you soon.`];
+      suggestions = defaultSuggestions(!!user.targetExam);
+    }
   }
 
   for (let i = 0; i < reply.length; i++) {

@@ -62,12 +62,68 @@ chat history remembering it. Tick a box and commit whenever a phase ships.
       That Add Up" card (calculation practice, current affairs reading, error review) below the
       checklist. Pure UI, no backend/schema — `DailyHabits` in `PlanTab.tsx`.
 
-## Next
+All 5 phases from the ChatGPT reference are shipped. Nothing queued right now from that reference —
+see the audit-driven items below for what's next.
 
-All 5 phases from the ChatGPT reference are shipped. Nothing queued right now — add items here
-when new gaps come up (e.g. extending Phase 3's mistake log retroactively, exam-category-specific
-topic lists instead of generic ones, the `My Mistakes` tab's subject-accuracy still being
-quiz-only and not counting mock-test attempts).
+## Chatbot audit (2026-10-28)
+
+Ran a full expert-style audit of the chat dispatcher (`sendChatMessage` in `lib/data/aiMentor.ts`)
+after live-testing surfaced a real bug (a free-text answer got silently saved into the wrong
+profile field). Full findings aren't duplicated here — the short version: this was a pure
+regex/keyword dispatcher with no actual language understanding, which is both the root cause of
+several bugs and the single biggest gap to feeling like a real "AI mentor". User has an OpenAI key
+now, so the fix direction is a **hybrid**: OpenAI only as a narrow backstop for understanding
+(validating an answer, recovering a misphrased/typo'd/Hindi-Hinglish intent), never as the source
+of truth for business facts (course prices, schedules, etc. always come from the existing
+deterministic code) — keeps cost low and avoids hallucinated course/pricing info.
+
+- [x] Narrowed `PLAN_PATTERN`/`STRATEGY_PATTERN` — dropped bare-word alternatives ("plan",
+      "today", "prepare") that collided with unrelated sentences (e.g. "who teaches the exam-prep
+      faculty?" used to hijack into the exam-strategy intake).
+- [x] **OpenAI backstop, new `lib/data/chatIntent.ts`** (same safe-fallback shape as
+      `examDateSuggestion.ts` — no key/failed call/timeout all degrade to the old regex-only
+      behavior, never breaks the chat):
+      - `looksLikeAnswerTo()` — before saving a free-text intake answer (qualification, weak
+        subject, study hours, etc.), sanity-checks it's actually attempting to answer the pending
+        question. Deliberately NOT done by extending the regex interrupt-list instead, since
+        several intent patterns share ordinary words with plausible answers (e.g. MISTAKES_PATTERN's
+        "weak" vs. a genuine "I'm weak in reasoning" answer) — meaning-based beats keyword-based here.
+      - `classifyUnmatchedMessage()` — only runs when no regex pattern matched anything (previously:
+        always a support ticket). Recovers small talk (no ticket) and typo'd/differently-phrased/
+        Hindi-Hinglish versions of known intents (shown as a tappable chip, which re-enters the
+        normal deterministic dispatch — never auto-executes a different code path).
+- [x] Unified the two onboarding paths: the quick-form "Set up my exam preparation" flow
+      (`completeOnboardingForm`) never built a schedule, so its own closing line — "ask me what's
+      my plan today and I'll turn this into a checklist" — was false for anyone who used it. Now
+      seeds a default schedule (`buildWeeklySchedule(null, null)`) there too, only if none exists
+      yet (never overwrites a schedule already personalized via the chat intake).
+- [x] Basic abuse/cost guards: rate limit on `/api/dashboard/ai-mentor/messages` (6 messages/10s
+      per user), and `createCounsellorLead` dedupes against an existing Lead from the same phone in
+      the last 24h instead of creating a duplicate every time "talk to a counsellor" is tapped.
+- [x] `createDoubtTicket` no longer stuffs the internal `userId` into the `rollNoOrOrderId` field
+      (misleading to an admin reading the ticket).
+- [ ] **Needs `OPENAI_API_KEY` set in the VPS `.env`** for any of the above OpenAI-backed behavior
+      to actually activate — until then every one of these checks safely no-ops back to the
+      pre-audit regex-only behavior. (The exam-date-suggestion feature already reads this same env
+      var — if that's ever shown a real suggestion in production, the key is already set.)
+
+## Next (not started)
+
+- [ ] **Real NLU beyond the narrow backstop above** — today's fix only patches the two riskiest
+      specific spots (intake-answer validation, unmatched-message fallback). The regex layer is
+      still the primary path for everything else, so paraphrased/multi-part/typo'd messages that
+      DO match some pattern, or a different pattern than intended, aren't covered by this round.
+- [ ] **State-machine refactor of `sendChatMessage`** — it's now a 30+ branch if/else chain that
+      infers "current state" via literal string-equality against the last assistant message's
+      text, rather than an explicit stored state. Works, but every new flow added is another
+      branch, and a prompt-text edit anywhere silently breaks resumption for anyone paused
+      mid-flow at deploy time.
+- [ ] Session memory beyond the stored profile fields (so the bot can reference what was just
+      discussed a turn or two ago, not only persisted DB state).
+- [ ] Proactive nudges (inactivity reminders, overdue-test pings) — currently fully reactive.
+- [ ] Extending Phase 3's mistake log retroactively; exam-category-specific topic lists instead of
+      generic ones; `My Mistakes` subject-accuracy still being quiz-only (doesn't count mock-test
+      attempts).
 
 ## Notes for whoever picks this up
 
