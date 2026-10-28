@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { generateMistakeTip } from '@/lib/data/chatIntent';
 
 export interface RecentMistake {
   id: string;
@@ -10,11 +11,31 @@ export interface RecentMistake {
   selectedAnswer: string | null;
   wasSkipped: boolean;
   explanation: string;
+  improvementTip: string | null;
+  reviewedAt: Date | null;
   createdAt: Date;
 }
 
+/** Fills in `improvementTip` for whichever of the given mistakes don't have one yet, in parallel,
+ * and persists each one as it's generated — lazily, on read, rather than at quiz/mock submission
+ * time, so a slow or failed OpenAI call can never delay a student's score. Best-effort throughout:
+ * a mistake that fails to generate a tip is returned as-is (null tip), exactly as before this existed. */
+async function withImprovementTips(mistakes: RecentMistake[]): Promise<RecentMistake[]> {
+  return Promise.all(
+    mistakes.map(async (m) => {
+      if (m.improvementTip) return m;
+      const correct = m.correctAnswerText ?? (m.correctAnswer !== null ? m.options[m.correctAnswer] : null);
+      if (!correct) return m;
+      const tip = await generateMistakeTip(m.subject, m.questionText, correct, m.explanation);
+      if (!tip) return m;
+      prisma.questionMistake.update({ where: { id: m.id }, data: { improvementTip: tip } }).catch(() => {});
+      return { ...m, improvementTip: tip };
+    })
+  );
+}
+
 export async function getRecentMistakes(userId: string, limit = 20): Promise<RecentMistake[]> {
-  return prisma.questionMistake.findMany({
+  const mistakes = await prisma.questionMistake.findMany({
     where: { userId },
     orderBy: { createdAt: 'desc' },
     take: limit,
@@ -28,9 +49,20 @@ export async function getRecentMistakes(userId: string, limit = 20): Promise<Rec
       selectedAnswer: true,
       wasSkipped: true,
       explanation: true,
+      improvementTip: true,
+      reviewedAt: true,
       createdAt: true,
     },
   });
+  return withImprovementTips(mistakes);
+}
+
+/** Stamps a mistake as seen in the one-by-one review flow, so the next time the student opens it
+ * this one doesn't take up a slot that could instead show something they haven't reviewed yet.
+ * Silently does nothing if the id doesn't belong to this user (no ownership leak, no error either
+ * — the client fires this as a best-effort side-effect while reviewing, not a critical action). */
+export async function markMistakeReviewed(userId: string, mistakeId: string): Promise<void> {
+  await prisma.questionMistake.updateMany({ where: { id: mistakeId, userId }, data: { reviewedAt: new Date() } });
 }
 
 export interface RankInfo {

@@ -227,3 +227,20 @@ export async function generateAiPracticeQuiz(subject: string, targetExam: string
     return null;
   }
 }
+
+/** A short, actionable "how to avoid this next time" tip for one wrong/skipped question — shown
+ * in "My Mistakes"' one-by-one review alongside the existing why-this-is-correct explanation
+ * (CEO feedback: the explanation alone doesn't say what to actually DO differently next time).
+ * Called lazily the first time a mistake is read back (getRecentMistakes), not at quiz/mock
+ * submission time, so a slow/failed generation can never delay a student's score. Returns null
+ * (caller just shows the mistake without a tip, as before this existed) if OPENAI_API_KEY isn't
+ * set, the call fails, or the response is empty. */
+export async function generateMistakeTip(subject: string, questionText: string, correctAnswer: string, explanation: string): Promise<string | null> {
+  const system =
+    `A student in an Indian government-exam-prep app got a "${subject}" question wrong or skipped it. ` +
+    'Given the question, the correct answer, and why it\'s correct, write ONE short, concrete, actionable tip ' +
+    '(1-2 sentences) for how they should approach this TYPE of question next time — a study habit, a technique, ' +
+    'or what to revise — not a restatement of the explanation. Reply with ONLY the tip, no preamble.';
+  const content = `Question: ${questionText}\nCorrect answer: ${correctAnswer}\nWhy: ${explanation}`;
+  return callOpenAI(system, content, 80, 0.4);
+}

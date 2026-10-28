@@ -215,7 +215,25 @@ findings.
       checklist/daily-habits "Go" button for that item now opens My Mistakes straight into review
       mode (`MistakesTab`'s new `startInReview` prop, threaded through `ChatWidget.tsx`'s
       `onGoToMistakes`); tapping the "My Mistakes" nav tab directly still opens the list view as
-      before. No schema/API change — purely a UI addition over the existing mistakes endpoint.
+      before.
+- [x] **Review cards now say how to improve, and don't repeat already-reviewed mistakes.** Two
+      follow-up feedback items on the one-by-one review above:
+      - Each card now shows a "Next time" tip (actionable — a technique/habit/what to revise, not a
+        restatement of the explanation) alongside the existing "Why" explanation.
+        `generateMistakeTip()` in `lib/data/chatIntent.ts`; generated lazily the first time a
+        mistake is read back (`getRecentMistakes` → `withImprovementTips` in
+        `lib/data/performance.ts`), not at quiz/mock submission time, so a slow/failed generation
+        never delays a student's score — persisted on `QuestionMistake.improvementTip` so it's only
+        generated once per mistake.
+      - A mistake the student has already gone through in review no longer takes up a slot next
+        time they open review — each card marks itself reviewed
+        (`QuestionMistake.reviewedAt`, new `POST /api/dashboard/ai-mentor/mistakes/review`) as soon
+        as it's shown. The mistakes endpoint now also returns `unreviewedMistakes` (same list,
+        filtered), which is what the one-by-one flow actually walks through — the list view still
+        shows everything, reviewed or not, as a full history. Review mode shows a "You're all
+        caught up!" state instead of an empty screen once nothing new is left.
+      **Needs `npx prisma db push` + `npx prisma generate` on deploy** (two new columns) — only
+      applies going forward; mistakes logged before this have no tip and read as not-yet-reviewed.
 
 ## Next (not started)
 

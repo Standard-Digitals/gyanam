@@ -315,6 +315,8 @@ model QuestionMistake {
   selectedAnswer    String?
   wasSkipped        Boolean
   explanation       String
+  improvementTip    String? // best-effort OpenAI-generated "how to avoid this next time" tip, filled in lazily on first read (getRecentMistakes), not at submission time — never blocks quiz/mock scoring
+  reviewedAt        DateTime? // set when the student has seen this one in the "My Mistakes" one-by-one review flow — lets that flow show only not-yet-reviewed mistakes next time instead of repeating the same ones
   createdAt         DateTime @default(now())
 
   @@index([userId])

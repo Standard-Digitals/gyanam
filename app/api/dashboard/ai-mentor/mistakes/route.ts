@@ -8,5 +8,8 @@ export async function GET() {
 
   const [subjects, recentMistakes] = await Promise.all([getSubjectStrength(user.id), getRecentMistakes(user.id)]);
   const weakest = [...subjects].sort((a, b) => a.avgAccuracy - b.avgAccuracy);
-  return NextResponse.json({ subjects: weakest, recentMistakes });
+  // Not-yet-reviewed-in-the-one-by-one-flow subset of the same list — lets that flow show fresh
+  // mistakes each time instead of repeating ones the student already went through.
+  const unreviewedMistakes = recentMistakes.filter((m) => !m.reviewedAt);
+  return NextResponse.json({ subjects: weakest, recentMistakes, unreviewedMistakes });
 }
