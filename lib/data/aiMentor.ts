@@ -578,6 +578,8 @@ function formatScheduleMessage(schedule: WeeklySchedule): string {
 
 // Fallback when no enrolled/matching course has subject-tagged chapters yet — rotates by day so
 // it isn't the same two topics forever, but is still a generic placeholder, not real syllabus data.
+// Used as-is for any exam category without its own list below (State PSC, Defence, Assam Govt,
+// Teaching Exams, or no exam set yet).
 const SUBJECT_TOPICS: Record<string, string[]> = {
   'Quantitative Aptitude': [
     'Number System', 'Simplification', 'Percentage', 'Ratio & Proportion', 'Profit & Loss',
@@ -601,6 +603,108 @@ const SUBJECT_TOPICS: Record<string, string[]> = {
   ],
   'Revision & timed practice': ['Review mistakes from recent quizzes', 'One timed mini-test'],
 };
+
+// Same 5-key shape as SUBJECT_TOPICS, re-weighted toward what each exam family actually tests
+// most — e.g. Banking leans hard on Puzzles/Seating + Banking Awareness, SSC on static GK +
+// Mensuration/Geometry, Railway on General Science, UPSC Prelims being structured enough
+// differently (GS + CSAT) that "Reasoning"/"English" map onto CSAT's decision-making/comprehension
+// instead. Falls back to SUBJECT_TOPICS for any category not listed here (see subjectTopicsFor).
+const SUBJECT_TOPICS_BY_CATEGORY: Record<string, Record<string, string[]>> = {
+  SSC: {
+    'Quantitative Aptitude': [
+      'Number System', 'Simplification', 'Percentage', 'Profit & Loss', 'Simple & Compound Interest',
+      'Ratio & Proportion', 'Average', 'Time & Work', 'Time, Speed & Distance', 'Mensuration',
+      'Geometry', 'Trigonometry', 'Algebra', 'Data Interpretation',
+    ],
+    Reasoning: [
+      'Analogy', 'Classification', 'Coding-Decoding', 'Blood Relations', 'Series (Number/Alphabet)',
+      'Non-Verbal Reasoning (Mirror/Water Images)', 'Paper Folding & Cutting', 'Venn Diagrams',
+      'Syllogism', 'Direction Sense', 'Word Formation', 'Matrix',
+    ],
+    English: [
+      'Error Spotting', 'Fill in the Blanks', 'Synonyms & Antonyms', 'One Word Substitution',
+      'Idioms & Phrases', 'Spelling Correction', 'Sentence Improvement', 'Para Jumbles', 'Cloze Test',
+      'Active-Passive Voice', 'Direct-Indirect Speech',
+    ],
+    'General Awareness': [
+      'Static GK', 'Indian History', 'Indian Polity', 'Geography', 'Economy', 'General Science',
+      'Current Affairs', 'Important Days', 'Awards & Honours', 'Books & Authors', 'Government Schemes',
+    ],
+    'Revision & timed practice': ['Review mistakes from recent quizzes', 'One timed sectional mock'],
+  },
+  Banking: {
+    'Quantitative Aptitude': [
+      'Simplification & Approximation', 'Number Series', 'Quadratic Equations', 'Data Interpretation (Tables/Bar/Pie)',
+      'Ratio & Proportion', 'Percentage', 'Profit & Loss', 'Simple & Compound Interest', 'Average',
+      'Time & Work', 'Mensuration',
+    ],
+    Reasoning: [
+      'Puzzles', 'Seating Arrangement (Linear)', 'Seating Arrangement (Circular)', 'Syllogism',
+      'Inequality', 'Coding-Decoding', 'Blood Relations', 'Direction Sense', 'Data Sufficiency',
+      'Input-Output', 'Order & Ranking',
+    ],
+    English: [
+      'Reading Comprehension', 'Cloze Test', 'Error Detection', 'Sentence Rearrangement (Para Jumbles)',
+      'Fillers/Double Fillers', 'Phrase Replacement', 'Vocabulary', 'Word Usage',
+    ],
+    'General Awareness': [
+      'Banking Awareness (RBI, Monetary Policy)', 'Banking Terms & Abbreviations', 'Financial Awareness',
+      'Current Affairs', 'Static GK', 'Government Schemes (Financial)', 'Important Days', 'Books & Authors',
+    ],
+    'Revision & timed practice': ['Review mistakes from recent quizzes', 'One timed sectional mock'],
+  },
+  Railway: {
+    'Quantitative Aptitude': [
+      'Number System', 'LCM & HCF', 'Percentage', 'Ratio & Proportion', 'Time & Work',
+      'Time, Speed & Distance', 'Mensuration', 'Geometry', 'Trigonometry', 'Algebra',
+      'Elementary Statistics', 'Data Interpretation',
+    ],
+    Reasoning: [
+      'Analogy', 'Classification', 'Coding-Decoding', 'Mathematical Operations', 'Venn Diagrams',
+      'Puzzle & Seating Arrangement', 'Syllogism', 'Statement & Argument', 'Jumbling',
+      'Mirror & Water Images', 'Direction Sense',
+    ],
+    English: [
+      'Reading Comprehension', 'Error Spotting', 'Fill in the Blanks', 'Synonyms & Antonyms',
+      'Spelling Correction', 'Sentence Improvement',
+    ],
+    'General Awareness': [
+      'General Science (Physics/Chemistry/Biology)', 'Current Affairs', 'Indian History',
+      'Indian Geography', 'Indian Polity', 'Environmental Issues', 'Sports', 'Transport & Railways GK',
+      'Important Days',
+    ],
+    'Revision & timed practice': ['Review mistakes from recent quizzes', 'One timed sectional mock'],
+  },
+  UPSC: {
+    // UPSC Prelims is GS + CSAT rather than SSC/Banking-style sectional papers — "Reasoning" and
+    // "English" are repurposed as CSAT's decision-making/comprehension components so the 5-block
+    // schedule shape still fits without implying a paper split UPSC doesn't actually have.
+    'Quantitative Aptitude': [
+      'Basic Numeracy', 'Percentage & Ratio', 'Time & Work', 'Time, Speed & Distance', 'Data Interpretation',
+      'Probability Basics', 'Mensuration', 'Average & Mixtures',
+    ],
+    Reasoning: [
+      'Logical Reasoning (CSAT)', 'Analytical Reasoning', 'Decision Making', 'Problem Solving',
+      'Syllogism', 'Puzzles', 'Statement & Assumption',
+    ],
+    English: [
+      'Reading Comprehension (CSAT)', 'Passage-Based Inference', 'Vocabulary in Context', 'Precis Writing',
+    ],
+    'General Awareness': [
+      'Indian Polity & Governance', 'Indian & World History', 'Geography (Indian & World)', 'Indian Economy',
+      'Environment & Ecology', 'Science & Technology', 'Current Affairs', 'Government Schemes & Policy',
+      'International Relations', 'Art & Culture',
+    ],
+    'Revision & timed practice': ['Review mistakes from recent quizzes', 'One timed sectional mock'],
+  },
+};
+
+/** Falls back to the generic `SUBJECT_TOPICS` for any category without its own tailored list
+ * (State PSC, Defence, Assam Govt, Teaching Exams) or when no exam/category is set yet. */
+function subjectTopicsFor(targetExam: string | null): Record<string, string[]> {
+  const category = matchExamCategory(targetExam);
+  return (category && SUBJECT_TOPICS_BY_CATEGORY[category]) || SUBJECT_TOPICS;
+}
 
 const dayIndex = () => Math.floor(Date.now() / DAY);
 
@@ -674,9 +778,10 @@ async function topicsFromCourse(courseId: string, userId: string | null): Promis
 }
 
 /** Full ordered topic list per core subject — the real course curriculum where it has
- * subject-tagged chapters, the generic list otherwise. Used to lay out the multi-phase roadmap
- * (as opposed to `topicsFromCourse`, which only needs a single "today" pick). */
-async function fullTopicSequence(courseId: string | null): Promise<Map<string, string[]>> {
+ * subject-tagged chapters, the exam-category-specific list otherwise (generic if the category has
+ * none). Used to lay out the multi-phase roadmap (as opposed to `topicsFromCourse`, which only
+ * needs a single "today" pick). */
+async function fullTopicSequence(courseId: string | null, targetExam: string | null): Promise<Map<string, string[]>> {
   const bySubject = new Map<string, string[]>();
   if (courseId) {
     const chapterTopics = await chapterTopicsBySubject(courseId);
@@ -684,8 +789,9 @@ async function fullTopicSequence(courseId: string | null): Promise<Map<string, s
       if (list.length > 0) bySubject.set(subject, list.map((t) => t.title));
     }
   }
+  const fallbackTopics = subjectTopicsFor(targetExam);
   for (const subject of CORE_SUBJECTS) {
-    if (!bySubject.has(subject)) bySubject.set(subject, SUBJECT_TOPICS[subject] ?? []);
+    if (!bySubject.has(subject)) bySubject.set(subject, fallbackTopics[subject] ?? []);
   }
   return bySubject;
 }
@@ -732,7 +838,7 @@ export async function buildRoadmap(userId: string, examDate: string | null, targ
     }
   }
 
-  const sequence = await fullTopicSequence(courseId);
+  const sequence = await fullTopicSequence(courseId, targetExam);
   const { totalDays } = resolveExamWindow(examDate);
   const foundationDays = Math.max(7, Math.round(totalDays * 0.4));
   const syllabusDays = Math.max(7, Math.round(totalDays * 0.4));
@@ -850,9 +956,10 @@ async function getTodaysTopics(userId: string, courseId: string | null, targetEx
     }
   }
 
+  const fallbackTopics = subjectTopicsFor(targetExam);
   const result = new Map<string, string>();
-  for (const subject of Object.keys(SUBJECT_TOPICS)) {
-    const fallbackList = SUBJECT_TOPICS[subject];
+  for (const subject of Object.keys(fallbackTopics)) {
+    const fallbackList = fallbackTopics[subject];
     const fallback = fallbackList.length ? fallbackList[dayIndex() % fallbackList.length] : undefined;
     const pick = fromCourse.get(subject) ?? fallback;
     if (pick) result.set(subject, pick);
@@ -1103,6 +1210,12 @@ export async function sendChatMessage(
     orderBy: { createdAt: 'desc' },
   });
 
+  // Recent prior turns (current message excluded — it's passed separately below) for every
+  // OpenAI backstop call in this function, so each judges the message in the context of the
+  // actual conversation instead of in total isolation. The current user message was already
+  // saved to history above, so this fetch's last row is dropped to exclude it.
+  const recentForAi = (await getChatMessages(user.id, user.chatResetAt, 9)).slice(0, -1).map((m) => ({ role: m.role, content: m.content }));
+
   // A clear, different ask — "what's my plan today", "give me a test", "talk to a counsellor" —
   // always gets answered right away instead of being silently swallowed as the literal answer to
   // whatever intake question is still pending (e.g. typing "what's my plan today" while
@@ -1127,7 +1240,7 @@ export async function sendChatMessage(
   // inconclusive just keeps the pre-existing behavior for that prompt (save-as-typed, or
   // assume-yes) exactly as before this existed.
   if (pendingAnswer) {
-    const looksValid = await looksLikeAnswerTo(pendingAnswer, trimmed);
+    const looksValid = await looksLikeAnswerTo(pendingAnswer, trimmed, recentForAi);
     if (!looksValid) pendingAnswer = null;
   }
 
@@ -1491,7 +1604,7 @@ export async function sendChatMessage(
     // Best-effort OpenAI backstop before escalating to a human — recovers small talk and
     // recognizable-but-differently-phrased intents without creating ticket noise; unavailable or
     // genuinely unclear still falls through to the exact same ticket-creation as before this existed.
-    const classification = await classifyUnmatchedMessage(trimmed);
+    const classification = await classifyUnmatchedMessage(trimmed, recentForAi);
     if (classification.kind === 'small_talk') {
       reply = [`Happy to help, ${name}! Let me know if you need your plan, a test, or anything else.`];
       suggestions = defaultSuggestions(!!user.targetExam);
@@ -1500,13 +1613,6 @@ export async function sendChatMessage(
       reply = [`Looks like you're asking about ${label} — tap below and I'll pull that up.`];
       suggestions = [chip];
     } else {
-      // Recent prior turns (current message excluded — it's passed separately) so a follow-up
-      // like "why that one?" or "explain more" lands as a continuation instead of a standalone,
-      // context-free message. Only fetched here, not for every message, since nothing else in the
-      // dispatcher needs it.
-      const recent = await getChatMessages(user.id, user.chatResetAt, 9);
-      const history = recent.slice(0, -1).map((m) => ({ role: m.role, content: m.content }));
-
       // Ticket creation stays unconditional — a human safety net regardless of whether the draft
       // reply below comes back. The draft only adds an immediate, encouraging first response
       // instead of leaving the student with nothing until faculty follows up; it's never allowed
@@ -1514,7 +1620,7 @@ export async function sendChatMessage(
       // ticket, only soften the wait.
       const [ticketNumber, drafted] = await Promise.all([
         createDoubtTicket(name, user.phone, user.email, trimmed),
-        draftDoubtReply(trimmed, user.targetExam, history),
+        draftDoubtReply(trimmed, user.targetExam, recentForAi),
       ]);
       reply = drafted
         ? [drafted, `I've also flagged this for your faculty (ticket ${ticketNumber}) in case you need more specific detail.`]

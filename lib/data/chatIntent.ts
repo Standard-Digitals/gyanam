@@ -71,17 +71,21 @@ export interface UnmatchedClassification {
 /** Only called once a message matched none of the regex intent patterns — tries to recover a
  * typo'd / Hindi-Hinglish-phrased / differently-worded version of something we already handle,
  * or at least avoid ticketing pure small talk ("ok", "thanks", "👍"). Anything else (or the LLM
- * being unavailable) keeps today's behavior: a genuine doubt, forwarded as a support ticket. */
-export async function classifyUnmatchedMessage(message: string): Promise<UnmatchedClassification> {
+ * being unavailable) keeps today's behavior: a genuine doubt, forwarded as a support ticket.
+ * `history` (recent prior turns, current message excluded) helps disambiguate a short/ambiguous
+ * message using what was just discussed — e.g. "which one" right after the bot named a subject. */
+export async function classifyUnmatchedMessage(message: string, history: ChatTurn[] = []): Promise<UnmatchedClassification> {
   const intentList = KNOWN_INTENTS.map((i) => `${i.id} = ${i.label}`).join('\n');
   const system =
     'You classify one message from a student in an Indian government-exam-prep chatbot (English, Hindi, or Hinglish, possibly with typos). ' +
+    'Prior turns of the conversation, if any, are given before the message to classify — use them only to resolve ' +
+    'ambiguity in that message (e.g. what "it" or "that one" refers to), not to classify an earlier turn instead. ' +
     'Reply with ONLY one of:\n' +
     '- SMALL_TALK if it is a greeting, thanks, acknowledgement, or chit-chat that needs no real answer\n' +
     `- one of these exact IDs if the message clearly means this, even if phrased very differently:\n${intentList}\n` +
     '- DOUBT for a genuine study question or anything unclear\n' +
     'Reply with ONLY that single word, nothing else, no punctuation.';
-  const result = await callOpenAI(system, message, 10);
+  const result = await callOpenAI(system, message, 10, 0, history);
   if (!result) return { kind: 'genuine_doubt' };
   const cleaned = result.toUpperCase().replace(/[^A-Z_]/g, '');
   if (cleaned === 'SMALL_TALK') return { kind: 'small_talk' };
@@ -92,14 +96,16 @@ export async function classifyUnmatchedMessage(message: string): Promise<Unmatch
 /** Only called when a free-text intake question (e.g. "what's your qualification?") is still
  * pending and no regex "interrupt" pattern matched the reply — sanity-checks that the reply is
  * actually attempting to answer that question before it gets saved as-is, so an unrelated message
- * ("what is the right approach to crack my exam?") can't silently overwrite a profile field. */
-export async function looksLikeAnswerTo(question: string, reply: string): Promise<boolean> {
+ * ("what is the right approach to crack my exam?") can't silently overwrite a profile field.
+ * `history` is mostly belt-and-suspenders here (the question itself is usually enough context),
+ * but costs nothing extra to pass since the caller already has it for the other two functions. */
+export async function looksLikeAnswerTo(question: string, reply: string, history: ChatTurn[] = []): Promise<boolean> {
   const system =
     `A chatbot just asked a student: "${question}". ` +
     'You will be given the student\'s next message. Reply with ONLY "YES" if it is a plausible attempt to answer ' +
     'that specific question (short, vague, or off-hand answers still count as YES), or "NO" if it looks like the ' +
     'student is asking something else entirely or ignoring the question. Reply with ONLY YES or NO.';
-  const result = await callOpenAI(system, reply, 5);
+  const result = await callOpenAI(system, reply, 5, 0, history);
   if (!result) return true; // unavailable — don't block, keep pre-existing behavior
   return /^\s*yes/i.test(result);
 }

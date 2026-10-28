@@ -75,7 +75,7 @@ export function MistakesTab() {
     return (
       <div className="p-6 text-center">
         <Trophy className="w-7 h-7 text-[#D9B4B5] mx-auto mb-2" />
-        <p className="text-xs text-[#888888] max-w-[240px] mx-auto">No quiz attempts yet — take a Daily Quiz to see your weak subjects here.</p>
+        <p className="text-xs text-[#888888] max-w-[240px] mx-auto">No quiz or mock test attempts yet — take one to see your weak subjects here.</p>
         <Link href="/daily-quiz" className="inline-block mt-3 px-4 py-2 bg-[#C12223] text-white font-bold text-xs rounded-xl">
           Take a Quiz
         </Link>
@@ -87,7 +87,7 @@ export function MistakesTab() {
     <div className="p-4 space-y-4">
       {subjects.length > 0 && (
         <>
-          <p className="text-[11px] text-[#888888] bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl p-3">Weakest subjects first, by average quiz accuracy.</p>
+          <p className="text-[11px] text-[#888888] bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl p-3">Weakest subjects first, by average accuracy across quizzes and mock tests.</p>
           <div className="space-y-3">
             {subjects.map((s, i) => (
               <div key={s.subject}>

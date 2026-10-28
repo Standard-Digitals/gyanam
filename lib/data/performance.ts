@@ -84,20 +84,40 @@ export interface SubjectStrength {
   attemptCount: number;
 }
 
+/** Folds in both quiz attempts (one subject each) and mock-test attempts (per-section breakdown,
+ * via `sectionStats` — null on attempts saved before that field existed, simply skipped) — this
+ * used to only ever look at QuizAttempt, so a student who only took mock tests saw no data here. */
 export async function getSubjectStrength(userId: string): Promise<SubjectStrength[]> {
-  const attempts = await prisma.quizAttempt.findMany({ where: { userId }, select: { quizId: true, accuracy: true } });
-  if (attempts.length === 0) return [];
-
-  const quizIds = [...new Set(attempts.map((a) => a.quizId))];
-  const quizzes = await prisma.quiz.findMany({ where: { id: { in: quizIds } }, select: { id: true, subject: true } });
-  const subjectMap = new Map(quizzes.map((q) => [q.id, q.subject]));
+  const [quizAttempts, mockAttempts] = await Promise.all([
+    prisma.quizAttempt.findMany({ where: { userId }, select: { quizId: true, accuracy: true } }),
+    prisma.mockTestAttempt.findMany({ where: { userId }, select: { sectionStats: true } }),
+  ]);
+  if (quizAttempts.length === 0 && mockAttempts.length === 0) return [];
 
   const bySubject = new Map<string, number[]>();
-  for (const a of attempts) {
-    const subject = subjectMap.get(a.quizId) ?? 'General';
-    const list = bySubject.get(subject) ?? [];
-    list.push(a.accuracy);
-    bySubject.set(subject, list);
+
+  if (quizAttempts.length > 0) {
+    const quizIds = [...new Set(quizAttempts.map((a) => a.quizId))];
+    const quizzes = await prisma.quiz.findMany({ where: { id: { in: quizIds } }, select: { id: true, subject: true } });
+    const subjectMap = new Map(quizzes.map((q) => [q.id, q.subject]));
+    for (const a of quizAttempts) {
+      const subject = subjectMap.get(a.quizId) ?? 'General';
+      const list = bySubject.get(subject) ?? [];
+      list.push(a.accuracy);
+      bySubject.set(subject, list);
+    }
+  }
+
+  for (const attempt of mockAttempts) {
+    const stats = attempt.sectionStats as Record<string, { correct: number; incorrect: number }> | null;
+    if (!stats) continue;
+    for (const [subject, s] of Object.entries(stats)) {
+      const total = s.correct + s.incorrect;
+      if (total === 0) continue;
+      const list = bySubject.get(subject) ?? [];
+      list.push(Math.round((s.correct / total) * 100));
+      bySubject.set(subject, list);
+    }
   }
 
   return [...bySubject.entries()]

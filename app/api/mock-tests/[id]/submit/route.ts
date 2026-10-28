@@ -32,6 +32,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let incorrectCount = 0;
   let unattemptedCount = 0;
   const mistakes: Prisma.QuestionMistakeCreateManyInput[] = [];
+  // Per-section correct/incorrect, folded into "My Mistakes" subject-strength alongside quiz
+  // attempts (previously that view only ever looked at QuizAttempt, so a student who only ever
+  // took mock tests saw no data there at all).
+  const sectionStats: Record<string, { correct: number; incorrect: number }> = {};
+  const bumpSection = (section: string, field: 'correct' | 'incorrect') => {
+    const s = (sectionStats[section] ??= { correct: 0, incorrect: 0 });
+    s[field]++;
+  };
   const logMistake = (q: (typeof mockTest.questions)[number], selectedAnswer: string | null, wasSkipped: boolean) => {
     mistakes.push({
       userId: user.userId,
@@ -51,21 +59,27 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   for (const q of mockTest.questions) {
     const selected = answers[String(q.id)];
+    const section = q.section ?? mockTest.examCategory;
     const answered = typeof selected === 'string' ? selected.trim().length > 0 : selected !== undefined;
     if (!answered) {
       unattemptedCount++;
       logMistake(q, null, true);
     } else if (q.type === 'fill_blank') {
       const isCorrect = typeof selected === 'string' && selected.trim().toLowerCase() === (q.correctAnswerText ?? '').trim().toLowerCase();
-      if (isCorrect) correctCount++;
-      else {
+      if (isCorrect) {
+        correctCount++;
+        bumpSection(section, 'correct');
+      } else {
         incorrectCount++;
+        bumpSection(section, 'incorrect');
         logMistake(q, String(selected), false);
       }
     } else if (selected === q.correctAnswer) {
       correctCount++;
+      bumpSection(section, 'correct');
     } else {
       incorrectCount++;
+      bumpSection(section, 'incorrect');
       logMistake(q, String(selected), false);
     }
   }
@@ -83,6 +97,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       obtainedMarks,
       accuracy,
       timeTakenSec,
+      sectionStats: Object.keys(sectionStats).length > 0 ? sectionStats : undefined,
     },
   });
 

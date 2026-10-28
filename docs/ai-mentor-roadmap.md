@@ -116,12 +116,32 @@ deterministic code) — keeps cost low and avoids hallucinated course/pricing in
       so a follow-up like "why that one?" or "explain more" lands as a continuation instead of a
       context-free non-sequitur. `callOpenAI()` in `lib/data/chatIntent.ts` takes an optional
       `history: ChatTurn[]`, inserted between the system prompt and the current message.
-- [ ] **Needs `OPENAI_API_KEY` set in the VPS `.env`** for any of the above OpenAI-backed behavior
-      to actually activate — until then every one of these checks safely no-ops back to the
+- [x] **Session memory extended to every backstop** (2026-10-28): `classifyUnmatchedMessage` and
+      `looksLikeAnswerTo` now also get the same recent history as `draftDoubtReply` — fetched once
+      per message (`recentForAi` in `sendChatMessage`) and reused across all three, instead of each
+      doing its own fetch or working from a single message in isolation.
+- [x] **`My Mistakes` subject-accuracy now includes mock-test attempts** (2026-10-28): previously
+      `getSubjectStrength` only ever looked at `QuizAttempt`, so a student who only took mock tests
+      saw no data there at all. Mock-test submission now also saves a per-section correct/incorrect
+      breakdown (`MockTestAttempt.sectionStats`), folded into the same per-subject averaging as quiz
+      accuracy. **Needs `npx prisma db push` + `npx prisma generate` on deploy** (new column) — only
+      populated for attempts made after this deploy, same retroactivity gap as Phase 3's mistake log.
+- [x] **Exam-category-specific topic lists** (2026-10-28): the generic `SUBJECT_TOPICS` fallback
+      (used by both "today's topic" and the roadmap when no real course curriculum is available) is
+      now re-weighted per exam category — SSC, Banking, Railway, and UPSC each have their own
+      tailored list (`SUBJECT_TOPICS_BY_CATEGORY` in `lib/data/aiMentor.ts`); any other category
+      (State PSC, Defence, Assam Govt, Teaching Exams) still falls back to the generic list.
+- [ ] **Needs `OPENAI_API_KEY` set in the VPS `.env`** for any of the OpenAI-backed behavior above
+      to actually activate — until then every one of those checks safely no-ops back to the
       pre-audit regex-only behavior. (The exam-date-suggestion feature already reads this same env
       var — if that's ever shown a real suggestion in production, the key is already set.)
 
 ## Next (not started)
+
+These two are deliberately not attempted in the same rushed pass as everything else above — both
+touch the core message-routing logic that every single chat message goes through, so getting them
+wrong risks breaking live chat outright. Worth a dedicated, carefully-tested pass rather than being
+squeezed into an already-long session.
 
 - [ ] **Real NLU beyond the narrow backstop above** — the regex layer is still the primary path
       for everything else, so paraphrased/multi-part messages that DO match some pattern (just the
@@ -130,13 +150,11 @@ deterministic code) — keeps cost low and avoids hallucinated course/pricing in
       infers "current state" via literal string-equality against the last assistant message's
       text, rather than an explicit stored state. Works, but every new flow added is another
       branch, and a prompt-text edit anywhere silently breaks resumption for anyone paused
-      mid-flow at deploy time.
-- [ ] Extend session memory beyond `draftDoubtReply` — `classifyUnmatchedMessage` and
-      `looksLikeAnswerTo` still judge only the single current message, no prior-turn context.
-- [ ] Proactive nudges (inactivity reminders, overdue-test pings) — currently fully reactive.
-- [ ] Extending Phase 3's mistake log retroactively; exam-category-specific topic lists instead of
-      generic ones; `My Mistakes` subject-accuracy still being quiz-only (doesn't count mock-test
-      attempts).
+      mid-flow at deploy time. (Today found two real bugs rooted in exactly this fragility.)
+- [ ] Proactive nudges (inactivity reminders, overdue-test pings) — currently fully reactive; needs
+      a cron/notification channel decision (email/SMS/push) that doesn't exist yet in this app.
+- [ ] Extending Phase 3's mistake log and the new mock-test `sectionStats` retroactively — not
+      actually possible (the data was never captured for past attempts), only forward-fixed.
 
 ## Notes for whoever picks this up
 

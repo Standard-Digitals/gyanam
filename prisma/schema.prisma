@@ -288,6 +288,7 @@ model MockTestAttempt {
   obtainedMarks    Float
   accuracy         Int
   timeTakenSec     Int
+  sectionStats     Json? // { [section/subject]: { correct: number, incorrect: number } } — per-section breakdown, used to fold mock-test performance into subject-strength alongside quiz attempts (null on attempts saved before this existed)
   submittedAt      DateTime @default(now())
 
   @@index([userId])
