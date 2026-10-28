@@ -334,6 +334,10 @@ const MARKS_SUGGESTIONS = ['Below 50%', '50-70%', '70-90%', 'Above 90%'];
 const CONFIRM_EXAM_SUGGESTIONS = ['Yes, same exam', "No, it's changed"];
 const EXAM_DATE_CONFIRM_SUGGESTIONS = ["Yes, that's about right", 'I have the exact date'];
 const OFFER_COURSE_SUGGESTIONS = ['Yes, show me', 'Not now'];
+// Same chips, plus a tappable way to do the thing the message text itself just told the student to
+// type ("ask me 'what's my plan today'") — without this, a student who doesn't think to type that
+// exact phrase has no way forward except typing it from memory.
+const OFFER_COURSE_WITH_PLAN_SUGGESTIONS = ["What's my plan today?", 'Yes, show me', 'Not now'];
 const ENROLL_OR_COUNSELLOR_SUGGESTIONS = ['Enroll now', 'Talk to a counsellor'];
 const TALK_TO_COUNSELLOR_SUGGESTIONS = ['Talk to a counsellor'];
 const BROWSE_OR_COUNSELLOR_SUGGESTIONS = ['Browse Courses', 'Talk to a counsellor'];
@@ -519,7 +523,7 @@ async function finishIntake(userId: string, targetExam: string, examDate: string
   // Don't dump the course pitch right after the advice — ask first. A wall of 8 messages in one
   // go reads like a lecture, not a conversation; asking turns it back into a two-way exchange and
   // means the pitch only shows up for someone who actually wants it.
-  return { messages: [...strategy, OFFER_COURSE_PROMPT], suggestions: OFFER_COURSE_SUGGESTIONS };
+  return { messages: [...strategy, OFFER_COURSE_PROMPT], suggestions: OFFER_COURSE_WITH_PLAN_SUGGESTIONS };
 }
 
 /**
@@ -1039,7 +1043,7 @@ async function buildDiagnosticNudge(userId: string): Promise<ReplyWithSuggestion
   const enrolled = await isUserEnrolled(userId);
   const nudge = 'Great — take today\'s Daily Quiz to get started, and ask me "what\'s my plan today" anytime after that.';
   if (enrolled) return { messages: [nudge], suggestions: defaultSuggestions(true) };
-  return { messages: [nudge, OFFER_COURSE_PROMPT], suggestions: OFFER_COURSE_SUGGESTIONS };
+  return { messages: [nudge, OFFER_COURSE_PROMPT], suggestions: OFFER_COURSE_WITH_PLAN_SUGGESTIONS };
 }
 
 /** Entry point into the strategy reveal — called once the intake (exam, date, stage, hours, weak
