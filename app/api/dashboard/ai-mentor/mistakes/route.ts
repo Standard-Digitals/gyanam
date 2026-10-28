@@ -6,7 +6,7 @@ export async function GET() {
   const user = await getCurrentUserProfile();
   if (!user) return NextResponse.json({ error: 'Login required' }, { status: 401 });
 
-  const [subjects, recentMistakes] = await Promise.all([getSubjectStrength(user.id), getRecentMistakes(user.id)]);
+  const [subjects, recentMistakes] = await Promise.all([getSubjectStrength(user.id, user.targetExam), getRecentMistakes(user.id, user.targetExam)]);
   const weakest = [...subjects].sort((a, b) => a.avgAccuracy - b.avgAccuracy);
   // Not-yet-reviewed-in-the-one-by-one-flow subset of the same list — lets that flow show fresh
   // mistakes each time instead of repeating ones the student already went through.

@@ -11,7 +11,7 @@ export async function GET() {
   const data = await getMyProgress(user.id, firstName);
   if (data) return NextResponse.json({ kind: 'full', data });
 
-  const basic = await getBasicProgress(user.id);
+  const basic = await getBasicProgress(user.id, user.targetExam);
   const courseSuggestion = await getSuggestedCourse(user.targetExam);
   return NextResponse.json({ kind: basic ? 'basic' : 'none', data: basic, courseSuggestion });
 }

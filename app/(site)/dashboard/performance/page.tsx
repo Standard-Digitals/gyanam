@@ -62,7 +62,7 @@ export default async function PerformancePage() {
   const [rankInfo, trend, subjectStrength] = await Promise.all([
     getUserRank(user.id),
     getScoreTrend(user.id),
-    getSubjectStrength(user.id),
+    getSubjectStrength(user.id, user.targetExam),
   ]);
 
   return (

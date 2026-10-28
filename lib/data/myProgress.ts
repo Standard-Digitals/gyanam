@@ -330,7 +330,7 @@ export interface BasicProgressResult {
   weakestSubject: { subject: string; avgAccuracy: number } | null;
 }
 
-export async function getBasicProgress(userId: string): Promise<BasicProgressResult | null> {
+export async function getBasicProgress(userId: string, targetExam: string | null = null): Promise<BasicProgressResult | null> {
   const [quizAttempts, mockAttempts] = await Promise.all([
     prisma.quizAttempt.findMany({ where: { userId }, select: { accuracy: true, submittedAt: true } }),
     prisma.mockTestAttempt.findMany({ where: { userId }, select: { accuracy: true, submittedAt: true } }),
@@ -344,7 +344,10 @@ export async function getBasicProgress(userId: string): Promise<BasicProgressRes
     .slice(-5)
     .map((a) => ({ date: a.submittedAt.toISOString(), accuracy: a.accuracy }));
 
-  const subjects = await getSubjectStrength(userId);
+  // targetExam-scoped (CEO feedback: switching exams kept showing stale best/weakest-subject data
+  // from a previous, unrelated exam's attempts) — overall accuracy/recent-attempts above stay
+  // unscoped, since "how am I doing overall" is still meaningful across everything attempted.
+  const subjects = await getSubjectStrength(userId, targetExam);
   const sorted = [...subjects].sort((a, b) => b.avgAccuracy - a.avgAccuracy);
 
   return {

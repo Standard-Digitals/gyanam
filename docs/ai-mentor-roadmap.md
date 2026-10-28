@@ -234,6 +234,19 @@ findings.
         caught up!" state instead of an empty screen once nothing new is left.
       **Needs `npx prisma db push` + `npx prisma generate` on deploy** (two new columns) — only
       applies going forward; mistakes logged before this have no tip and read as not-yet-reviewed.
+- [x] **Subject-accuracy/mistakes now scoped to the student's current target exam.** CEO feedback:
+      a test account switched its selected exam to UPSC, but strategy advice still said "Banking
+      Awareness is your weakest area" — `getSubjectStrength`/`getRecentMistakes` pulled from the
+      student's *entire* attempt history regardless of which exam those quizzes/mocks were actually
+      for, so switching exams (or, in testing, reusing one account across many exams) kept
+      surfacing stale, unrelated data. Both now take an optional `targetExam` and, when it resolves
+      to a known category (`matchExamCategory`, moved to new `lib/data/examCategories.ts` so both
+      `aiMentor.ts` and `performance.ts` can use it without importing each other), scope results to
+      quizzes/mocks tagged for that category — generic/untagged quizzes still count for everyone.
+      No category match (unset/unrecognized exam): unfiltered, identical to the pre-fix behavior.
+      Threaded through every caller: chat's strategy advice and "my mistakes" reply, the My
+      Mistakes tab, the My Progress tab/page, and the standalone Performance page. No schema
+      change — purely a query-scoping fix.
 
 ## Next (not started)
 

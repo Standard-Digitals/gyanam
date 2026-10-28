@@ -3,6 +3,7 @@ import { getCourseProgress } from '@/lib/data/courseProgress';
 import { getSubjectStrength } from '@/lib/data/performance';
 import { getMyProgress, getBasicProgress } from '@/lib/data/myProgress';
 import { suggestExamPeriod } from '@/lib/data/examDateSuggestion';
+import { matchExamCategory } from '@/lib/data/examCategories';
 import { classifyUnmatchedMessage, looksLikeAnswerTo, draftDoubtReply, generateAiPracticeQuiz, AI_QUIZ_SAFE_SUBJECTS } from '@/lib/data/chatIntent';
 import type { KnownIntentId } from '@/lib/data/chatIntent';
 import {
@@ -490,7 +491,7 @@ async function buildCounsellorReply(
  * messages instead of one bulleted dump, so it reads like someone actually talking it through.
  */
 async function buildStrategyAdvice(userId: string, examName: string, examDate: string | null): Promise<string[]> {
-  const [subjects, progress] = await Promise.all([getSubjectStrength(userId), getMyProgress(userId, 'you')]);
+  const [subjects, progress] = await Promise.all([getSubjectStrength(userId, examName), getMyProgress(userId, 'you')]);
   const weakest = subjects.length ? [...subjects].sort((a, b) => a.avgAccuracy - b.avgAccuracy)[0] : null;
 
   const msgs: string[] = [];
@@ -1117,29 +1118,8 @@ export async function completeOnboardingForm(userId: string, targetExam: string,
   return { messages, suggestions };
 }
 
-// Quiz/MockTest.examCategory holds one of these admin-facing group names (see
-// app/admin/(dashboard)/_components/examCategories.ts), not the specific exam the student typed
-// into chat (e.g. "Bank Clerk", "SSC cgl") — this maps free text to the right group by keyword so
-// "give me a practice test" doesn't hand back a quiz for a completely different exam.
-const EXAM_CATEGORY_KEYWORDS: Record<string, string[]> = {
-  SSC: ['ssc'],
-  Banking: ['bank', 'ibps', 'sbi', 'rrb po'],
-  Railway: ['railway', 'rrb', 'ntpc', 'rpf', 'alp'],
-  UPSC: ['upsc', 'civil services'],
-  'State PSC': ['state pcs', 'psc'],
-  Defence: ['cds', 'nda', 'afcat', 'capf', 'defence'],
-  'Assam Govt': ['adre', 'apdcl', 'assam'],
-  'Teaching Exams': ['tet', 'ugc net', 'cadre', 'teaching'],
-};
-
-function matchExamCategory(targetExam: string | null): string | null {
-  if (!targetExam) return null;
-  const lower = targetExam.toLowerCase();
-  for (const [category, keywords] of Object.entries(EXAM_CATEGORY_KEYWORDS)) {
-    if (keywords.some((kw) => lower.includes(kw))) return category;
-  }
-  return null;
-}
+// Moved to lib/data/examCategories.ts (imported at the top of this file) so lib/data/performance.ts
+// can also use it, without the two files importing each other.
 
 /** Exported so the "Test" chat tab can look up the same open test and fetch its full questions,
  * without duplicating this attempted-vs-catalog comparison. Prefers a test tagged for the
@@ -1722,7 +1702,7 @@ export async function sendChatMessage(
       reply = ["Here's how you're doing:", data.summary];
       suggestions = defaultSuggestions(true);
     } else {
-      const basic = await getBasicProgress(user.id);
+      const basic = await getBasicProgress(user.id, user.targetExam);
       reply = basic
         ? [
             `You've attempted ${basic.totalAttempts} quiz${basic.totalAttempts === 1 ? '' : 'zes'}/mock test${basic.totalAttempts === 1 ? '' : 's'} so far, averaging ${basic.avgAccuracy}% accuracy.`,
@@ -1733,7 +1713,7 @@ export async function sendChatMessage(
       suggestions = basic ? ENROLL_OR_COUNSELLOR_SUGGESTIONS : defaultSuggestions(!!user.targetExam);
     }
   } else if (MISTAKES_PATTERN.test(trimmed)) {
-    const subjects = await getSubjectStrength(user.id);
+    const subjects = await getSubjectStrength(user.id, user.targetExam);
     if (subjects.length === 0) {
       reply = ["You haven't attempted any quizzes yet, so there's nothing to review — take a Daily Quiz to get started."];
     } else {

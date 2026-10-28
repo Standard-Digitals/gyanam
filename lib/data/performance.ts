@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { generateMistakeTip } from '@/lib/data/chatIntent';
+import { matchExamCategory } from '@/lib/data/examCategories';
 
 export interface RecentMistake {
   id: string;
@@ -34,13 +35,21 @@ async function withImprovementTips(mistakes: RecentMistake[]): Promise<RecentMis
   );
 }
 
-export async function getRecentMistakes(userId: string, limit = 20): Promise<RecentMistake[]> {
-  const mistakes = await prisma.questionMistake.findMany({
+/** `targetExam`, when it resolves to a known category, scopes results to mistakes from quizzes/
+ * mock tests tagged for that exam (or untagged/generic quizzes) — otherwise a student who switches
+ * their target exam keeps seeing old mistakes from a completely different exam's content (CEO
+ * feedback: switched to UPSC, still saw "Banking Awareness is your weakest area" from earlier
+ * Banking-category attempts). Unmatched/no exam set: unfiltered, same as before this existed. */
+export async function getRecentMistakes(userId: string, targetExam: string | null = null, limit = 20): Promise<RecentMistake[]> {
+  const category = matchExamCategory(targetExam);
+  const raw = await prisma.questionMistake.findMany({
     where: { userId },
     orderBy: { createdAt: 'desc' },
-    take: limit,
+    take: category ? limit * 3 : limit, // overfetch since category filtering below may drop some
     select: {
       id: true,
+      source: true,
+      sourceId: true,
       subject: true,
       questionText: true,
       options: true,
@@ -54,6 +63,28 @@ export async function getRecentMistakes(userId: string, limit = 20): Promise<Rec
       createdAt: true,
     },
   });
+
+  let scoped = raw;
+  if (category) {
+    const quizIds = raw.filter((m) => m.source === 'quiz').map((m) => m.sourceId);
+    const mockIds = raw.filter((m) => m.source === 'mock').map((m) => m.sourceId);
+    const [quizzes, mocks] = await Promise.all([
+      quizIds.length ? prisma.quiz.findMany({ where: { id: { in: quizIds } }, select: { id: true, examCategory: true } }) : [],
+      mockIds.length ? prisma.mockTest.findMany({ where: { id: { in: mockIds } }, select: { id: true, examCategory: true } }) : [],
+    ]);
+    const quizCategoryById = new Map(quizzes.map((q) => [q.id, q.examCategory]));
+    const mockCategoryById = new Map(mocks.map((m) => [m.id, m.examCategory]));
+    scoped = raw.filter((m) => {
+      if (m.source === 'quiz') {
+        const cats = quizCategoryById.get(m.sourceId);
+        return !cats || cats.length === 0 || cats.includes(category);
+      }
+      const cat = mockCategoryById.get(m.sourceId);
+      return !cat || cat === category;
+    });
+  }
+
+  const mistakes: RecentMistake[] = scoped.slice(0, limit).map(({ source: _source, sourceId: _sourceId, ...m }) => m);
   return withImprovementTips(mistakes);
 }
 
@@ -118,11 +149,17 @@ export interface SubjectStrength {
 
 /** Folds in both quiz attempts (one subject each) and mock-test attempts (per-section breakdown,
  * via `sectionStats` — null on attempts saved before that field existed, simply skipped) — this
- * used to only ever look at QuizAttempt, so a student who only took mock tests saw no data here. */
-export async function getSubjectStrength(userId: string): Promise<SubjectStrength[]> {
+ * used to only ever look at QuizAttempt, so a student who only took mock tests saw no data here.
+ * `targetExam`, when it resolves to a known category, scopes this to attempts from quizzes/mocks
+ * tagged for that exam (or untagged/generic quizzes) — otherwise a student who switches exams
+ * keeps seeing stale "weakest subject" data from a completely different exam's content (CEO
+ * feedback: switched to UPSC, still told "Banking Awareness is your weakest area"). Unmatched/no
+ * exam set: unfiltered, same as before this param existed. */
+export async function getSubjectStrength(userId: string, targetExam: string | null = null): Promise<SubjectStrength[]> {
+  const category = matchExamCategory(targetExam);
   const [quizAttempts, mockAttempts] = await Promise.all([
     prisma.quizAttempt.findMany({ where: { userId }, select: { quizId: true, accuracy: true } }),
-    prisma.mockTestAttempt.findMany({ where: { userId }, select: { sectionStats: true } }),
+    prisma.mockTestAttempt.findMany({ where: { userId }, select: { mockTestId: true, sectionStats: true } }),
   ]);
   if (quizAttempts.length === 0 && mockAttempts.length === 0) return [];
 
@@ -130,26 +167,36 @@ export async function getSubjectStrength(userId: string): Promise<SubjectStrengt
 
   if (quizAttempts.length > 0) {
     const quizIds = [...new Set(quizAttempts.map((a) => a.quizId))];
-    const quizzes = await prisma.quiz.findMany({ where: { id: { in: quizIds } }, select: { id: true, subject: true } });
-    const subjectMap = new Map(quizzes.map((q) => [q.id, q.subject]));
+    const quizzes = await prisma.quiz.findMany({ where: { id: { in: quizIds } }, select: { id: true, subject: true, examCategory: true } });
+    const quizMeta = new Map(quizzes.map((q) => [q.id, q]));
     for (const a of quizAttempts) {
-      const subject = subjectMap.get(a.quizId) ?? 'General';
+      const meta = quizMeta.get(a.quizId);
+      if (!meta) continue;
+      if (category && meta.examCategory.length > 0 && !meta.examCategory.includes(category)) continue;
+      const subject = meta.subject || 'General';
       const list = bySubject.get(subject) ?? [];
       list.push(a.accuracy);
       bySubject.set(subject, list);
     }
   }
 
-  for (const attempt of mockAttempts) {
-    const stats = attempt.sectionStats as Record<string, { correct: number; incorrect: number }> | null;
-    if (!stats || typeof stats !== 'object') continue;
-    for (const [subject, s] of Object.entries(stats)) {
-      if (typeof s?.correct !== 'number' || typeof s?.incorrect !== 'number') continue; // malformed/legacy shape — skip rather than produce NaN
-      const total = s.correct + s.incorrect;
-      if (total === 0) continue;
-      const list = bySubject.get(subject) ?? [];
-      list.push(Math.round((s.correct / total) * 100));
-      bySubject.set(subject, list);
+  if (mockAttempts.length > 0) {
+    const mockIds = [...new Set(mockAttempts.map((a) => a.mockTestId))];
+    const mocks = await prisma.mockTest.findMany({ where: { id: { in: mockIds } }, select: { id: true, examCategory: true } });
+    const mockCategoryById = new Map(mocks.map((m) => [m.id, m.examCategory]));
+    for (const attempt of mockAttempts) {
+      const mockCategory = mockCategoryById.get(attempt.mockTestId);
+      if (category && mockCategory && mockCategory !== category) continue;
+      const stats = attempt.sectionStats as Record<string, { correct: number; incorrect: number }> | null;
+      if (!stats || typeof stats !== 'object') continue;
+      for (const [subject, s] of Object.entries(stats)) {
+        if (typeof s?.correct !== 'number' || typeof s?.incorrect !== 'number') continue; // malformed/legacy shape — skip rather than produce NaN
+        const total = s.correct + s.incorrect;
+        if (total === 0) continue;
+        const list = bySubject.get(subject) ?? [];
+        list.push(Math.round((s.correct / total) * 100));
+        bySubject.set(subject, list);
+      }
     }
   }
 

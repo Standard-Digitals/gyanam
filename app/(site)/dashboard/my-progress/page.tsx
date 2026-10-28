@@ -81,7 +81,7 @@ export default async function MyProgressPage() {
   const data = await getMyProgress(user.id, firstName);
 
   if (!data) {
-    const basic = await getBasicProgress(user.id);
+    const basic = await getBasicProgress(user.id, user.targetExam);
 
     if (basic) {
       const course = await getSuggestedCourse(user.targetExam);
