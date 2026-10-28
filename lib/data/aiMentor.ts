@@ -1500,6 +1500,13 @@ export async function sendChatMessage(
       reply = [`Looks like you're asking about ${label} — tap below and I'll pull that up.`];
       suggestions = [chip];
     } else {
+      // Recent prior turns (current message excluded — it's passed separately) so a follow-up
+      // like "why that one?" or "explain more" lands as a continuation instead of a standalone,
+      // context-free message. Only fetched here, not for every message, since nothing else in the
+      // dispatcher needs it.
+      const recent = await getChatMessages(user.id, user.chatResetAt, 9);
+      const history = recent.slice(0, -1).map((m) => ({ role: m.role, content: m.content }));
+
       // Ticket creation stays unconditional — a human safety net regardless of whether the draft
       // reply below comes back. The draft only adds an immediate, encouraging first response
       // instead of leaving the student with nothing until faculty follows up; it's never allowed
@@ -1507,7 +1514,7 @@ export async function sendChatMessage(
       // ticket, only soften the wait.
       const [ticketNumber, drafted] = await Promise.all([
         createDoubtTicket(name, user.phone, user.email, trimmed),
-        draftDoubtReply(trimmed, user.targetExam),
+        draftDoubtReply(trimmed, user.targetExam, history),
       ]);
       reply = drafted
         ? [drafted, `I've also flagged this for your faculty (ticket ${ticketNumber}) in case you need more specific detail.`]

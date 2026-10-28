@@ -6,7 +6,15 @@
  * breaking. Same fetch/timeout shape as examDateSuggestion.ts.
  */
 
-async function callOpenAI(systemPrompt: string, userContent: string, maxTokens: number, temperature = 0): Promise<string | null> {
+export interface ChatTurn {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+/** `history`, when given, is inserted between the system prompt and the final user turn — real
+ * prior turns, not summarized into text, so the model can follow an actual back-and-forth (e.g. a
+ * "why that subject?" follow-up) instead of judging each message in total isolation. */
+async function callOpenAI(systemPrompt: string, userContent: string, maxTokens: number, temperature = 0, history: ChatTurn[] = []): Promise<string | null> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return null;
 
@@ -24,6 +32,7 @@ async function callOpenAI(systemPrompt: string, userContent: string, maxTokens: 
         max_tokens: maxTokens,
         messages: [
           { role: 'system', content: systemPrompt },
+          ...history.map((turn) => ({ role: turn.role, content: turn.content.slice(0, 500) })),
           { role: 'user', content: userContent.slice(0, 500) },
         ],
       }),
@@ -101,17 +110,22 @@ export async function looksLikeAnswerTo(question: string, reply: string): Promis
  * follows up. Deliberately NEVER a source of facts: the prompt forbids stating anything specific
  * (current affairs, dates, pricing, syllabus/policy details) it isn't certain of, and the caller
  * always still creates the support ticket regardless of this — a human safety net stays in place
- * whether or not this draft comes back. Returns null (caller falls back to the old ticket-only
- * reply) if OPENAI_API_KEY isn't set, the call fails, or the response is empty. */
-export async function draftDoubtReply(message: string, targetExam: string | null): Promise<string | null> {
+ * whether or not this draft comes back. `history` (recent prior turns, oldest first, current
+ * message NOT included) lets a follow-up like "why that one?" or "explain more" actually land as a
+ * continuation of the conversation instead of a standalone, context-free message. Returns null
+ * (caller falls back to the old ticket-only reply) if OPENAI_API_KEY isn't set, the call fails, or
+ * the response is empty. */
+export async function draftDoubtReply(message: string, targetExam: string | null, history: ChatTurn[] = []): Promise<string | null> {
   const system =
     'You are a warm, encouraging study mentor for Indian government-exam aspirants (SSC/Banking/Railway/UPSC/etc.), ' +
     `replying inside a chat app${targetExam ? ` to a student preparing for ${targetExam}` : ''}. ` +
-    "Reply to the student's message below in 1-3 short sentences, in the same language/mix they used " +
+    "The recent conversation (if any) is given as prior turns before the student's latest message — use it to " +
+    "understand follow-ups (\"why that one?\", \"explain more\") the same way a human mentor would, but reply to " +
+    "the LATEST message only, in 1-3 short sentences, in the same language/mix the student used " +
     '(English, Hindi, or Hinglish). You may give general study-skill advice, encouragement, or exam-strategy tips. ' +
     'You must NEVER state specific facts you are not certain are correct — no current affairs, exact dates, ' +
     'syllabus specifics, prices, policies, or anything about this institute\'s courses/schedule (those come from ' +
     "elsewhere in the app). If the question needs any such fact, say only that you're not 100% sure and a faculty " +
     "member will confirm it — never guess. Do not mention that you're an AI or that this is a draft.";
-  return callOpenAI(system, message, 120, 0.4);
+  return callOpenAI(system, message, 120, 0.4, history);
 }

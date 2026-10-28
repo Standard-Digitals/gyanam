@@ -110,6 +110,12 @@ deterministic code) — keeps cost low and avoids hallucinated course/pricing in
       the last 24h instead of creating a duplicate every time "talk to a counsellor" is tapped.
 - [x] `createDoubtTicket` no longer stuffs the internal `userId` into the `rollNoOrOrderId` field
       (misleading to an admin reading the ticket).
+- [x] **Session memory for doubt replies** (2026-10-28): `draftDoubtReply` now gets the last ~8
+      prior turns of the conversation (current message excluded, fetched only when actually
+      needed) as real OpenAI message history, not just the single current message in isolation —
+      so a follow-up like "why that one?" or "explain more" lands as a continuation instead of a
+      context-free non-sequitur. `callOpenAI()` in `lib/data/chatIntent.ts` takes an optional
+      `history: ChatTurn[]`, inserted between the system prompt and the current message.
 - [ ] **Needs `OPENAI_API_KEY` set in the VPS `.env`** for any of the above OpenAI-backed behavior
       to actually activate — until then every one of these checks safely no-ops back to the
       pre-audit regex-only behavior. (The exam-date-suggestion feature already reads this same env
@@ -125,8 +131,8 @@ deterministic code) — keeps cost low and avoids hallucinated course/pricing in
       text, rather than an explicit stored state. Works, but every new flow added is another
       branch, and a prompt-text edit anywhere silently breaks resumption for anyone paused
       mid-flow at deploy time.
-- [ ] Session memory beyond the stored profile fields (so the bot can reference what was just
-      discussed a turn or two ago, not only persisted DB state).
+- [ ] Extend session memory beyond `draftDoubtReply` — `classifyUnmatchedMessage` and
+      `looksLikeAnswerTo` still judge only the single current message, no prior-turn context.
 - [ ] Proactive nudges (inactivity reminders, overdue-test pings) — currently fully reactive.
 - [ ] Extending Phase 3's mistake log retroactively; exam-category-specific topic lists instead of
       generic ones; `My Mistakes` subject-accuracy still being quiz-only (doesn't count mock-test
