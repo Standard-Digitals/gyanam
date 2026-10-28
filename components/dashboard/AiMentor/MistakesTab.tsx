@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Trophy, XCircle, MinusCircle } from 'lucide-react';
+import { Trophy, XCircle, MinusCircle, ChevronLeft, ChevronRight, X, ListChecks } from 'lucide-react';
 
 interface SubjectStrength {
   subject: string;
@@ -30,11 +30,16 @@ function answerLabel(m: RecentMistake, value: string | null): string {
   return value;
 }
 
-function RecentMistakesList({ mistakes }: { mistakes: RecentMistake[] }) {
+function RecentMistakesList({ mistakes, onReview }: { mistakes: RecentMistake[]; onReview: () => void }) {
   if (mistakes.length === 0) return null;
   return (
     <div className="space-y-3">
-      <p className="text-[10px] font-black text-[#888888] uppercase tracking-wide">Recent mistakes, question-by-question</p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[10px] font-black text-[#888888] uppercase tracking-wide">Recent mistakes, question-by-question</p>
+        <button onClick={onReview} className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-white bg-[#C12223] px-2.5 py-1.5 rounded-lg cursor-pointer whitespace-nowrap">
+          Review one by one <ChevronRight className="w-3 h-3" />
+        </button>
+      </div>
       <div className="space-y-2.5">
         {mistakes.map((m) => (
           <div key={m.id} className="bg-white border border-[#F3DCDD] rounded-xl p-3 space-y-1.5">
@@ -56,9 +61,82 @@ function RecentMistakesList({ mistakes }: { mistakes: RecentMistake[] }) {
   );
 }
 
-export function MistakesTab() {
+/** Guided, one-at-a-time walkthrough of the same mistakes the list above shows — CEO feedback:
+ * tapping "review your wrong and skipped questions" dumped the whole list at once; it should
+ * explain each mistake in turn with a Next button, like actually sitting down and going through
+ * them one by one. Same data as RecentMistakesList, just one card shown at a time with Prev/Next. */
+function OneByOneReview({ mistakes, onExit }: { mistakes: RecentMistake[]; onExit: () => void }) {
+  const [index, setIndex] = useState(0);
+  const m = mistakes[index];
+  const isLast = index === mistakes.length - 1;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[10px] font-black text-[#888888] uppercase tracking-wide">
+          Mistake {index + 1} of {mistakes.length}
+        </p>
+        <button onClick={onExit} className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-[#888888] cursor-pointer">
+          <X className="w-3.5 h-3.5" /> Exit review
+        </button>
+      </div>
+      <div className="h-1.5 bg-[#F3DCDD] rounded-full overflow-hidden">
+        <div className="h-full bg-[#C12223] rounded-full transition-all" style={{ width: `${((index + 1) / mistakes.length) * 100}%` }} />
+      </div>
+      <div className="bg-white border border-[#F3DCDD] rounded-2xl p-4 space-y-3">
+        <div className="flex items-center gap-1.5">
+          {m.wasSkipped ? <MinusCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" /> : <XCircle className="w-3.5 h-3.5 text-[#C12223] shrink-0" />}
+          <span className="text-[10px] font-black text-[#888888] uppercase tracking-wide">{m.subject}</span>
+        </div>
+        <p className="text-sm font-bold text-[#1F1A1C] leading-snug">{m.questionText}</p>
+        <div className="space-y-1.5 text-xs">
+          <p>
+            {m.wasSkipped ? (
+              <span className="font-semibold text-amber-700">You skipped this one</span>
+            ) : (
+              <>
+                Your answer: <span className="font-semibold text-[#C12223]">{answerLabel(m, m.selectedAnswer)}</span>
+              </>
+            )}
+          </p>
+          <p>
+            Correct answer:{' '}
+            <span className="font-semibold text-emerald-700">{m.correctAnswerText ?? answerLabel(m, m.correctAnswer !== null ? String(m.correctAnswer) : null)}</span>
+          </p>
+        </div>
+        {m.explanation && (
+          <div className="bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl p-3">
+            <p className="text-[10px] font-black text-[#C12223] uppercase tracking-wide mb-1">Why</p>
+            <p className="text-xs text-[#555555] leading-snug">{m.explanation}</p>
+          </div>
+        )}
+      </div>
+      <div className="flex gap-2">
+        <button
+          onClick={() => setIndex((i) => Math.max(0, i - 1))}
+          disabled={index === 0}
+          className="flex items-center gap-1 px-4 py-2.5 bg-gray-100 text-gray-600 font-bold text-xs rounded-xl disabled:opacity-40 cursor-pointer"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" /> Prev
+        </button>
+        {isLast ? (
+          <button onClick={onExit} className="flex-1 px-4 py-2.5 bg-[#C12223] text-white font-bold text-xs rounded-xl cursor-pointer">
+            Done — back to list
+          </button>
+        ) : (
+          <button onClick={() => setIndex((i) => i + 1)} className="flex-1 flex items-center justify-center gap-1 px-4 py-2.5 bg-[#C12223] text-white font-bold text-xs rounded-xl cursor-pointer">
+            Next <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function MistakesTab({ startInReview }: { startInReview?: boolean } = {}) {
   const [subjects, setSubjects] = useState<SubjectStrength[] | null>(null);
   const [recentMistakes, setRecentMistakes] = useState<RecentMistake[]>([]);
+  const [reviewing, setReviewing] = useState(!!startInReview);
 
   useEffect(() => {
     fetch('/api/dashboard/ai-mentor/mistakes')
@@ -83,8 +161,22 @@ export function MistakesTab() {
     );
   }
 
+  if (reviewing && recentMistakes.length > 0) {
+    return (
+      <div className="p-4">
+        <OneByOneReview mistakes={recentMistakes} onExit={() => setReviewing(false)} />
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 space-y-4">
+      {startInReview && recentMistakes.length === 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 flex items-center gap-2">
+          <ListChecks className="w-4 h-4 text-amber-700 shrink-0" />
+          <p className="text-xs text-amber-800">No mistakes to review yet — take a quiz or mock test first.</p>
+        </div>
+      )}
       {subjects.length > 0 && (
         <>
           <p className="text-[11px] text-[#888888] bg-[#FFF5F5] border border-[#F3DCDD] rounded-xl p-3">Weakest subjects first, by average accuracy across quizzes and mock tests.</p>
@@ -103,7 +195,7 @@ export function MistakesTab() {
           </div>
         </>
       )}
-      <RecentMistakesList mistakes={recentMistakes} />
+      <RecentMistakesList mistakes={recentMistakes} onReview={() => setReviewing(true)} />
     </div>
   );
 }

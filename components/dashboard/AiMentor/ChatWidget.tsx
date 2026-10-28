@@ -30,6 +30,10 @@ type TabKey = (typeof TABS)[number]['key'];
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<TabKey>('chat');
+  // Set when "My Plan" sends the student to My Mistakes specifically to review wrong answers
+  // (as opposed to tapping the "My Mistakes" nav tab directly) — jumps straight into the guided
+  // one-by-one walkthrough instead of the list view.
+  const [mistakesStartInReview, setMistakesStartInReview] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [onboardingResolved, setOnboardingResolved] = useState(false);
@@ -190,7 +194,10 @@ export function ChatWidget() {
             {TABS.map((t) => (
               <button
                 key={t.key}
-                onClick={() => setTab(t.key)}
+                onClick={() => {
+                  if (t.key === 'mistakes') setMistakesStartInReview(false);
+                  setTab(t.key);
+                }}
                 className={`px-3.5 py-3 text-xs font-bold whitespace-nowrap border-b-2 cursor-pointer transition ${
                   tab === t.key ? 'border-[#C12223] text-[#C12223]' : 'border-transparent text-[#888888] hover:text-[#1F1A1C]'
                 }`}
@@ -298,11 +305,14 @@ export function ChatWidget() {
                     onTalkToCounsellor={handleTalkToCounsellor}
                     onBrowseCourses={handleBrowseCourses}
                     onGoToTest={() => setTab('test')}
-                    onGoToMistakes={() => setTab('mistakes')}
+                    onGoToMistakes={() => {
+                      setMistakesStartInReview(true);
+                      setTab('mistakes');
+                    }}
                   />
                 )}
                 {tab === 'test' && <QuizTab />}
-                {tab === 'mistakes' && <MistakesTab />}
+                {tab === 'mistakes' && <MistakesTab startInReview={mistakesStartInReview} />}
                 {tab === 'progress' && <ProgressTab onBrowseCourses={handleBrowseCourses} />}
                 {tab === 'courses' && <CoursesTab />}
               </div>

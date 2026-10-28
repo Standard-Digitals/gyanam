@@ -206,6 +206,16 @@ findings.
       every check, so OpenAI calls and quiz-bank growth stay bounded. `generateAiPracticeQuiz()`
       in `lib/data/chatIntent.ts`, `buildAiPracticeQuiz()` in `lib/data/aiMentor.ts`. Best-effort —
       unavailable/failed generation keeps the exact pre-existing "nothing open" result.
+- [x] **Guided one-by-one mistake review.** CEO feedback: tapping "review your wrong and skipped
+      questions" dumped the whole mistake list at once — wanted a one-at-a-time walkthrough with an
+      explanation per mistake and a Next button, like actually sitting down and going through them.
+      Added `OneByOneReview` to `MistakesTab.tsx` (reuses the same `recentMistakes` data as the list
+      view — question, your answer, correct answer, explanation — one card at a time with Prev/Next
+      and a progress bar); the list view also gained a "Review one by one →" button. "My Plan"'s
+      checklist/daily-habits "Go" button for that item now opens My Mistakes straight into review
+      mode (`MistakesTab`'s new `startInReview` prop, threaded through `ChatWidget.tsx`'s
+      `onGoToMistakes`); tapping the "My Mistakes" nav tab directly still opens the list view as
+      before. No schema/API change — purely a UI addition over the existing mistakes endpoint.
 
 ## Next (not started)
 
