@@ -490,42 +490,28 @@ async function buildCounsellorReply(
  * Daily schedule, tests-per-day, current progress and a goal — broken into a short sequence of
  * messages instead of one bulleted dump, so it reads like someone actually talking it through.
  */
-async function buildStrategyAdvice(userId: string, examName: string, examDate: string | null): Promise<string[]> {
-  const [subjects, progress] = await Promise.all([getSubjectStrength(userId, examName), getMyProgress(userId, 'you', examName)]);
-  const weakest = subjects.length ? [...subjects].sort((a, b) => a.avgAccuracy - b.avgAccuracy)[0] : null;
-
-  const msgs: string[] = [];
-  msgs.push(`Great, let's build you a plan for ${examName}${examDate ? ` — targeting ${examDate}` : ''}.`);
-  msgs.push('Daily schedule: 2 practice tests (one sectional, one full-length on alternate days) + 30-45 minutes of focused revision, every single day. Consistency beats one long weekend session.');
-
-  if (weakest) {
-    msgs.push(`Looking at your quizzes so far, ${weakest.subject} is your weakest area (${weakest.avgAccuracy}% accuracy) — start today's revision there.`);
-  } else {
-    msgs.push("You haven't taken a quiz yet — do one today so I can tell you exactly which subject needs the most work.");
-  }
-
-  if (progress) {
-    msgs.push(`Your current progress score is ${progress.me.overall ?? '—'}/100${progress.cmp.courseMedianOverall !== null ? `, against a course median of ${progress.cmp.courseMedianOverall}` : ''}. Check the My Progress tab anytime for the full breakdown.`);
-  }
-
-  msgs.push('Set yourself a goal: 75%+ accuracy and at least 10 full tests attempted before your exam. Review every wrong answer — that review is where the real improvement happens, not the test itself.');
-  msgs.push('Ask me "what\'s my plan today" anytime and I\'ll turn this into a daily checklist.');
-  return msgs;
+/** CEO feedback: this used to dump 5-6 paragraphs at once (schedule, weakest subject, progress
+ * score, goal, "ask me...") right after the onboarding form — even paced with a typing delay, it
+ * read as "everything at once", not a conversation. Now it's one line; the schedule/progress/etc.
+ * it used to pre-empt are exactly what the suggestion chips below already offer on their own
+ * (PLAN_PATTERN, PROGRESS_PATTERN, ...) — the student picks what they want to see, one at a time,
+ * the same click-to-reveal shape every other prompt in this file already uses. */
+function buildStrategyIntro(examName: string, examDate: string | null): string {
+  return `Great, let's build you a plan for ${examName}${examDate ? ` — targeting ${examDate}` : ''}.`;
 }
 
-/** Terminal step of the intake — strategy advice for everyone, plus a course pitch for students
- * who aren't enrolled yet, since at that point we finally have enough to recommend something.
- * Used by the onboarding-form path only; the chat-driven "how do I crack my exam" flow uses
+/** Terminal step of the intake — a short intro for everyone, plus a course pitch for students who
+ * aren't enrolled yet, since at that point we finally have enough to recommend something. Used by
+ * the onboarding-form path only; the chat-driven "how do I crack my exam" flow uses
  * `finishStrategyIntake` below instead, which personalizes the schedule from the student's own
  * answers rather than handing everyone the same template. */
 async function finishIntake(userId: string, targetExam: string, examDate: string): Promise<ReplyWithSuggestions> {
-  const strategy = await buildStrategyAdvice(userId, targetExam, examDate);
+  const intro = buildStrategyIntro(targetExam, examDate);
   const enrolled = await isUserEnrolled(userId);
-  if (enrolled) return { messages: strategy, suggestions: defaultSuggestions(true) };
-  // Don't dump the course pitch right after the advice — ask first. A wall of 8 messages in one
-  // go reads like a lecture, not a conversation; asking turns it back into a two-way exchange and
-  // means the pitch only shows up for someone who actually wants it.
-  return { messages: [...strategy, OFFER_COURSE_PROMPT], suggestions: OFFER_COURSE_WITH_PLAN_SUGGESTIONS };
+  if (enrolled) return { messages: [intro], suggestions: defaultSuggestions(true) };
+  // Don't dump the course pitch right after the intro — ask first. Asking turns it back into a
+  // two-way exchange and means the pitch only shows up for someone who actually wants it.
+  return { messages: [intro, OFFER_COURSE_PROMPT], suggestions: OFFER_COURSE_WITH_PLAN_SUGGESTIONS };
 }
 
 /**

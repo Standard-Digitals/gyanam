@@ -61,19 +61,17 @@ export function ChatWidget() {
       .catch(() => setLoaded(true));
   }, [open, loaded]);
 
-  // Shows each reply chunk one at a time with a "typing" pause in between, instead of dumping the
-  // whole answer in one bubble — reads like a person replying, not a report. CEO feedback: the old
-  // 450-850ms gap was too brief to actually feel conversational, especially for the longer
-  // multi-message replies (onboarding-form completion, strategy advice) — a quick look (or a
-  // screenshot taken a couple seconds after submitting) just saw every bubble already there. The
-  // pause now scales with how long the next message is, like it's actually being typed out, with a
-  // higher floor and ceiling so even a short reply pauses long enough to read as a deliberate beat.
-  // Only the last chunk carries the quick-reply chips, matching how the server attaches them.
+  // Shows each reply chunk one at a time with a short "typing" pause in between, instead of
+  // dumping the whole answer in one bubble — reads like a person replying, not a report. CEO
+  // feedback was actually about something else (a long reply auto-showing every piece of info at
+  // once) — see buildStrategyIntro/finishIntake in aiMentor.ts, which now sends far fewer messages
+  // per reply and leaves the rest to suggestion chips the student taps on their own — so this
+  // pause is deliberately kept short, not stretched out; it was never the actual problem. Only the
+  // last chunk carries the quick-reply chips, matching how the server attaches them.
   const appendRepliesSequentially = async (replies: string[], suggestions: string[] = []) => {
     for (let i = 0; i < replies.length; i++) {
       setSending(true);
-      const typingDelay = Math.min(2200, 700 + replies[i].length * 9) + Math.random() * 300;
-      await new Promise((r) => setTimeout(r, typingDelay));
+      await new Promise((r) => setTimeout(r, 450 + Math.random() * 400));
       setMessages((prev) => [
         ...prev,
         {

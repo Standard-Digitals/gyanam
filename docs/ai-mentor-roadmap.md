@@ -258,14 +258,21 @@ findings.
       tab/page's own calls, which intentionally always show whatever course the student is
       actually enrolled in regardless of what they've told the chatbot; scoping those too would
       have broken that page's real purpose for a genuinely enrolled student. No schema change.
-- [x] **Multi-message replies now pause noticeably longer between bubbles.** CEO feedback: the
-      onboarding-form-completion reply (and any other multi-message reply) still read as "all
-      dumped at once" — the old 450-850ms gap between bubbles was there, but too brief to actually
-      register, especially glancing at a screenshot taken a couple seconds after submitting.
-      `appendRepliesSequentially` (`ChatWidget.tsx`) now scales the pause with how long the next
-      message is (capped 700-2200ms + jitter) instead of a flat short delay, so longer messages
-      pause noticeably longer, like they're actually being typed — the existing "Typing..." bubble
-      shows throughout each pause. Pure client-side timing change, no API/schema impact.
+- [x] **Onboarding-form completion no longer auto-dumps 5-6 messages — click to reveal each one,
+      like everywhere else in this chat.** First attempt at this feedback (a longer "typing" pause
+      between bubbles) was the wrong read — CEO clarified: after the form, the chat should show
+      only "Great, let's build you a plan for X", then chips; schedule/progress/etc. should each
+      only appear once the student taps the chip for it, not auto-play through all of them. The
+      intake-reveal pattern we already use everywhere else (`buildPlanIntro` → "ready to see your
+      schedule?" → ...) already does exactly this — `buildStrategyAdvice` (quick-form-only path)
+      was the one holdout still flat-dumping 5-6 paragraphs (schedule, weakest subject, progress
+      score, goal, "ask me...") in one go. Replaced with `buildStrategyIntro()`, a single line;
+      `finishIntake` now returns just that (plus the course-offer prompt if unenrolled) with the
+      standard suggestion chips (`defaultSuggestions`/`OFFER_COURSE_WITH_PLAN_SUGGESTIONS`) —
+      "What's my plan today?", "How is my progress?", etc. already have full working replies of
+      their own, so nothing was lost, it's just revealed on tap instead of pre-empted. Reverted the
+      "longer typing pause" change from the first attempt — back to the original short 450-850ms
+      gap, since far fewer messages auto-show per reply now, so it was never actually needed.
 
 ## Next (not started)
 
