@@ -258,6 +258,14 @@ findings.
       tab/page's own calls, which intentionally always show whatever course the student is
       actually enrolled in regardless of what they've told the chatbot; scoping those too would
       have broken that page's real purpose for a genuinely enrolled student. No schema change.
+- [x] **Multi-message replies now pause noticeably longer between bubbles.** CEO feedback: the
+      onboarding-form-completion reply (and any other multi-message reply) still read as "all
+      dumped at once" — the old 450-850ms gap between bubbles was there, but too brief to actually
+      register, especially glancing at a screenshot taken a couple seconds after submitting.
+      `appendRepliesSequentially` (`ChatWidget.tsx`) now scales the pause with how long the next
+      message is (capped 700-2200ms + jitter) instead of a flat short delay, so longer messages
+      pause noticeably longer, like they're actually being typed — the existing "Typing..." bubble
+      shows throughout each pause. Pure client-side timing change, no API/schema impact.
 
 ## Next (not started)
 
