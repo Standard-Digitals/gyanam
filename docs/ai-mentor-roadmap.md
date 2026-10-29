@@ -247,6 +247,17 @@ findings.
       Threaded through every caller: chat's strategy advice and "my mistakes" reply, the My
       Mistakes tab, the My Progress tab/page, and the standalone Performance page. No schema
       change — purely a query-scoping fix.
+- [x] **Same fix, `getMyProgress`'s cohort progress score.** Immediate follow-up: switching to CDS
+      in chat still quoted an unrelated enrollment's "22/100" score, since `getMyProgress` only
+      ever checked *whether* an active enrollment existed, never whether that enrollment's course
+      was actually for the exam currently being discussed. Added the same optional `targetExam` —
+      if it resolves to a category and the enrolled course's `category` list doesn't include it,
+      returns `null` (same as "not enrolled"), rather than presenting a different exam's course
+      progress as this one's. Deliberately only applied to the two chat call sites
+      (`buildStrategyAdvice`, the chat "how is my progress" reply) — **not** the My Progress
+      tab/page's own calls, which intentionally always show whatever course the student is
+      actually enrolled in regardless of what they've told the chatbot; scoping those too would
+      have broken that page's real purpose for a genuinely enrolled student. No schema change.
 
 ## Next (not started)
 

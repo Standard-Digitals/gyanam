@@ -491,7 +491,7 @@ async function buildCounsellorReply(
  * messages instead of one bulleted dump, so it reads like someone actually talking it through.
  */
 async function buildStrategyAdvice(userId: string, examName: string, examDate: string | null): Promise<string[]> {
-  const [subjects, progress] = await Promise.all([getSubjectStrength(userId, examName), getMyProgress(userId, 'you')]);
+  const [subjects, progress] = await Promise.all([getSubjectStrength(userId, examName), getMyProgress(userId, 'you', examName)]);
   const weakest = subjects.length ? [...subjects].sort((a, b) => a.avgAccuracy - b.avgAccuracy)[0] : null;
 
   const msgs: string[] = [];
@@ -1697,7 +1697,7 @@ export async function sendChatMessage(
       suggestions = defaultSuggestions(true);
     }
   } else if (PROGRESS_PATTERN.test(trimmed)) {
-    const data = await getMyProgress(user.id, name);
+    const data = await getMyProgress(user.id, name, user.targetExam);
     if (data) {
       reply = ["Here's how you're doing:", data.summary];
       suggestions = defaultSuggestions(true);

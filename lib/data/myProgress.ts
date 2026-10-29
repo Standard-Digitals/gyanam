@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { getSubjectStrength } from '@/lib/data/performance';
+import { matchExamCategory } from '@/lib/data/examCategories';
 
 /**
  * "My Progress" — a study-habit score for the logged-in student, compared with everyone else
@@ -359,7 +360,13 @@ export async function getBasicProgress(userId: string, targetExam: string | null
   };
 }
 
-export async function getMyProgress(userId: string, firstName: string): Promise<MyProgressResult | null> {
+/** `targetExam`, when it resolves to a known category, only returns this student's progress if
+ * their active enrollment's course is actually for that exam — otherwise treated the same as "not
+ * enrolled" (null), so a leftover enrollment from a different exam (CEO feedback: selected CDS in
+ * chat, strategy advice still quoted an old, unrelated enrollment's "22/100" score) doesn't get
+ * presented as this exam's progress. Unmatched/no exam given: unfiltered, same as before this
+ * param existed. */
+export async function getMyProgress(userId: string, firstName: string, targetExam: string | null = null): Promise<MyProgressResult | null> {
   const enrollment = await prisma.enrollment.findFirst({
     where: { userId, status: 'ACTIVE' },
     orderBy: { enrolledAt: 'desc' },
@@ -368,6 +375,9 @@ export async function getMyProgress(userId: string, firstName: string): Promise<
 
   const course = await prisma.course.findUnique({ where: { id: enrollment.courseId } });
   if (!course) return null;
+
+  const category = matchExamCategory(targetExam);
+  if (category && !course.category.includes(category)) return null;
 
   const [cohortEnrollments, chapters] = await Promise.all([
     prisma.enrollment.findMany({ where: { courseId: course.id, status: 'ACTIVE' }, select: { userId: true } }),
